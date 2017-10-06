@@ -1,0 +1,30 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: hashicorp/terraform
+    tag: light
+run:
+  path: terraform
+  args:
+  - "${COMMAND}"
+  - "-var service_account_email=${SERVICE_ACCOUNT_EMAIL}"
+  - "-var projectid=${PROJECT_ID}"
+  - "-var network=${NETWORK_NAME}"
+  - "-var prefix=${ENV_PREFIX}"
+  - "-var zone=${AZ}"
+  - "-var subnet_ip_prefix=${SUBNET_IP_PREFIX}"
+
+inputs:
+- name: tf-source-dir
+
+params:
+  TF_LOG: DEBUG
+  COMMAND: replace-me
+  SERVICE_ACCOUNT_EMAIL: replace-me
+  ENV_PREFIX: replace-me
+  PROJECT_ID: replace-me
+  NETWORK_NAME: replace-me
+  REGION: replace-me
+  AZ: replace-me
+  SUBNET_IP_PREFIX: replace-me
