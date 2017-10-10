@@ -1,0 +1,17 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfmobile/pfs-ci-gcloud
+inputs:
+- name: git-pfs-ci
+run:
+  path: git-pfs-ci/tasks/scripts/clean_env.sh
+
+params:
+  ENV_PREFIX: replace-me
+  PROJECT_ID: replace-me
+  NETWORK_NAME: replace-me
+  AZ: replace-me
+  REGION: replace-me
+  GOOGLE_CLOUD_KEYFILE_JSON: replace-me

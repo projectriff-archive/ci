@@ -1,21 +1,18 @@
+<%
+  KuboEnvironment = Struct.new(:name, :subnet_prefix, :region, :az)
+  envs = [
+    KuboEnvironment.new('pfsenv01', '10.0.31', 'us-central1', 'us-central1-c'),
+    KuboEnvironment.new('pfsenv02', '10.0.32', 'us-west1', 'us-west1-b')
+  ]
+%>
 ---
-
-##############################################################
-# Resource Types
-##############################################################
 resource_types:
-
 - name: gcs
   type: docker-image
   source:
     repository: frodenas/gcs-resource
 
-
-##############################################################
-# Resources
-##############################################################
 resources:
-
 - name: gcs-kubo-deployment-tarball
   type: gcs
   source:
@@ -28,14 +25,14 @@ resources:
   source:
     uri: git@github.com:pivotal-cf/pfs-ci.git
     private_key: ((git-pfs-ci-ssh-key))
-    branch: master
+    branch: deploykubo    # master
 
-##############################################################
-# Jobs
-##############################################################
 jobs:
+<% envs.each do |env| %>
+- name: deploy-kubo-<%= env.name %>
+  serial: true
+  serial_groups: [<%= env.name %>]
 
-- name: pave-infrastructure
   plan:
 
   - aggregate:
@@ -45,7 +42,7 @@ jobs:
   - task: unpack-tgz
     file: git-pfs-ci/tasks/unpack-tgz.yml
     input_mapping:
-      source_tarball: kubo-deployment-tarball
+      source_tarball: gcs-kubo-deployment-tarball
     params:
       SOURCE_TARBALL_REGEX: kubo-deployment-*.tgz
       COLLAPSE_DIR: kubo-deployment
@@ -57,9 +54,40 @@ jobs:
     params:
       COMMAND: apply
       SERVICE_ACCOUNT_EMAIL: ((pfs-gcp-ci-service-account-email))
-      ENV_PREFIX: pfsenv01
+      ENV_PREFIX: <%= env.name %>
       PROJECT_ID: ((pfs-gcp-ci-project))
-      NETWORK_NAME: pfsenv01net
-      REGION: us-central1
-      AZ: us-central1-c
-      SUBNET_IP_PREFIX: 10.0.30
+      NETWORK_NAME: <%= env.name %>net
+      REGION: <%= env.region %>
+      AZ: <%= env.az %>
+      SUBNET_IP_PREFIX: <%= env.subnet_prefix %>
+      GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
+
+  - task: deploy-bosh-and-k8s
+    file: git-pfs-ci/tasks/deploy-kubo.yml
+    params:
+      ENV_PREFIX: <%= env.name %>
+      PROJECT_ID: ((pfs-gcp-ci-project))
+      NETWORK_NAME: <%= env.name %>net
+      BOSH_CREDS: ((pfs-gcp-ci-bosh-creds-<%= env.name %>))
+      AZ: <%= env.az %>
+      GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
+
+- name: clean-<%= env.name %>
+  serial: true
+  serial_groups: [<%= env.name %>]
+
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+
+  - task: cleanup
+    file: git-pfs-ci/tasks/clean-kubo.yml
+    params:
+      ENV_PREFIX: <%= env.name %>
+      PROJECT_ID: ((pfs-gcp-ci-project))
+      NETWORK_NAME: <%= env.name %>net
+      AZ: <%= env.az %>
+      REGION: <%= env.region %>
+      GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
+
+<% end %>

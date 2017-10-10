@@ -2,21 +2,21 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: hashicorp/terraform
-    tag: light
+    repository: cfmobile/pfs-ci-tf
+    tag: latest
 run:
-  path: terraform
+  path: bash
   args:
-  - "${COMMAND}"
-  - "-var service_account_email=${SERVICE_ACCOUNT_EMAIL}"
-  - "-var projectid=${PROJECT_ID}"
-  - "-var network=${NETWORK_NAME}"
-  - "-var prefix=${ENV_PREFIX}"
-  - "-var zone=${AZ}"
-  - "-var subnet_ip_prefix=${SUBNET_IP_PREFIX}"
+  - git-pfs-ci/tasks/scripts/tf_invoke.sh
+  - tf-source-dir/docs/user-guide/platforms/gcp
+  - tf-source-dir/docs/user-guide/routing/gcp
 
 inputs:
+- name: git-pfs-ci
 - name: tf-source-dir
+
+outputs:
+- name: tf-output
 
 params:
   TF_LOG: DEBUG
@@ -28,3 +28,4 @@ params:
   REGION: replace-me
   AZ: replace-me
   SUBNET_IP_PREFIX: replace-me
+  GOOGLE_CLOUD_KEYFILE_JSON: replace-me
