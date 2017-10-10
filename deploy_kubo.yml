@@ -19,14 +19,14 @@ resources:
 - name: gcs-kubo-deployment-tarball
   type: gcs
   source:
-  #  json_key: ((gcs-json-key))
+    json_key: ((gcp-json-key))
     bucket: kubo-public
     versioned_file: kubo-deployment-latest.tgz
 
 - name: git-pfs-ci
   type: git
   source:
-    uri: https://github.com/pivotal-cf/pfs-ci
+    uri: git@github.com:pivotal-cf/pfs-ci.git
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
@@ -42,7 +42,7 @@ jobs:
     - get: git-pfs-ci
     - get: gcs-kubo-deployment-tarball
 
- - task: unpack-tgz
+  - task: unpack-tgz
     file: git-pfs-ci/tasks/unpack-tgz.yml
     input_mapping:
       source_tarball: kubo-deployment-tarball
