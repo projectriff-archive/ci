@@ -1,9 +1,3 @@
-# resource_types:
-# - name: pull-request
-#   type: docker-image
-#   source:
-#     repository: jtarchie/pr
-
 resources:
 - name: git-sk8s
   type: git
@@ -24,11 +18,38 @@ resources:
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
+- name: docker-invoker-java-base
+  type: docker-image
+  source:
+    repository: cfmobile/pfs-invoker-java-base
+    username: ((docker-cfmobile-username))
+    password: ((docker-cfmobile-password))
+
 jobs:
-- name: build-sk8s
+- name: build-sk8s-and-invoker-java
   plan:
   - get: git-pfs-ci
   - get: git-sk8s
   - get: git-kubernetes-model
+    params:
+      depth: 1
+
   - task: build-sk8s
     file: git-pfs-ci/tasks/build-sk8s.yml
+
+  - task: build-invoker-java-base
+    file: git-pfs-ci/tasks/build-invoker-java-base.yml
+
+  - put:  docker-invoker-java-base
+    params: {build: sk8s-invoker-build-context}
+
+#
+# - name: build-sample-function-containers-java
+#   plan:
+#   - get: git-pfs-ci
+#   - get: git-sk8s
+#   - get: git-kubernetes-model
+#     params:
+#       depth: 1
+#   - task: build-sk8s
+#     file: git-pfs-ci/tasks/build-sk8s.yml

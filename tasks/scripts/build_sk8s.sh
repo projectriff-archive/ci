@@ -9,6 +9,6 @@ cp -r $build_root/git-kubernetes-model $model_dir/kubernetes-model
 cd $model_dir/kubernetes-model
 make
 cd $build_root/git-sk8s
-./mvnw clean package
+./mvnw clean package -Ddocker.skip=true
 
 cp $build_root/git-sk8s/function-invokers/java-function-invoker/target/java-function-invoker*.jar "$build_root/sk8s-invoker-java/"
