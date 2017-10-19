@@ -14,9 +14,9 @@ params:
 run:
   path: /bin/sh
   args:
-  - -exc
   - -o
   - pipefail
+  - -exc
   - |
     source /opt/resource/common.sh
     start_docker
