@@ -32,6 +32,14 @@ resources:
     username: ((docker-cfmobile-username))
     password: ((docker-cfmobile-password))
 
+- name: gh-faas-cli-release
+  type: github-release
+  source:
+    owner: pivotal-cf
+    repository: faas-cli
+    access_token: ((access_token))
+    pre_release: true
+
 jobs:
 - name: build-faas-cli
   plan:
@@ -40,6 +48,18 @@ jobs:
   - task: build-faas-cli
     file: git-pfs-ci/tasks/build-faas-cli.yml
     privileged: true
+
+  - put: git-faas-cli
+    params:
+      tag: faas-cli-out/release.tag
+      only_tag: true
+
+  - put: gh-release
+    params:
+      name: faas-cli-out/release.meta
+      tag: faas-cli-out/release.tag
+      globs:
+      - faas-cli-out/faas-cli
 
 - name: build-sk8s-and-invoker-java
   plan:
