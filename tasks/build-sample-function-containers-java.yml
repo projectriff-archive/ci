@@ -7,6 +7,10 @@ inputs:
 - name: gh-faas-cli-release
 - name: git-pfs-ci
 
+params:
+  DOCKERHUB_USERNAME: replace-me
+  DOCKERHUB_PASSWORD: replace-me
+
 run:
   path: /bin/sh
   args:
@@ -25,4 +29,14 @@ run:
     cd git-pfs-ci/integration/sample_functions/java/uppercase
     mvn clean package
 
-    "$build_root/gh-faas-cli-release/faas-cli" -n sample-uppercase build
+    function_name="sample-uppercase"
+
+    "$build_root/gh-faas-cli-release/faas-cli" -n "$function_name" build
+
+    new_image_id=$(docker images "$function_name" --format="{{.ID}}")
+
+    docker tag "$new_image_id" "cfmobile/faas-test-$function_name"
+
+    docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
+
+    docker push "cfmobile/faas-test-$function_name"
