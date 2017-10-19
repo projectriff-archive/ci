@@ -20,6 +20,8 @@ run:
 
     build_root="$PWD"
 
+    go get github.com/maxbrunsfeld/counterfeiter
+
     mv dep-linux-amd64 /usr/local/bin/dep
     chmod +x /usr/local/bin/dep
 
