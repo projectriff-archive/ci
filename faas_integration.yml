@@ -54,7 +54,7 @@ jobs:
       tag: faas-cli-out/release.tag
       only_tag: true
 
-  - put: gh-release
+  - put: gh-faas-cli-release
     params:
       name: faas-cli-out/release.meta
       tag: faas-cli-out/release.tag
