@@ -55,7 +55,8 @@ jobs:
     file: git-pfs-ci/tasks/build-invoker-java-base.yml
 
   - put:  docker-invoker-java-base
-    params: {build: sk8s-invoker-build-context}
+    params:
+      build: sk8s-invoker-build-context
 
 #
 # - name: build-sample-function-containers-java
