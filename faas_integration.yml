@@ -37,7 +37,7 @@ resources:
   source:
     owner: pivotal-cf
     repository: faas-cli
-    access_token: ((access_token))
+    access_token: ((gitbot-access-token))
     pre_release: true
 
 jobs:
@@ -53,10 +53,11 @@ jobs:
     params:
       tag: faas-cli-out/release.tag
       only_tag: true
+      repository: git-faas-cli
 
   - put: gh-faas-cli-release
     params:
-      name: faas-cli-out/release.meta
+      name: faas-cli-out/release.name
       tag: faas-cli-out/release.tag
       globs:
       - faas-cli-out/faas-cli
@@ -79,13 +80,10 @@ jobs:
     params:
       build: sk8s-invoker-build-context
 
-#
-# - name: build-sample-function-containers-java
-#   plan:
-#   - get: git-pfs-ci
-#   - get: git-sk8s
-#   - get: git-kubernetes-model
-#     params:
-#       depth: 1
-#   - task: build-sk8s
-#     file: git-pfs-ci/tasks/build-sk8s.yml
+
+- name: build-sample-function-containers-java
+  plan:
+  - get: gh-faas-cli-release
+  - get: git-pfs-ci
+  - task: build-sample-function-containers-java
+    file: git-pfs-ci/tasks/build-sample-function-containers-java.yml
