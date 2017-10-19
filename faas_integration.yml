@@ -1,0 +1,34 @@
+# resource_types:
+# - name: pull-request
+#   type: docker-image
+#   source:
+#     repository: jtarchie/pr
+
+resources:
+- name: git-sk8s
+  type: git
+  source:
+    uri: https://github.com/markfisher/sk8s
+    base: master
+
+- name: git-kubernetes-model
+  type: git
+  source:
+    uri: https://github.com/ericbottard/kubernetes-model
+    branch: sk8s
+
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+jobs:
+- name: build-sk8s
+  plan:
+  - get: git-pfs-ci
+  - get: git-sk8s
+  - get: git-kubernetes-model
+  - task: build-sk8s
+    file: git-pfs-ci/tasks/build-sk8s.yml
