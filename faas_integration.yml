@@ -87,3 +87,4 @@ jobs:
   - get: git-pfs-ci
   - task: build-sample-function-containers-java
     file: git-pfs-ci/tasks/build-sample-function-containers-java.yml
+    privileged: true
