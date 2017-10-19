@@ -18,6 +18,13 @@ resources:
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
+- name: git-faas-cli
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/faas-cli.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
 - name: docker-invoker-java-base
   type: docker-image
   source:
@@ -26,6 +33,13 @@ resources:
     password: ((docker-cfmobile-password))
 
 jobs:
+- name: build-faas-cli
+  plan:
+  - get: git-pfs-ci
+  - get: git-faas-cli
+  - task: build-faas-cli
+    file: git-pfs-ci/tasks/build-faas-cli.yml
+
 - name: build-sk8s-and-invoker-java
   plan:
   - get: git-pfs-ci
