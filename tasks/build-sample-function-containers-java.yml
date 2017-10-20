@@ -26,14 +26,14 @@ run:
 
     build_root="$PWD"
 
-    chmod +x gh-faas-cli-release/faas-cli
+    chmod +x gh-faas-cli-release/faas-cli-linux-amd64
 
     cd git-pfs-ci/integration/sample_functions/java/uppercase
     mvn clean package
 
     function_name="sample-uppercase"
 
-    "$build_root/gh-faas-cli-release/faas-cli" -n "$function_name" build
+    "$build_root/gh-faas-cli-release/faas-cli-linux-amd64" -n "$function_name" build
 
     new_image_id=$(docker images "$function_name" --format="{{.ID}}")
 

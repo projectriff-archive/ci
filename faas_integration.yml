@@ -60,7 +60,7 @@ jobs:
       name: faas-cli-out/release.name
       tag: faas-cli-out/release.tag
       globs:
-      - faas-cli-out/faas-cli
+      - faas-cli-out/faas-cli*
 
 - name: build-sk8s-and-invoker-java
   plan:

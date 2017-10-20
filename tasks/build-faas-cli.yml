@@ -2,7 +2,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: concourse/docker-image-resource
+    repository: sk8s/faas-cli-build
 
 inputs:
 - name: git-faas-cli
@@ -12,34 +12,19 @@ outputs:
 - name: faas-cli-out
 
 run:
-  path: /bin/sh
+  path: /bin/bash
   args:
   - -exc
   - |
-    source /opt/resource/common.sh
-    start_docker
-
-    apk update
-    apk add alpine-sdk bash wget go git
-    export GOPATH=$(go env GOPATH)
-
-    wget https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64
+    source /opt/resource/common.sh && start_docker
 
     build_root="$PWD"
-
-    go get github.com/maxbrunsfeld/counterfeiter
-    cp /root/go/bin/counterfeiter  /usr/local/bin/
-
-    mv dep-linux-amd64 /usr/local/bin/dep
-    chmod +x /usr/local/bin/dep
-
-
     mkdir -p "$GOPATH/src/github.com/pivotal-cf"
-    cp -r git-faas-cli "$GOPATH/src/github.com/pivotal-cf/faas-cli"
+    cp -r "$build_root/git-faas-cli" "$GOPATH/src/github.com/pivotal-cf/faas-cli"
 
     cd "$GOPATH/src/github.com/pivotal-cf/faas-cli"
 
     ./build.sh
-    cp ./faas-cli "$build_root/faas-cli-out/"
+    cp ./faas-cli* "$build_root/faas-cli-out/"
     echo "faas-cli-pre-alpha" >  "$build_root/faas-cli-out/release.name"
     echo "dev-build" >  "$build_root/faas-cli-out/release.tag"
