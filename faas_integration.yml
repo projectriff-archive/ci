@@ -53,6 +53,7 @@ jobs:
     params:
       tag: faas-cli-out/release.tag
       only_tag: true
+      force: true
       repository: git-faas-cli
 
   - put: gh-faas-cli-release
