@@ -1,8 +1,5 @@
 #!/bin/bash
 
-source /opt/resource/common.sh
-start_docker
-
 set -exuo pipefail
 
 build_root=$PWD
@@ -18,8 +15,14 @@ export MAVEN_OPTS="-XX:-UseGCOverheadLimit -XX:+HeapDumpOnOutOfMemoryError -XX:H
 make
 cd $build_root/git-sk8s
 
+
+set +u
+source /opt/resource/common.sh
+start_docker # starting docker here instead of at the beginning, due to memory restrictions
+
 ./mvnw clean package
 ./dockerize
+set -u
 
 mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
