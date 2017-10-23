@@ -73,6 +73,10 @@ jobs:
 
   - task: build-sk8s
     file: git-pfs-ci/tasks/build-sk8s.yml
+    privileged: true
+    params:
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      K8S_NS: pfs-ci
 
   - task: build-invoker-java-base
     file: git-pfs-ci/tasks/build-invoker-java-base.yml
