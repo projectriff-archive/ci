@@ -54,7 +54,7 @@ instance_groups:
 
 - name: worker
   instances: 2
-  vm_type: medium
+  vm_type: large
 
   stemcell: trusty
   azs: [z1]
