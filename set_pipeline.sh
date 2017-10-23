@@ -78,7 +78,9 @@ main() {
     --var gcp-json-key="$gsp_key" \
     -l <(lpass show --note 6968658724120942125) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-bosh-creds-pfsenv01) \
-    -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-bosh-creds-pfsenv02)
+    -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-bosh-creds-pfsenv02) \
+    -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-pfsenv01) \
+    -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-pfsenv02)
     ${@:2}
 }
 

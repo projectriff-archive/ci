@@ -1,11 +1,12 @@
 #!/bin/bash
 
+source /opt/resource/common.sh
+
 set -exuo pipefail
 
-build_root=$PWD
-
-source /opt/resource/common.sh
 start_docker
+
+build_root=$PWD
 
 model_dir="$(go env GOPATH)/src/github.com/fabric8io"
 mkdir -p $model_dir
