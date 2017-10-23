@@ -12,7 +12,7 @@ mkdir -p $model_dir
 cp -r $build_root/git-kubernetes-model $model_dir/kubernetes-model
 cd $model_dir/kubernetes-model
 
-export MAVEN_OPTS="-Xms256m -Xmx256m -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:+CMSClassUnloadingEnabled"
+export MAVEN_OPTS="-Xms512m -Xmx512m -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=512M -XX:+CMSClassUnloadingEnabled"
 
 make
 cd $build_root/git-sk8s
