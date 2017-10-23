@@ -19,9 +19,21 @@ cd $build_root/git-sk8s
 mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
 
-kubectl create ns "$K8S_NS"
-kubectl apply -f config/types -n "$K8S_NS"
-kubectl apply -f config/kafka -n "$K8S_NS"
-kubectl apply -f config -n "$K8S_NS"
+set +e
+existing_ns=$(kubectl get ns -o json | jq -r  .items[].metadata.name | grep "$K8S_NS_PREFIX")
+
+if [ ! -z "$existing_ns" ]; then
+  kubectl delete ns "$existing_ns" --cascade=true
+  sleep 30
+fi
+set -e
+
+ns_suffix=$(date "+%s")
+ns_name="$K8S_NS_PREFIX"-"$ns_suffix"
+
+kubectl create ns "$ns_name"
+kubectl apply -f config/types -n "$ns_name"
+kubectl apply -f config/kafka -n "$ns_name"
+kubectl apply -f config -n "$ns_name"
 
 cp $build_root/git-sk8s/function-invokers/java-function-invoker/target/java-function-invoker*.jar "$build_root/sk8s-invoker-java/"
