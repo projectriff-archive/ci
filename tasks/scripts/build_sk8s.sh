@@ -14,7 +14,7 @@ cd $model_dir/kubernetes-model
 make
 cd $build_root/git-sk8s
 
-export MAVEN_OPTS="-Xms256m -Xmx256m"
+export MAVEN_OPTS="-Xms256m -Xmx256m -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=256M -XX:+CMSClassUnloadingEnabled"
 
 ./mvnw clean package
 ./dockerize
