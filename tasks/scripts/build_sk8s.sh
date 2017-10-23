@@ -13,6 +13,9 @@ cp -r $build_root/git-kubernetes-model $model_dir/kubernetes-model
 cd $model_dir/kubernetes-model
 make
 cd $build_root/git-sk8s
+
+export MAVEN_OPTS="-Xms256m -Xmx256m"
+
 ./mvnw clean package
 ./dockerize
 
