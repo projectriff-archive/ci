@@ -8,6 +8,7 @@ resources:
 - name: git-kubernetes-model
   type: git
   source:
+  #  uri: https://github.com/pivotal-jamie-klassen/kubernetes-model
     uri: https://github.com/ericbottard/kubernetes-model
     branch: sk8s
 
@@ -70,6 +71,9 @@ jobs:
   - get: git-kubernetes-model
     params:
       depth: 1
+
+  - task: build-fabric8-model
+    file: git-pfs-ci/tasks/build-fabric8-model.yml
 
   - task: build-sk8s
     file: git-pfs-ci/tasks/build-sk8s.yml

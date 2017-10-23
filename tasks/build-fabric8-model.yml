@@ -1,0 +1,15 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/build
+
+inputs:
+- name: git-kubernetes-model
+- name: git-pfs-ci
+
+outputs:
+- name: m2-repo
+
+run:
+  path: git-pfs-ci/tasks/scripts/build_fabric8_model.sh

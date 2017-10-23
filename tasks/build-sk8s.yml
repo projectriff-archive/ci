@@ -6,8 +6,8 @@ image_resource:
 
 inputs:
 - name: git-sk8s
-- name: git-kubernetes-model
 - name: git-pfs-ci
+- name: m2-repo
 
 outputs:
 - name: sk8s-invoker-java

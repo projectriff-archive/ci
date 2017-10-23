@@ -4,21 +4,15 @@ set -exuo pipefail
 
 build_root=$PWD
 
-model_dir="$(go env GOPATH)/src/github.com/fabric8io"
-mkdir -p $model_dir
-cp -r $build_root/git-kubernetes-model $model_dir/kubernetes-model
-cd $model_dir/kubernetes-model
+mkdir -p ~/.m2
 
-#export MAVEN_OPTS="-Xms512m -Xmx1024m -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=1024M -XX:MaxPermSize=128m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
-export MAVEN_OPTS="-XX:-UseGCOverheadLimit -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/root"
+cp -r "$build_root/m2-repo/repository" ~/.m2/
 
-make
 cd $build_root/git-sk8s
-
 
 set +u
 source /opt/resource/common.sh
-start_docker # starting docker here instead of at the beginning, due to memory restrictions
+start_docker 
 
 ./mvnw clean package
 ./dockerize
