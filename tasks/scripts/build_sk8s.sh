@@ -1,10 +1,9 @@
 #!/bin/bash
 
 source /opt/resource/common.sh
+start_docker
 
 set -exuo pipefail
-
-start_docker
 
 build_root=$PWD
 
