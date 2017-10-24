@@ -16,7 +16,7 @@ run:
   args:
   - -exc
   - |
-    source /opt/resource/common.sh && start_docker
+    start_docker
 
     build_root="$PWD"
     mkdir -p "$GOPATH/src/github.com/pivotal-cf"
