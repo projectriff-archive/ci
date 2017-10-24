@@ -10,10 +10,13 @@ cp -r "$build_root/m2-repo/repository" ~/.m2/
 
 cd $build_root/git-sk8s
 
+set +u
+source /opt/resource/common.sh
 start_docker 
 
 ./mvnw clean package
 ./dockerize
+set -u
 
 mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config

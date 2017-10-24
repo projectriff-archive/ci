@@ -4,4 +4,5 @@
 .springBeans
 .project
 .factorypath
+*.swp
 target
