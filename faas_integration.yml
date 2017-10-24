@@ -2,13 +2,12 @@ resources:
 - name: git-sk8s
   type: git
   source:
-    uri: https://github.com/markfisher/sk8s
+    uri: https://github.com/pivotal-jamie-klassen/sk8s
     base: master
 
 - name: git-kubernetes-model
   type: git
   source:
-  #  uri: https://github.com/pivotal-jamie-klassen/kubernetes-model
     uri: https://github.com/ericbottard/kubernetes-model
     branch: sk8s
 
