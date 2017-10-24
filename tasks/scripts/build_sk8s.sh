@@ -10,7 +10,7 @@ cp -r "$build_root/m2-repo/repository" ~/.m2/
 
 cd $build_root/git-sk8s
 
-start_docker 
+start_docker
 
 ./mvnw clean package
 ./dockerize
@@ -35,4 +35,7 @@ kubectl apply -f config/types -n "$ns_name"
 kubectl apply -f config/kafka -n "$ns_name"
 kubectl apply -f config -n "$ns_name"
 
-cp $build_root/git-sk8s/function-invokers/java-function-invoker/target/java-function-invoker*.jar "$build_root/sk8s-invoker-java/"
+pushd $build_root/git-sk8s/function-invokers/java-function-invoker/target/
+    invoker_jar_file=$(readlink -f $(ls *.jar | grep -v docker-info))
+    cp "$invoker_jar_file" "$build_root/sk8s-invoker-java/"
+popd
