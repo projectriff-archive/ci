@@ -12,6 +12,9 @@ inputs:
 outputs:
 - name: sk8s-invoker-java
 
+caches:
+- path: docker-cache
+
 run:
   path: git-pfs-ci/tasks/scripts/build_sk8s.sh
 

@@ -10,6 +10,7 @@ cp -r "$build_root/m2-repo/repository" ~/.m2/
 
 cd $build_root/git-sk8s
 
+export DOCKER_DAEMON_ARGS="--data-root $build_root/docker-cache"
 start_docker
 
 
