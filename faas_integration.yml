@@ -1,3 +1,19 @@
+<%
+  DockerImage = Struct.new(:path, :name)
+  sk8s_docker_images = [
+    DockerImage.new('event-dispatcher', 'cfmobile/sk8s-event-dispatcher:0.0.1-SNAPSHOT'),
+    DockerImage.new('function-invokers/java-function-invoker','cfmobile/sk8s-java-function-invoker:0.0.1-SNAPSHOT'),
+    DockerImage.new('function-invokers/node-function-invoker','cfmobile/sk8s-node-function-invoker:0.0.1-SNAPSHOT'),
+    DockerImage.new('function-invokers/python2-function-invoker', 'cfmobile/sk8s-python2-function-invoker:0.0.1-SNAPSHOT'),
+    DockerImage.new('function-invokers/shell-function-invoker', 'cfmobile/sk8s-shell-function-invoker:0.0.1-SNAPSHOT'),
+    DockerImage.new('function-sidecar','cfmobile/sk8s-function-sidecar:0.0.1-SNAPSHOT'),
+    DockerImage.new('topic-controller','cfmobile/sk8s-topic-controller:0.0.1-SNAPSHOT'),
+    DockerImage.new('topic-gateway','cfmobile/sk8s-topic-gateway:0.0.1-SNAPSHOT'),
+    DockerImage.new('zipkin-server', 'cfmobile/sk8s-zipkin-server:0.0.1-SNAPSHOT')
+  ]
+
+%>
+
 resources:
 - name: git-sk8s
   type: git
@@ -76,21 +92,18 @@ jobs:
 
   - task: build-sk8s
     file: git-pfs-ci/tasks/build-sk8s.yml
-    privileged: true
+<% sk8s_docker_images.each do |image| %>
+  - put:  <%= image.name %>
+    params:
+      build: sk8s-docker-contexts/<%= image.path %>
+      build_args:
+        JAR_FILE: *.jar
+<% end %>
+  - task: deploy-sk8s
+    file: git-pfs-ci/tasks/deploy-sk8s.yml
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
-      DOCKERHUB_USERNAME: ((docker-cfmobile-username))
-      DOCKERHUB_PASSWORD: ((docker-cfmobile-password))
-      DOCKERHUB_ORG: cfmobile
-
-  - task: build-invoker-java-base
-    file: git-pfs-ci/tasks/build-invoker-java-base.yml
-
-  - put:  docker-invoker-java-base
-    params:
-      build: sk8s-invoker-build-context
-
 
 - name: build-sample-function-containers-java
   plan:

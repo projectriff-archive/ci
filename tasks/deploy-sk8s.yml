@@ -7,10 +7,11 @@ image_resource:
 inputs:
 - name: git-sk8s
 - name: git-pfs-ci
-- name: m2-repo
-
-outputs:
-- name: sk8s-docker-contexts
 
 run:
-  path: git-pfs-ci/tasks/scripts/build_sk8s.sh
+  path: git-pfs-ci/tasks/scripts/deploy_sk8s.sh
+
+params:
+  KUBECONFIG_STRING: replace-me
+  K8S_NS_PREFIX: replace-me
+  
