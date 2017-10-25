@@ -18,3 +18,5 @@ run:
 params:
   KUBECONFIG_STRING: replace-me
   K8S_NS_PREFIX: replace-me
+  DOCKERHUB_USERNAME: replace-me
+  DOCKERHUB_PASSWORD: replace-me

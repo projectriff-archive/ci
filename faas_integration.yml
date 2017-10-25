@@ -2,7 +2,7 @@ resources:
 - name: git-sk8s
   type: git
   source:
-    uri: https://github.com/pivotal-jamie-klassen/sk8s
+    uri: https://github.com/markfisher/sk8s
     base: master
 
 - name: git-kubernetes-model
@@ -80,6 +80,8 @@ jobs:
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
+      DOCKERHUB_USERNAME: ((docker-cfmobile-username))
+      DOCKERHUB_PASSWORD: ((docker-cfmobile-password))
 
   - task: build-invoker-java-base
     file: git-pfs-ci/tasks/build-invoker-java-base.yml
