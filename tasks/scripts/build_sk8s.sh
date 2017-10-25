@@ -17,9 +17,7 @@ start_docker
 
 docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
 
-./mvnw clean package
-./dockerize
-./mvnw dockerfile:push -pl \
+./mvnw clean package dockerfile:build dockerfile:push -Ddocker.org="$DOCKERHUB_ORG" -pl \
 topic-controller,\
 topic-gateway,\
 event-dispatcher,\

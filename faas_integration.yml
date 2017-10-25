@@ -82,6 +82,7 @@ jobs:
       K8S_NS_PREFIX: pfs-ci
       DOCKERHUB_USERNAME: ((docker-cfmobile-username))
       DOCKERHUB_PASSWORD: ((docker-cfmobile-password))
+      DOCKERHUB_ORG: cfmobile
 
   - task: build-invoker-java-base
     file: git-pfs-ci/tasks/build-invoker-java-base.yml

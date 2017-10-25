@@ -20,3 +20,4 @@ params:
   K8S_NS_PREFIX: replace-me
   DOCKERHUB_USERNAME: replace-me
   DOCKERHUB_PASSWORD: replace-me
+  DOCKERHUB_ORG: replace-me
