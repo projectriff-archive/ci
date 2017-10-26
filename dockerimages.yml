@@ -10,30 +10,30 @@ resources:
 - name: faas_build_dockerimage
   type: docker-image
   source:
-    repository: cfmobile/faas-build
-    username: ((docker-cfmobile-username))
-    password: ((docker-cfmobile-password))
+    repository: ((docker-sk8s-org))/faas-build
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
 
 - name: faas_cli_build_dockerimage
   type: docker-image
   source:
-    repository: cfmobile/faas-cli-build
-    username: ((docker-cfmobile-username))
-    password: ((docker-cfmobile-password))
+    repository: ((docker-sk8s-org))/faas-cli-build
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
 
 - name: faas_tf_dockerimage
   type: docker-image
   source:
-    repository: cfmobile/pfs-ci-tf
-    username: ((docker-cfmobile-username))
-    password: ((docker-cfmobile-password))
+    repository: ((docker-sk8s-org))/pfs-ci-tf
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
 
 - name: faas_gcloud_dockerimage
   type: docker-image
   source:
-    repository: cfmobile/pfs-ci-gcloud
-    username: ((docker-cfmobile-username))
-    password: ((docker-cfmobile-password))
+    repository: ((docker-sk8s-org))/pfs-ci-gcloud
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
 
 jobs:
 

@@ -37,8 +37,8 @@ run:
 
     new_image_id=$(docker images "$function_name" --format="{{.ID}}")
 
-    docker tag "$new_image_id" "cfmobile/faas-test-$function_name"
+    docker tag "$new_image_id" "sk8s/faas-test-$function_name"
 
     docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
 
-    docker push "cfmobile/faas-test-$function_name"
+    docker push "sk8s/faas-test-$function_name"

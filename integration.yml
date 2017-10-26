@@ -1,0 +1,59 @@
+resources:
+
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+- name: git-faas-cli
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/faas-cli.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+- name: gh-faas-cli-release
+  type: github-release
+  source:
+    owner: pivotal-cf
+    repository: faas-cli
+    access_token: ((gitbot-access-token))
+    pre_release: true
+
+jobs:
+- name: build-faas-cli
+  plan:
+  - get: git-pfs-ci
+  - get: git-faas-cli
+  - task: build-faas-cli
+    file: git-pfs-ci/tasks/build-faas-cli.yml
+    privileged: true
+
+  - put: git-faas-cli
+    params:
+      tag: faas-cli-out/release.tag
+      only_tag: true
+      force: true
+      repository: git-faas-cli
+
+  - put: gh-faas-cli-release
+    params:
+      name: faas-cli-out/release.name
+      tag: faas-cli-out/release.tag
+      globs:
+      - faas-cli-out/faas-cli*
+
+- name: build-sample-function-containers-java
+  plan:
+  - get: gh-faas-cli-release
+    passed: [build-faas-cli]
+  - get: git-pfs-ci
+  - task: build-sample-function-containers-java
+    file: git-pfs-ci/tasks/build-sample-function-containers-java.yml
+    privileged: true
+    params:
+      DOCKERHUB_USERNAME: ((docker-sk8s-username))
+      DOCKERHUB_PASSWORD: ((docker-sk8s-password))
+      DOCKERHUB_ORG: ((docker-sk8s-org))
