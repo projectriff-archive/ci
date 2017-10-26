@@ -1,0 +1,44 @@
+resources:
+
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+- name: faas_build_dockerimage
+  type: docker-image
+  source:
+    repository: cfmobile/faas-build
+    username: ((docker-cfmobile-username))
+    password: ((docker-cfmobile-password))
+
+- name: faas_cli_build_dockerimage
+  type: docker-image
+  source:
+    repository: cfmobile/faas-cli-build
+    username: ((docker-cfmobile-username))
+    password: ((docker-cfmobile-password))
+
+- name: faas_tf_dockerimage
+  type: docker-image
+  source:
+    repository: cfmobile/pfs-ci-tf
+    username: ((docker-cfmobile-username))
+    password: ((docker-cfmobile-password))
+
+jobs:
+
+- name: build-dockerimages
+  plan:
+  - get: git-pfs-ci
+  - put: faas_build_dockerimage
+    params:
+      build: git-pfs-ci/tasks/containers/faas_build
+  - put: faas_cli_build_dockerimage
+    params:
+      build: git-pfs-ci/tasks/containers/faas_cli_build
+  - put: faas_tf_dockerimage
+    params:
+      build: git-pfs-ci/tasks/containers/terraform_extended
