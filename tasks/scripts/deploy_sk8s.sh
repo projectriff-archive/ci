@@ -20,7 +20,7 @@ mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
 
 set +e
-existing_tiller_ns_name=$(kubectl get ns | grep "$K8S_NS_PREFIX-tiller")
+existing_tiller_ns_name=$(kubectl get ns | grep "$K8S_NS_PREFIX-tiller" | awk '{print $1}')
 set -e
 if [ ! -z "$existing_tiller_ns_name" ]; then
   helm ls  --tiller-namespace="$existing_tiller_ns_name" | grep -v NAME | awk '{print $1}' | xargs -I{} helm  --tiller-namespace="$existing_tiller_ns_name" delete {} --purge
