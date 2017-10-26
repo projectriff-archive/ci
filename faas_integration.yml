@@ -106,6 +106,7 @@ jobs:
   plan:
   - get: git-pfs-ci
   - get: git-sk8s
+    passed: [build-sk8s]
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
     params:
@@ -115,6 +116,7 @@ jobs:
 - name: build-sample-function-containers-java
   plan:
   - get: gh-faas-cli-release
+    passed: [build-faas-cli]
   - get: git-pfs-ci
   - task: build-sample-function-containers-java
     file: git-pfs-ci/tasks/build-sample-function-containers-java.yml
