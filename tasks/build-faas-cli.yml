@@ -2,7 +2,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfmobile/faas-cli-build
+    repository: sk8s/faas-cli-build
 
 inputs:
 - name: git-faas-cli
