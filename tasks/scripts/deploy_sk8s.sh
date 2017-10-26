@@ -16,11 +16,6 @@ HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicGateway.image.tag=latest,"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}zipkin.image.repository=cfmobile/sk8s-zipkin-server,"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}zipkin.image.tag=latest"
 
-pushd charts
-  helm package sk8s
-  # TODO: push chart to helm repo
-popd
-
 mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
 
@@ -48,10 +43,15 @@ kubectl get customresourcedefinitions --all-namespaces -o json |
   xargs -I{} kubectl delete customresourcedefinition {}
 
 pushd charts
+
+    helm package sk8s
+
     chart_file=$(basename sk8s*tgz)
+
     helm install "$chart_file" \
       --tiller-namespace="$tiller_ns_name" \
       --namespace="$sk8s_ns_name" \
       --name="$helm_release_name" \
       --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true"
+
 popd

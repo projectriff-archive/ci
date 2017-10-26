@@ -11,3 +11,5 @@ ENV GOPATH=/root/go
 RUN KUBERNETES_VERSION=$(curl -s -k -L https://storage.googleapis.com/kubernetes-release/release/stable.txt) && \
   curl -L -k https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubectl > /usr/local/bin/kubectl && \
   chmod +x /usr/local/bin/kubectl
+
+RUN curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
