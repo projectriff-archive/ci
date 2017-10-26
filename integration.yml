@@ -61,6 +61,7 @@ jobs:
   plan:
   - get: git-pfs-ci
   - get: git-faas-cli
+    trigger: true
   - task: build-faas-cli
     file: git-pfs-ci/tasks/build-faas-cli.yml
     privileged: true
@@ -83,6 +84,7 @@ jobs:
 - name: build-sample-function-containers-java
   plan:
   - get: gh-faas-cli-release
+    trigger: true
     passed: [build-faas-cli]
   - get: git-pfs-ci
   - task: build-sample-function-containers-java
