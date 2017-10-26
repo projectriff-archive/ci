@@ -19,14 +19,18 @@ HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}zipkin.image.tag=latest"
 mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
 
+# delete existing tiller deployments
 set +e
 existing_tiller_ns_name=$(kubectl get ns | grep "$K8S_NS_PREFIX-tiller" | awk '{print $1}')
-set -e
 if [ ! -z "$existing_tiller_ns_name" ]; then
   helm ls  --tiller-namespace="$existing_tiller_ns_name" | grep -v NAME | awk '{print $1}' | xargs -I{} helm  --tiller-namespace="$existing_tiller_ns_name" delete {} --purge
 fi
+set -e
 
+# delete existing CI namespaces
+set +e
 kubectl get ns -o json | jq -r  .items[].metadata.name | grep "$K8S_NS_PREFIX" | xargs -I{} kubectl delete ns {} --cascade=true
+set -e
 sleep 30
 
 ns_suffix=$(date "+%s")
