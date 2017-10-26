@@ -28,10 +28,19 @@ resources:
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 
+
 - name: faas_gcloud_dockerimage
   type: docker-image
   source:
     repository: ((docker-sk8s-org))/pfs-ci-gcloud
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
+
+- name: fabric8_build
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/fabric8_build
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 
@@ -52,3 +61,6 @@ jobs:
   - put: faas_gcloud_dockerimage
     params:
       build: git-pfs-ci/tasks/containers/gcloud_extended
+  - put: fabric8_build
+    params:
+      build: git-pfs-ci/tasks/containers/fabric8_build
