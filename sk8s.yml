@@ -14,7 +14,20 @@
 
 %>
 
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
 resources:
+
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: ((slack-hook-url))
+
 - name: git-sk8s
   type: git
   source:
