@@ -79,12 +79,13 @@ resources:
 jobs:
 - name: build-sk8s
   plan:
-  - get: git-pfs-ci
-  - get: git-sk8s
-    trigger: true
-  - get: git-kubernetes-model
-    params:
-      depth: 1
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-sk8s
+      trigger: true
+    - get: git-kubernetes-model
+      params:
+        depth: 1
 
   - task: build-fabric8-model
     file: git-pfs-ci/tasks/build-fabric8-model.yml
@@ -102,10 +103,11 @@ jobs:
 
 - name: deploy-sk8s
   plan:
-  - get: git-pfs-ci
-  - get: git-sk8s
-    trigger: true
-    passed: [build-sk8s]
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-sk8s
+      trigger: true
+      passed: [build-sk8s]
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
     params:

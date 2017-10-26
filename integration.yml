@@ -1,4 +1,12 @@
 <%
+
+  invoker_images = [
+    'sk8s/java-function-invoker',
+    #'sk8s/node-function-invoker',
+    #'sk8s/python2-function-invoker',
+    #'sk8s/shell-function-invoker'
+  ]
+
 slack_notification="""
   on_success:
     do:
@@ -56,12 +64,21 @@ resources:
     access_token: ((gitbot-access-token))
     pre_release: true
 
+<% invoker_images.each do |invoker_image_name| %>
+- name:  <%= invoker_image_name.gsub("\:","-").gsub("/","-") %>
+  type: docker-image
+  source:
+    repository: <%= invoker_image_name %>
+<% end %>
+
 jobs:
 - name: build-faas-cli
   plan:
-  - get: git-pfs-ci
-  - get: git-faas-cli
-    trigger: true
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-faas-cli
+      trigger: true
+
   - task: build-faas-cli
     file: git-pfs-ci/tasks/build-faas-cli.yml
     privileged: true
@@ -83,10 +100,16 @@ jobs:
 
 - name: build-sample-function-containers-java
   plan:
-  - get: gh-faas-cli-release
-    trigger: true
-    passed: [build-faas-cli]
-  - get: git-pfs-ci
+  - aggregate:
+<% invoker_images.each do |invoker_image_name| %>
+    - get: <%= invoker_image_name.gsub("\:","-").gsub("/","-") %>
+      trigger: true
+<% end %>
+    - get: gh-faas-cli-release
+      trigger: true
+      passed: [build-faas-cli]
+    - get: git-pfs-ci
+
   - task: build-sample-function-containers-java
     file: git-pfs-ci/tasks/build-sample-function-containers-java.yml
     privileged: true
