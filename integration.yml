@@ -1,3 +1,26 @@
+<%
+slack_notification="""
+  on_success:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Passed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+"""
+
+%>
+
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -55,6 +78,7 @@ jobs:
       tag: faas-cli-out/release.tag
       globs:
       - faas-cli-out/faas-cli*
+<%= slack_notification %>
 
 - name: build-sample-function-containers-java
   plan:
@@ -68,3 +92,4 @@ jobs:
       DOCKERHUB_USERNAME: ((docker-sk8s-username))
       DOCKERHUB_PASSWORD: ((docker-sk8s-password))
       DOCKERHUB_ORG: ((docker-sk8s-org))
+<%= slack_notification %>

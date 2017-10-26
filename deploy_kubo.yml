@@ -4,6 +4,28 @@
     KuboEnvironment.new('pfsenv01', '10.0.31', 'us-central1', 'us-central1-c'),
     KuboEnvironment.new('pfsenv02', '10.0.32', 'us-west1', 'us-west1-b')
   ]
+
+
+slack_notification="""
+  on_success:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Passed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+"""
+
 %>
 ---
 
@@ -86,6 +108,7 @@ jobs:
       BOSH_CREDS: ((pfs-gcp-ci-bosh-creds-<%= env.name %>))
       AZ: <%= env.az %>
       GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
+<%= slack_notification %>
 
 - name: clean-<%= env.name %>
   serial: true
@@ -104,5 +127,6 @@ jobs:
       AZ: <%= env.az %>
       REGION: <%= env.region %>
       GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
+<%= slack_notification %>
 
 <% end %>
