@@ -53,7 +53,7 @@ kubectl get customresourcedefinitions --all-namespaces -o json |
 
 pushd charts
 
-    helm package sk8s
+    helm package sk8s --version="$SK8S_VERSION"
 
     chart_file=$(basename sk8s*tgz)
 

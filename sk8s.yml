@@ -66,7 +66,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ericbottard/kubernetes-model
-    branch: sk8s
+    branch: sk8s-sidecar-scaling
 
 - name: git-pfs-ci
   type: git
@@ -89,6 +89,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
+    - get: sk8s-version
     - get: git-sk8s
       trigger: true
     - get: git-kubernetes-model
@@ -96,7 +97,7 @@ jobs:
         depth: 1
 
   - put: sk8s-version
-    params: {bump: patch}
+    params: {bump: patch, pre: SNAPSHOT}
 
   - task: build-fabric8-model
     file: git-pfs-ci/tasks/build-fabric8-model.yml
