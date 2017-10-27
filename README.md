@@ -11,7 +11,7 @@ Container images and Helm charts built from `sk8s` are versioned using the Conco
 - To generate a final version number (without a suffix), run the `version-bump-final` job
 
 ### Helm Charts
-Charts (and a corresponding `index.yaml` for the latest build) are published to https://sk8s_charts_dev.storage.googleapis.com
+Charts (and a corresponding `index.yaml` for the latest build) are published to https://storage.googleapis.com/sk8s_charts_dev
 
 ### Concourse: https://ci.faas.to.cf-app.com
 
