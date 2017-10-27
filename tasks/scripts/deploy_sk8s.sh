@@ -3,6 +3,7 @@
 set -exuo pipefail
 
 build_root=$PWD
+SK8S_VERSION=$(head "$build_root/sk8s-version/version")
 
 cd $build_root/git-sk8s
 
