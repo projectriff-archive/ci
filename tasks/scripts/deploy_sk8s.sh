@@ -83,7 +83,7 @@ pushd charts
 
     cp "$chart_file" "$build_root/sk8s-charts/"
 
-    chart_index_timestamp=$(date +"%Y-%m-%dT%H-%M-%S")
+    chart_index_timestamp=$(date +"%Y-%m-%dT%H:%M:%SZ00:00")
 
-    echo "$HELM_CHART_INDEX_TEMPLATE" | sed -e "s/{chart_index_timestamp}/$chart_index_timestamp/g"  -e "s/{chart_filename}/$chart_file/g"  -e "s/{sha256_checksum}/$chart_checksum/g" -e "s/{chart_version}/$SK8S_VERSION/g" > "$build_root/sk8s-charts/index.yaml"    
+    echo "$HELM_CHART_INDEX_TEMPLATE" | sed -e "s/{chart_index_timestamp}/$chart_index_timestamp/g"  -e "s/{chart_filename}/$chart_file/g"  -e "s/{sha256_checksum}/$chart_checksum/g" -e "s/{chart_version}/$SK8S_VERSION/g" > "$build_root/sk8s-charts/index.yaml"
 popd
