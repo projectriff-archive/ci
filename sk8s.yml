@@ -43,6 +43,14 @@ resource_types:
 
 resources:
 
+- name: sk8s-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: pfs_versions
+    key: sk8s_version
+    json_key: ((gcp-json-key))
+
 - name: slack-alert
   type: slack-notification
   source:
@@ -87,6 +95,9 @@ jobs:
       params:
         depth: 1
 
+  - put: sk8s-version
+    params: {bump: patch}
+
   - task: build-fabric8-model
     file: git-pfs-ci/tasks/build-fabric8-model.yml
 
@@ -96,6 +107,8 @@ jobs:
   - put:  <%= image.name %>
     params:
       build: sk8s-docker-contexts/<%= image.path %>
+      tag: sk8s-docker-contexts/sk8s_version
+      tag_as_latest: true
       build_args:
         JAR_FILE: '*.jar'
 <% end %>

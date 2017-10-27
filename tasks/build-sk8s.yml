@@ -8,6 +8,7 @@ inputs:
 - name: git-sk8s
 - name: git-pfs-ci
 - name: m2-repo
+- name: sk8s-version
 
 outputs:
 - name: sk8s-docker-contexts
