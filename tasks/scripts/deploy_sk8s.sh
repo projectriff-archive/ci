@@ -7,21 +7,6 @@ SK8S_VERSION=$(head "$build_root/sk8s-version/version")
 
 cd $build_root/git-sk8s
 
-HELM_CHART_INDEX_TEMPLATE='apiVersion: v1
-entries:
-  sk8s:
-    - created: {chart_index_timestamp}
-      description: sk8s
-      digest: {sha256_checksum}
-      home: https://github.com/markfisher/sk8s
-      name: sk8s
-      sources:
-      - https://sk8s_charts_dev.storage.googleapis.com
-      urls:
-      - https://sk8s_charts_dev.storage.googleapis.com/{chart_filename}
-      version: {chart_version}
-generated: {chart_index_timestamp}'
-
 HELM_VALUES_OVERRIDE=""
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.repository=sk8s/event-dispatcher,"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.tag=latest,"
@@ -73,7 +58,6 @@ pushd charts
     helm package sk8s --version="$SK8S_VERSION"
 
     chart_file=$(basename sk8s*tgz)
-    chart_checksum=$(sha256sum $chart_file | awk '{print $1}')
 
     helm install "$chart_file" \
       --tiller-namespace="$tiller_ns_name" \
@@ -82,8 +66,6 @@ pushd charts
       --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true"
 
     cp "$chart_file" "$build_root/sk8s-charts/"
-
-    chart_index_timestamp=$(date +"%Y-%m-%dT%H:%M:%SZ00:00")
-
-    echo "$HELM_CHART_INDEX_TEMPLATE" | sed -e "s/{chart_index_timestamp}/$chart_index_timestamp/g"  -e "s/{chart_filename}/$chart_file/g"  -e "s/{sha256_checksum}/$chart_checksum/g" -e "s/{chart_version}/$SK8S_VERSION/g" > "$build_root/sk8s-charts/index.yaml"
+    
+    helm repo index "$build_root/sk8s-charts" --url "https://sk8s_charts_dev.storage.googleapis.com"
 popd
