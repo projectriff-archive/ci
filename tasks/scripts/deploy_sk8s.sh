@@ -73,7 +73,7 @@ pushd charts
     helm package sk8s --version="$SK8S_VERSION"
 
     chart_file=$(basename sk8s*tgz)
-    chart_checksum=$(sha256sum $chart_file)
+    chart_checksum=$(sha256sum $chart_file | awk '{print $1}')
 
     helm install "$chart_file" \
       --tiller-namespace="$tiller_ns_name" \
