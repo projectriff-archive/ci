@@ -41,7 +41,19 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
+- name: gcs-resource
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
 resources:
+
+- name: gcs-sk8s-charts
+  type: gcs-resource
+  source:
+    bucket: sk8s_charts_dev
+    json_key: ((gcp-json-key))
+    regexp: sk8s*tgz
 
 - name: sk8s-version
   type: semver
@@ -139,4 +151,8 @@ jobs:
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
+  - put: gcs-sk8s-charts
+    params:
+      file: sk8s-charts/*.tgz
+      predefined_acl: publicRead
 <%= slack_notification %>

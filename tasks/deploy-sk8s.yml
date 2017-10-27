@@ -9,6 +9,9 @@ inputs:
 - name: git-pfs-ci
 - name: sk8s-version
 
+outputs:
+- name: sk8s-charts
+
 run:
   path: git-pfs-ci/tasks/scripts/deploy_sk8s.sh
 

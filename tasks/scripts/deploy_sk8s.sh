@@ -65,4 +65,6 @@ pushd charts
       --name="$helm_release_name" \
       --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true"
 
+    cp "$chart_file" "$build_root/sk8s-charts/"
+
 popd
