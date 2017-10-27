@@ -35,7 +35,7 @@ kubectl get ns -o json | jq -r  .items[].metadata.name | grep "$K8S_NS_PREFIX" |
 set -e
 sleep 30
 
-sanitized_version=$(echo "$SK8S_VERSION" | sed 's/\./-/g')
+sanitized_version=$(echo "$SK8S_VERSION" | sed 's/\./-/g' |  awk '{print tolower($0)}')
 timestamp=$(date "+%s")
 ns_suffix="${sanitized_version}-${timestamp}"
 tiller_ns_name="$K8S_NS_PREFIX"-tiller-"$ns_suffix"
