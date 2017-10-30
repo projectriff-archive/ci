@@ -82,6 +82,8 @@ jobs:
   - task: build-faas-cli
     file: git-pfs-ci/tasks/build-faas-cli.yml
     privileged: true
+    params:
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
 
   - put: git-faas-cli
     params:

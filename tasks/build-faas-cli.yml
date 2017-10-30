@@ -11,12 +11,18 @@ inputs:
 outputs:
 - name: faas-cli-out
 
+params:
+  KUBECONFIG_STRING: replace-me
+
 run:
   path: /bin/bash
   args:
   - -exc
   - |
     start_docker
+
+    mkdir -p ~/.kube
+    echo "$KUBECONFIG_STRING" > ~/.kube/config
 
     build_root="$PWD"
     mkdir -p "$GOPATH/src/github.com/pivotal-cf"
