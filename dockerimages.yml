@@ -1,16 +1,4 @@
-resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-    tag: latest
-
 resources:
-- name: slack-alert
-  type: slack-notification
-  source:
-    url: ((slack-hook-url))
-
 - name: git-pfs-ci
   type: git
   source:
@@ -55,6 +43,13 @@ resources:
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 
+- name: kafka_zookeeper_dockerimage
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/kafka-zookeeper
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
 jobs:
 
 - name: faas_build_dockerimage
@@ -91,3 +86,10 @@ jobs:
   - put: java_build_dockerimage
     params:
       build: git-pfs-ci/tasks/containers/java_build
+
+- name: kafka_zookeeper_dockerimage
+  plan:
+  - get: git-pfs-ci
+  - put: kafka_zookeeper_dockerimage
+    params:
+      build: git-pfs-ci/tasks/containers/kafka_zookeeper
