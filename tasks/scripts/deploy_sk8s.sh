@@ -63,9 +63,9 @@ pushd charts
       --tiller-namespace="$tiller_ns_name" \
       --namespace="$sk8s_ns_name" \
       --name="$helm_release_name" \
-      --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true"
+      --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true,enable.tracingDashboard=true"
 
     cp "$chart_file" "$build_root/sk8s-charts/"
-    
+
     helm repo index "$build_root/sk8s-charts" --url "https://sk8s_charts_dev.storage.googleapis.com"
 popd
