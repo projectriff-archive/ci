@@ -34,6 +34,8 @@ run:
 
       KAFKA_BROKER=localhost:9092 go test -v ./...
 
+      pkill -9 java
+
       cp -r ./* "$build_root/go-sidecar-docker-context/"
 
     popd
