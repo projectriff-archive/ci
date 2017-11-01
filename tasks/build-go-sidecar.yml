@@ -32,7 +32,7 @@ run:
 
       make build
 
-      KAFKA_BROKER=localhost:9092 go test -v cmd/function-sidecar_test.go
+      KAFKA_BROKER=localhost:9092 go test -v ./...
 
       cp -r ./* "$build_root/go-sidecar-docker-context/"
 

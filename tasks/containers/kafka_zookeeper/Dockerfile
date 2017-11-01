@@ -1,5 +1,6 @@
 FROM alpine
-RUN apk update && \
+RUN echo "http://dl-6.alpinelinux.org/alpine/edge/community" > /etc/apk/repositories && \
+  apk update && \
   apk add bash openjdk8 alpine-sdk python go && \
   wget http://www-us.apache.org/dist/kafka/0.10.2.0/kafka_2.10-0.10.2.0.tgz && \
   tar -xzf kafka* && \

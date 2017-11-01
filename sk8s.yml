@@ -79,13 +79,13 @@ resources:
   type: git
   source:
     uri: https://github.com/pivotal-jamie-klassen/function-sidecar.git
-    base: tracing
+    branch: tracing
 
 - name: git-sk8s
   type: git
   source:
     uri: https://github.com/markfisher/sk8s
-    base: master
+    branch: master
 
 - name: git-kubernetes-model
   type: git
