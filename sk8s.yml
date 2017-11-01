@@ -75,6 +75,12 @@ resources:
   source:
     url: ((slack-hook-url))
 
+- name: git-go-sidecar
+  type: git
+  source:
+    uri: https://github.com/pivotal-jamie-klassen/function-sidecar.git
+    base: tracing
+
 - name: git-sk8s
   type: git
   source:
@@ -93,6 +99,14 @@ resources:
     uri: git@github.com:pivotal-cf/pfs-ci.git
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
+
+
+- name: go_sidecar_docker_image
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
 
 <% sk8s_docker_images.each do |image| %>
 - name:  <%= image.name %>
@@ -114,6 +128,22 @@ jobs:
   plan:
   - put: sk8s-version
     params: {bump: final}
+
+- name: build-go-sidecar
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-go-sidecar
+    - get: sk8s-version
+
+  - task: build-go-sidecar
+    file: git-pfs-ci/tasks/build-go-sidecar.yml
+
+  - put: go_sidecar_docker_image
+    params:
+      build: go-sidecar-docker-context
+      tag: go-sidecar-docker-context/sk8s_version
+      tag_as_latest: true
 
 - name: build-sk8s
   plan:
