@@ -134,6 +134,7 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-go-sidecar
+      trigger: true
     - get: sk8s-version
 
   - task: build-go-sidecar
