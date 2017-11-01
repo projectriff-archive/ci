@@ -23,12 +23,16 @@ run:
 
     build_root=$(pwd)
 
+    export GOPATH=$(go env GOPATH)
 
-    pushd git-go-sidecar
+    mkdir -p "$GOPATH/src/github.com/sk8sio/function-sidecar"
+    cp -r git-go-sidecar/* "$GOPATH/src/github.com/sk8sio/function-sidecar/"
+
+    pushd "$GOPATH/src/github.com/sk8sio/function-sidecar/"
 
       make build
 
-      GOPATH=$(go env GOPATH) KAFKA_BROKER=localhost:9092 go test -v cmd/function-sidecar_test.go
+      KAFKA_BROKER=localhost:9092 go test -v cmd/function-sidecar_test.go
 
       cp -r ./* "$build_root/go-sidecar-docker-context/"
 
