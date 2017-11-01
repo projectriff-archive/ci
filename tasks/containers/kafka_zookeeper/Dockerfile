@@ -1,6 +1,6 @@
 FROM alpine
 RUN apk update && \
-  apk add bash openjdk8 alpine-sdk python && \
+  apk add bash openjdk8 alpine-sdk python go && \
   wget http://www-us.apache.org/dist/kafka/0.10.2.0/kafka_2.10-0.10.2.0.tgz && \
   tar -xzf kafka* && \
   rm kafka*.tgz && \
