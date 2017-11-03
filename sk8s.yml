@@ -146,7 +146,6 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
-      trigger: true
     - get: git-sk8s
       trigger: true
     - get: git-kubernetes-model
