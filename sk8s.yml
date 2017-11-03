@@ -173,7 +173,7 @@ jobs:
 <% end %>
 <%= slack_notification %>
 
-- name: deploy-sk8s
+- name: build-sk8s-chart
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -182,6 +182,27 @@ jobs:
     - get: git-sk8s
       trigger: true
       passed: [build-sk8s-containers]
+  - task: build-sk8s-chart
+    file: git-pfs-ci/tasks/build-sk8s-chart.yml
+  - put: gcs-sk8s-charts
+    params:
+      file: sk8s-charts/*.tgz
+      predefined_acl: publicRead
+  - put: gcs-sk8s-chart-index
+    params:
+      file: sk8s-charts/index.yaml
+      predefined_acl: publicRead
+<%= slack_notification %>
+
+- name: deploy-sk8s
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: sk8s-version
+      passed: [build-sk8s-chart]
+    - get: git-sk8s
+      trigger: true
+      passed: [build-sk8s-chart]
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
     params:
