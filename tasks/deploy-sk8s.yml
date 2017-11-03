@@ -5,7 +5,6 @@ image_resource:
     repository: sk8s/faas-build
 
 inputs:
-- name: git-sk8s
 - name: git-pfs-ci
 - name: sk8s-version
 

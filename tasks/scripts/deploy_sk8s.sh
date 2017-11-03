@@ -5,8 +5,6 @@ set -exuo pipefail
 build_root=$PWD
 SK8S_VERSION=$(head "$build_root/sk8s-version/version")
 
-cd $build_root/git-sk8s
-
 HELM_VALUES_OVERRIDE=""
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.repository=sk8s/event-dispatcher,"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.tag=latest,"
@@ -53,19 +51,13 @@ kubectl get customresourcedefinitions --all-namespaces -o json |
   jq -r  .items[].metadata.name |
   xargs -I{} kubectl delete customresourcedefinition {}
 
-pushd charts
+# deploy previously constructed helm chart
+helm repo add sk8srepo https://sk8s_charts_dev.storage.googleapis.com
+helm repo update sk8srepo
+helm search sk8s
 
-    helm package sk8s --version="$SK8S_VERSION"
-
-    chart_file=$(basename sk8s*tgz)
-
-    helm install "$chart_file" \
-      --tiller-namespace="$tiller_ns_name" \
-      --namespace="$sk8s_ns_name" \
-      --name="$helm_release_name" \
-      --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true,enable.tracingDashboard=true"
-
-    cp "$chart_file" "$build_root/sk8s-charts/"
-
-    helm repo index "$build_root/sk8s-charts" --url "https://sk8s_charts_dev.storage.googleapis.com"
-popd
+helm install "sk8srepo/sk8s" \
+  --tiller-namespace="$tiller_ns_name" \
+  --namespace="$sk8s_ns_name" \
+  --name="$helm_release_name" \
+  --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true,enable.tracingDashboard=true"
