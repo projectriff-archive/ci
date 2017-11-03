@@ -14,4 +14,4 @@ outputs:
 - name: sk8s-docker-contexts
 
 run:
-  path: git-pfs-ci/tasks/scripts/build_sk8s.sh
+  path: git-pfs-ci/tasks/scripts/build_sk8s_containers.sh
