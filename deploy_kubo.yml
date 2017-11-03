@@ -36,8 +36,6 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
-resource_types:
-
 - name: gcs
   type: docker-image
   source:
