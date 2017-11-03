@@ -146,6 +146,7 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
+      trigger: true
     - get: git-sk8s
       trigger: true
     - get: git-kubernetes-model
@@ -195,11 +196,8 @@ jobs:
     - get: git-pfs-ci
     - get: sk8s-version
       passed: [build-sk8s-chart]
-    - get: git-sk8s
       trigger: true
-      passed: [build-sk8s-chart]
-      params:
-        depth: 1
+
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
     params:
@@ -213,11 +211,7 @@ jobs:
     - get: git-pfs-ci
     - get: sk8s-version
       passed: [deploy-sk8s]
-    - get: git-sk8s
-      params:
-        depth: 1
       trigger: true
-      passed: [deploy-sk8s]
 
   - task: run-sk8s-acceptance-tests
     file: git-pfs-ci/tasks/run-sk8s-acceptance-tests.yml
