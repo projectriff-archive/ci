@@ -122,12 +122,7 @@ jobs:
 - name: manual-version-bump-patch
   plan:
   - put: sk8s-version
-    params: {bump: patch, pre: SNAPSHOT}
-
-- name: manual-version-bump-final
-  plan:
-  - put: sk8s-version
-    params: {bump: final}
+    params: {bump: patch}
 
 - name: build-go-sidecar
   plan:
@@ -230,7 +225,5 @@ jobs:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
 
-  # - put: sk8s-version
-  #   params: {bump: patch, pre: SNAPSHOT}
-
-<%= slack_notification %>
+  - put: sk8s-version
+    params: {bump: patch}
