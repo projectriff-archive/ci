@@ -7,6 +7,8 @@ SK8S_VERSION=$(head "$build_root/sk8s-version/version")
 
 pushd $build_root/git-sk8s/charts
 
+  helm init
+
   helm package sk8s --version="$SK8S_VERSION"
 
   chart_file=$(basename sk8s*tgz)
