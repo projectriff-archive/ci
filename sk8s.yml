@@ -157,9 +157,6 @@ jobs:
       params:
         depth: 1
 
-  # - put: sk8s-version
-  #   params: {bump: patch, pre: SNAPSHOT}
-
   - task: build-fabric8-model
     file: git-pfs-ci/tasks/build-fabric8-model.yml
 
@@ -197,4 +194,26 @@ jobs:
     params:
       file: sk8s-charts/index.yaml
       predefined_acl: publicRead
+<%= slack_notification %>
+
+- name: run-sk8s-acceptance-tests
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: sk8s-version
+    - get: git-sk8s
+      params:
+        depth: 1
+      trigger: true
+      passed: [deploy-sk8s]
+
+  - task: run-sk8s-acceptance-tests
+    file: git-pfs-ci/tasks/run-sk8s-acceptance-tests.yml
+    params:
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      K8S_NS_PREFIX: pfs-ci
+
+  # - put: sk8s-version
+  #   params: {bump: patch, pre: SNAPSHOT}
+
 <%= slack_notification %>
