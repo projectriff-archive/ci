@@ -13,6 +13,6 @@ function determine_sk8s_version(){
   if [ -z "$_pr_number" ]; then
     echo "$_sk8s_version"
   else
-    echo "pr${_pr_number}"
+    echo "0.0.0-pr${_pr_number}"
   fi
 }
