@@ -266,7 +266,7 @@ jobs:
     params: {bump: patch}
 <%= slack_notification %>
 
-- name: publish-crds
+- name: manual-publish-crds
   plan:
   - aggregate:
     - get: git-sk8s
