@@ -67,12 +67,12 @@ resources:
     json_key: ((gcp-json-key))
     regexp: index.yaml
 
-- name: sk8s-version
+- name: sk8s-version-placeholder
   type: semver
   source:
     driver: gcs
     bucket: pfs_versions
-    key: sk8s_version
+    key: sk8s_pr_version
     json_key: ((gcp-json-key))
 
 - name: slack-alert
@@ -89,8 +89,8 @@ resources:
 - name: git-sk8s-pr
   type: pull-request
   source:
-    repo: markfisher/sk8s
-    uri: https://github.com/markfisher/sk8s
+    repo: freynca/sk8s
+    uri: https://github.com/freynca/sk8s
     base: master
 
 - name: git-kubernetes-model
@@ -146,7 +146,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: sk8s-version
+    - get: sk8s-version-placeholder
     - get: git-sk8s-pr
   #    trigger: true
     - get: git-kubernetes-model
@@ -158,14 +158,16 @@ jobs:
 
   - task: build-sk8s-containers
     file: git-pfs-ci/tasks/build-sk8s-containers.yml
-    input_mapping: { git-sk8s: git-sk8s-pr }
+    input_mapping:
+      git-sk8s: git-sk8s-pr
+      sk8s-version: sk8s-version-placeholder
 
 <% sk8s_docker_images.each do |image| %>
   - put:  <%= image.name %>
     params:
       build: sk8s-docker-contexts/<%= image.path %>
       tag: sk8s-docker-contexts/sk8s_version
-      tag_as_latest: true
+      tag_as_latest: false  # do NOT tag PR containers as latest
       build_args:
         JAR_FILE: '*.jar'
 <% end %>
@@ -175,7 +177,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: sk8s-version
+    - get: sk8s-version-placeholder
       passed: [build-sk8s-pr-containers]
     - get: git-sk8s-pr
     #  trigger: true
@@ -183,7 +185,9 @@ jobs:
 
   - task: build-sk8s-chart
     file: git-pfs-ci/tasks/build-sk8s-chart.yml
-    input_mapping: { git-sk8s: git-sk8s-pr }
+    input_mapping:
+      git-sk8s: git-sk8s-pr
+      sk8s-version: sk8s-version-placeholder
     params:
       SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
 
@@ -201,15 +205,21 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: sk8s-version
+    - get: git-sk8s-pr
+      passed: [build-sk8s-pr-chart]
+    - get: sk8s-version-placeholder
       passed: [build-sk8s-pr-chart]
     #  trigger: true
 
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
+    input_mapping:
+      git-sk8s: git-sk8s-pr
+      sk8s-version: sk8s-version-placeholder
+
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      K8S_NS_PREFIX: pfs-ci
+      K8S_NS_PREFIX: pfs-sk8s-pr
       SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
 <%= slack_notification %>
 
@@ -217,7 +227,6 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: sk8s-version
       passed: [deploy-sk8s-pr]
     #  trigger: true
 
@@ -225,7 +234,4 @@ jobs:
     file: git-pfs-ci/tasks/run-sk8s-acceptance-tests.yml
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      K8S_NS_PREFIX: pfs-ci
-
-  # - put: sk8s-version
-  #   params: {bump: patch}
+      K8S_NS_PREFIX: pfs-sk8s-pr

@@ -9,14 +9,14 @@ SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-v
 
 HELM_VALUES_OVERRIDE=""
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.repository=sk8s/event-dispatcher,"
-HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.tag=latest,"
+HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.tag=${SK8S_VERSION},"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicController.image.repository=sk8s/topic-controller,"
-HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicController.image.tag=latest,"
+HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicController.image.tag=${SK8S_VERSION},"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicGateway.image.repository=sk8s/topic-gateway,"
-HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicGateway.image.tag=latest,"
+HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicGateway.image.tag=${SK8S_VERSION},"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicGateway.service.type=LoadBalancer,"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}zipkin.image.repository=sk8s/zipkin-server,"
-HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}zipkin.image.tag=latest"
+HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}zipkin.image.tag=${SK8S_VERSION}"
 
 mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
@@ -62,5 +62,5 @@ helm install "sk8srepo/sk8s" \
   --tiller-namespace="$tiller_ns_name" \
   --namespace="$sk8s_ns_name" \
   --name="$helm_release_name" \
-  --version="$SK8S_VERSION" \
+  --version="${SK8S_VERSION}" \
   --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true,enable.tracingDashboard=true"
