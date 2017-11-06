@@ -222,6 +222,24 @@ jobs:
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
+<%= slack_notification %>
+
+- name: clean-sk8s-deployment
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-sk8s
+      passed: [run-sk8s-acceptance-tests]
+    - get: sk8s-version
+      passed: [run-sk8s-acceptance-tests]
+      trigger: true
+
+  - task: clean-sk8s-deployment
+    file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
+    params:
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      K8S_NS_PREFIX: pfs-ci
 
   - put: sk8s-version
     params: {bump: patch}
+<%= slack_notification %>

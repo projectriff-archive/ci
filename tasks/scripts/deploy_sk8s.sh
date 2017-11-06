@@ -21,26 +21,11 @@ HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}zipkin.image.tag=${SK8S_VERSION}"
 mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
 
-# delete existing tiller deployments
-set +e
-existing_tiller_ns_name=$(kubectl get ns | grep "$K8S_NS_PREFIX-tiller" | awk '{print $1}')
-if [ ! -z "$existing_tiller_ns_name" ]; then
-  helm ls  --tiller-namespace="$existing_tiller_ns_name" | grep -v NAME | awk '{print $1}' | xargs -I{} helm  --tiller-namespace="$existing_tiller_ns_name" delete {} --purge
-fi
-set -e
-
-# delete existing CI namespaces
-set +e
-kubectl get ns -o json | jq -r  .items[].metadata.name | grep "$K8S_NS_PREFIX" | xargs -I{} kubectl delete ns {} --cascade=true
-set -e
-sleep 30
-
-sanitized_version=$(echo "$SK8S_VERSION" | sed 's/\./-/g' |  awk '{print tolower($0)}')
 timestamp=$(date "+%s")
-ns_suffix="${sanitized_version}-${timestamp}"
-tiller_ns_name="$K8S_NS_PREFIX"-tiller-"$ns_suffix"
-sk8s_ns_name="$K8S_NS_PREFIX"-sk8s-"$ns_suffix"
-helm_release_name="sk8s-$ns_suffix"
+
+tiller_ns_name=$(generate_tiller_ns_name "$K8S_NS_PREFIX" "$SK8S_VERSION" "$timestamp")
+sk8s_ns_name=$(generate_sk8s_ns_name "$K8S_NS_PREFIX" "$SK8S_VERSION" "$timestamp")
+helm_release_name="${sk8s_ns_name}"
 
 kubectl create ns "$tiller_ns_name"
 kubectl create ns "$sk8s_ns_name"
