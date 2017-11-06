@@ -80,17 +80,12 @@ resources:
   source:
     url: ((slack-hook-url))
 
-# - name: git-go-sidecar
-#   type: git
-#   source:
-#     uri: https://github.com/pivotal-jamie-klassen/function-sidecar.git
-#     branch: tracing
-
 - name: git-sk8s-pr
   type: pull-request
   source:
-    repo: freynca/sk8s
-    uri: https://github.com/freynca/sk8s
+    repo: markfisher/sk8s
+    private_key: ((git-pfs-ci-ssh-key))
+    access_token: ((gitbot-access-token))
     base: master
 
 - name: git-kubernetes-model
@@ -107,13 +102,6 @@ resources:
     branch: master
 
 
-# - name: go_sidecar_docker_image
-#   type: docker-image
-#   source:
-#     repository: ((docker-sk8s-org))/function-sidecar-go
-#     username: ((docker-sk8s-username))
-#     password: ((docker-sk8s-password))
-
 <% sk8s_docker_images.each do |image| %>
 - name:  <%= image.name %>
   type: docker-image
@@ -125,30 +113,13 @@ resources:
 
 jobs:
 
-# - name: build-go-sidecar
-#   plan:
-#   - aggregate:
-#     - get: git-pfs-ci
-#     - get: git-go-sidecar
-#       trigger: true
-#     - get: sk8s-version
-#
-#   - task: build-go-sidecar
-#     file: git-pfs-ci/tasks/build-go-sidecar.yml
-#
-#   - put: go_sidecar_docker_image
-#     params:
-#       build: go-sidecar-docker-context
-#       tag: go-sidecar-docker-context/sk8s_version
-#       tag_as_latest: true
-
 - name: build-sk8s-pr-containers
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version-placeholder
     - get: git-sk8s-pr
-  #    trigger: true
+      trigger: true
     - get: git-kubernetes-model
       params:
         depth: 1

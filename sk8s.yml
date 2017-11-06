@@ -120,11 +120,13 @@ resources:
 jobs:
 
 - name: manual-version-bump-patch
+  serial: true
   plan:
   - put: sk8s-version
     params: {bump: patch}
 
 - name: build-go-sidecar
+  serial: true
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -142,6 +144,7 @@ jobs:
       tag_as_latest: true
 
 - name: build-sk8s-containers
+  serial: true
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -169,6 +172,7 @@ jobs:
 <%= slack_notification %>
 
 - name: build-sk8s-chart
+  serial: true
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -192,6 +196,7 @@ jobs:
 <%= slack_notification %>
 
 - name: deploy-sk8s
+  serial: true
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -210,6 +215,7 @@ jobs:
 <%= slack_notification %>
 
 - name: run-sk8s-acceptance-tests
+  serial: true
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -225,6 +231,7 @@ jobs:
 <%= slack_notification %>
 
 - name: clean-sk8s-deployment
+  serial: true
   plan:
   - aggregate:
     - get: git-pfs-ci

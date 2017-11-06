@@ -5,7 +5,7 @@ function generate_tiller_ns_name(){
   local _sk8s_version="$2"
   local _suffix="$3"
   local _sanitized_version=$(echo "$_sk8s_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
-  echo="${_prefix}-tiller-${_sanitized_version}-${_suffix}"
+  echo "${_prefix}-tiller-${_sanitized_version}-${_suffix}"
 }
 
 function generate_sk8s_ns_name(){
@@ -13,7 +13,7 @@ function generate_sk8s_ns_name(){
   local _sk8s_version="$2"
   local _suffix="$3"
   local _sanitized_version=$(echo "$_sk8s_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
-  echo="${_prefix}-sk8s-${_sanitized_version}-${_suffix}"
+  echo "${_prefix}-sk8s-${_sanitized_version}-${_suffix}"
 }
 
 function find_existing_tiller_ns(){
