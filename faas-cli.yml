@@ -1,12 +1,4 @@
 <%
-
-  invoker_images = [
-    'sk8s/java-function-invoker',
-    #'sk8s/node-function-invoker',
-    #'sk8s/python2-function-invoker',
-    #'sk8s/shell-function-invoker'
-  ]
-
 slack_notification="""
   on_success:
     do:
@@ -71,13 +63,6 @@ resources:
     repository: faas-cli
     access_token: ((gitbot-access-token))
     pre_release: true
-
-<% invoker_images.each do |invoker_image_name| %>
-- name:  <%= invoker_image_name.gsub("\:","-").gsub("/","-") %>
-  type: docker-image
-  source:
-    repository: <%= invoker_image_name %>
-<% end %>
 
 jobs:
 - name: build-faas-cli

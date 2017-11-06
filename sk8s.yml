@@ -265,3 +265,38 @@ jobs:
   - put: sk8s-version
     params: {bump: patch}
 <%= slack_notification %>
+
+- name: publish-crds
+  plan:
+  - aggregate:
+    - get: git-sk8s
+
+  - task: publish-crds
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: sk8s/faas-build
+      inputs:
+      - name: git-sk8s
+
+      params:
+        KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+
+      run:
+        path: /bin/sh
+        args:
+        - -o
+        - pipefail
+        - -exc
+        - |
+
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_STRING" > ~/.kube/config
+
+          cat git-sk8s/charts/sk8s/templates/function-resource.yaml | grep -v '{{' > function-resource.yaml
+          cat git-sk8s/charts/sk8s/templates/topic-resource.yaml | grep -v '{{' > topic-resource.yaml
+
+          kubectl apply -f function-resource.yaml
+          kubectl apply -f topic-resource.yaml
