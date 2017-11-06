@@ -60,4 +60,5 @@ helm install "sk8srepo/sk8s" \
   --tiller-namespace="$tiller_ns_name" \
   --namespace="$sk8s_ns_name" \
   --name="$helm_release_name" \
+  --version="$SK8S_VERSION" \
   --set "${HELM_VALUES_OVERRIDE},create.faas=true,create.crd=true,enable.tracingDashboard=true"
