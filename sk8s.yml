@@ -60,7 +60,7 @@ resources:
   source:
     bucket: sk8s_charts_dev
     json_key: ((gcp-json-key))
-    regexp: index.yaml
+    versioned_file: index.yaml
 
 - name: sk8s-version
   type: semver
@@ -206,6 +206,8 @@ jobs:
       passed: [build-sk8s-chart]
     - get: sk8s-version
       passed: [build-sk8s-chart]
+    - get: gcs-sk8s-chart-index
+      passed: [build-sk8s-chart]
       trigger: true
 
   - task: deploy-sk8s
@@ -225,6 +227,8 @@ jobs:
       passed: [deploy-sk8s]
     - get: sk8s-version
       passed: [deploy-sk8s]
+    - get: gcs-sk8s-chart-index
+      passed: [deploy-sk8s]
       trigger: true
 
   - task: run-sk8s-acceptance-tests
@@ -242,6 +246,8 @@ jobs:
     - get: git-sk8s
       passed: [run-sk8s-acceptance-tests]
     - get: sk8s-version
+      passed: [run-sk8s-acceptance-tests]
+    - get: gcs-sk8s-chart-index
       passed: [run-sk8s-acceptance-tests]
       trigger: true
 

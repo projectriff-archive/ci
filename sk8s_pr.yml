@@ -102,7 +102,7 @@ resources:
   source:
     bucket: sk8s_charts_pr
     json_key: ((gcp-json-key))
-    regexp: index.yaml
+    versioned_file: index.yaml
 
 - name: sk8s-version-placeholder
   type: semver
