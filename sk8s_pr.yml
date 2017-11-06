@@ -12,9 +12,13 @@
     DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
   ]
 
-slack_notification="""
+shared_hooks_pending="""
   on_success:
     do:
+    - put: git-sk8s-pr
+      params:
+        path: git-sk8s-pr
+        status: pending
     - put: slack-alert
       params:
         channel: '#pfs-ops'
@@ -24,6 +28,39 @@ slack_notification="""
 
   on_failure:
     do:
+    - put: git-sk8s-pr
+      params:
+        path: git-sk8s-pr
+        status: failure
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+"""
+
+shared_hooks_complete="""
+  on_success:
+    do:
+    - put: git-sk8s-pr
+      params:
+        path: git-sk8s-pr
+        status: success
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Passed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+  on_failure:
+    do:
+    - put: git-sk8s-pr
+      params:
+        path: git-sk8s-pr
+        status: failure
     - put: slack-alert
       params:
         channel: '#pfs-ops'
@@ -142,7 +179,7 @@ jobs:
       build_args:
         JAR_FILE: '*.jar'
 <% end %>
-<%= slack_notification %>
+<%= shared_hooks_pending %>
 
 - name: build-sk8s-pr-chart
   plan:
@@ -170,7 +207,8 @@ jobs:
     params:
       file: sk8s-charts/index.yaml
       predefined_acl: publicRead
-<%= slack_notification %>
+<%= shared_hooks_pending %>
+
 
 - name: deploy-sk8s-pr
   plan:
@@ -192,7 +230,7 @@ jobs:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-sk8s-pr
       SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
-<%= slack_notification %>
+<%= shared_hooks_pending %>
 
 - name: run-sk8s-pr-acceptance-tests
   plan:
@@ -210,7 +248,7 @@ jobs:
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-sk8s-pr
-<%= slack_notification %>
+<%= shared_hooks_pending %>
 
 - name: clean-sk8s-deployment
   plan:
@@ -224,7 +262,10 @@ jobs:
 
   - task: clean-sk8s-deployment
     file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
+    input_mapping:
+      git-sk8s: git-sk8s-pr
+      sk8s-version: sk8s-version-placeholder
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-sk8s-pr
-<%= slack_notification %>
+<%= shared_hooks_complete %>

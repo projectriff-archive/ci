@@ -219,6 +219,8 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
+    - get: git-sk8s
+      passed: [deploy-sk8s]
     - get: sk8s-version
       passed: [deploy-sk8s]
       trigger: true
@@ -235,6 +237,8 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
+    - get: git-sk8s
+      passed: [run-sk8s-acceptance-tests]
     - get: sk8s-version
       passed: [run-sk8s-acceptance-tests]
       trigger: true
