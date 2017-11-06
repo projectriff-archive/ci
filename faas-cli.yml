@@ -69,6 +69,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
+    - get: faas-cli-version
     - get: git-faas-cli
       trigger: true
 
@@ -95,7 +96,7 @@ jobs:
   - put: git-faas-cli
     params:
       tag: faas-cli-version/version
-      repository: git-sk8s
+      repository: git-faas-cli
 
   - put: faas-cli-version
     params: {bump: patch}

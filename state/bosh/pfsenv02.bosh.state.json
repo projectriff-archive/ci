@@ -1,0 +1,54 @@
+{
+    "director_id": "dd38f039-c182-4349-7189-59497b9d49a2",
+    "installation_id": "02f39d4f-dd26-4589-4d8c-3ac3ba3d0f90",
+    "current_vm_cid": "vm-f2158a0c-3100-48fc-64ce-d28728d909ca",
+    "current_stemcell_id": "5c318af9-8996-4879-760d-38b740587d52",
+    "current_disk_id": "6a0477ad-975a-47a9-7b5a-387dcd7d8b34",
+    "current_release_ids": [
+        "4134158e-cff1-4b96-6892-bf16276830af",
+        "bfb325e1-a5a1-4fb2-682e-6e7f1aa92003",
+        "67410419-6b18-49c9-488f-73d447b01ac9",
+        "faf51d4e-80eb-4c13-6bfa-141c4ff6f67a"
+    ],
+    "current_manifest_sha": "11db7fd448ca2f52f2dbd56790a545b76e03cf49e645596f826d4b4d7a0f1314cc7391aba61b3e18ed40357a1712488d829ffd4b87cac7e2c0f621d82b0280b8",
+    "disks": [
+        {
+            "id": "6a0477ad-975a-47a9-7b5a-387dcd7d8b34",
+            "cid": "disk-734a8584-2f4e-4578-7494-182d3085bee9",
+            "size": 32768,
+            "cloud_properties": {
+                "type": "pd-standard"
+            }
+        }
+    ],
+    "stemcells": [
+        {
+            "id": "5c318af9-8996-4879-760d-38b740587d52",
+            "name": "bosh-google-kvm-ubuntu-trusty-go_agent",
+            "version": "3445.7",
+            "cid": "stemcell-d18657c3-f45a-4d7d-4b16-ef6dec39d79c"
+        }
+    ],
+    "releases": [
+        {
+            "id": "4134158e-cff1-4b96-6892-bf16276830af",
+            "name": "bosh",
+            "version": "263.2.0"
+        },
+        {
+            "id": "bfb325e1-a5a1-4fb2-682e-6e7f1aa92003",
+            "name": "uaa",
+            "version": "45.3"
+        },
+        {
+            "id": "67410419-6b18-49c9-488f-73d447b01ac9",
+            "name": "credhub",
+            "version": "1.5.0"
+        },
+        {
+            "id": "faf51d4e-80eb-4c13-6bfa-141c4ff6f67a",
+            "name": "bosh-google-cpi",
+            "version": "25.10.0"
+        }
+    ]
+}
