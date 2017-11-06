@@ -32,5 +32,3 @@ run:
 
     ./build.sh
     cp ./faas-cli* "$build_root/faas-cli-out/"
-    echo "faas-cli-pre-alpha" >  "$build_root/faas-cli-out/release.name"
-    echo "dev-build" >  "$build_root/faas-cli-out/release.tag"

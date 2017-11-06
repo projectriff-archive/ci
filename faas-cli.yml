@@ -42,6 +42,14 @@ resources:
   source:
     url: ((slack-hook-url))
 
+- name: faas-cli-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: pfs_versions
+    key: faas_cli_version
+    json_key: ((gcp-json-key))
+
 - name: git-pfs-ci
   type: git
   source:
@@ -87,36 +95,24 @@ jobs:
 
   - put: git-faas-cli
     params:
-      tag: faas-cli-out/release.tag
+      tag: faas-cli-version/version
       only_tag: true
       force: true
       repository: git-faas-cli
 
   - put: gh-faas-cli-release
     params:
-      name: faas-cli-out/release.name
-      tag: faas-cli-out/release.tag
+      name: faas-cli-version/version
+      tag: faas-cli-version/version
       globs:
       - faas-cli-out/faas-cli*
-<%= slack_notification %>
 
-- name: build-sample-function-containers-java
-  plan:
-  - aggregate:
-<% invoker_images.each do |invoker_image_name| %>
-    - get: <%= invoker_image_name.gsub("\:","-").gsub("/","-") %>
-      trigger: true
-<% end %>
-    - get: gh-faas-cli-release
-      trigger: true
-      passed: [build-faas-cli]
-    - get: git-pfs-ci
-
-  - task: build-sample-function-containers-java
-    file: git-pfs-ci/tasks/build-sample-function-containers-java.yml
-    privileged: true
+  - put: git-faas-cli
     params:
-      DOCKERHUB_USERNAME: ((docker-sk8s-username))
-      DOCKERHUB_PASSWORD: ((docker-sk8s-password))
-      DOCKERHUB_ORG: ((docker-sk8s-org))
+      tag: faas-cli-version/version
+      repository: git-sk8s
+
+  - put: faas-cli-version
+    params: {bump: patch}
+
 <%= slack_notification %>
