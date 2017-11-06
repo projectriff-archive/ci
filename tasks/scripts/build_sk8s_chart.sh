@@ -3,7 +3,9 @@
 set -exuo pipefail
 
 build_root=$PWD
-SK8S_VERSION=$(head "$build_root/sk8s-version/version")
+
+source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 
 pushd $build_root/git-sk8s/charts
 

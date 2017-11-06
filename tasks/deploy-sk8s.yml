@@ -6,6 +6,7 @@ image_resource:
 
 inputs:
 - name: git-pfs-ci
+- name: git-sk8s
 - name: sk8s-version
 
 outputs:
