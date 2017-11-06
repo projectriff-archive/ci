@@ -41,6 +41,11 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
 - name: gcs-resource
   type: docker-image
   source:
@@ -51,14 +56,14 @@ resources:
 - name: gcs-sk8s-charts
   type: gcs-resource
   source:
-    bucket: sk8s_charts_dev
+    bucket: sk8s_charts_pr
     json_key: ((gcp-json-key))
     regexp: sk8s*tgz
 
 - name: gcs-sk8s-chart-index
   type: gcs-resource
   source:
-    bucket: sk8s_charts_dev
+    bucket: sk8s_charts_pr
     json_key: ((gcp-json-key))
     regexp: index.yaml
 
@@ -75,17 +80,18 @@ resources:
   source:
     url: ((slack-hook-url))
 
-- name: git-go-sidecar
-  type: git
-  source:
-    uri: https://github.com/pivotal-jamie-klassen/function-sidecar.git
-    branch: tracing
+# - name: git-go-sidecar
+#   type: git
+#   source:
+#     uri: https://github.com/pivotal-jamie-klassen/function-sidecar.git
+#     branch: tracing
 
-- name: git-sk8s
-  type: git
+- name: git-sk8s-pr
+  type: pull-request
   source:
+    repo: markfisher/sk8s
     uri: https://github.com/markfisher/sk8s
-    branch: master
+    base: master
 
 - name: git-kubernetes-model
   type: git
@@ -101,12 +107,12 @@ resources:
     branch: master
 
 
-- name: go_sidecar_docker_image
-  type: docker-image
-  source:
-    repository: ((docker-sk8s-org))/function-sidecar-go
-    username: ((docker-sk8s-username))
-    password: ((docker-sk8s-password))
+# - name: go_sidecar_docker_image
+#   type: docker-image
+#   source:
+#     repository: ((docker-sk8s-org))/function-sidecar-go
+#     username: ((docker-sk8s-username))
+#     password: ((docker-sk8s-password))
 
 <% sk8s_docker_images.each do |image| %>
 - name:  <%= image.name %>
@@ -119,35 +125,30 @@ resources:
 
 jobs:
 
-- name: manual-version-bump-patch
-  plan:
-  - put: sk8s-version
-    params: {bump: patch}
+# - name: build-go-sidecar
+#   plan:
+#   - aggregate:
+#     - get: git-pfs-ci
+#     - get: git-go-sidecar
+#       trigger: true
+#     - get: sk8s-version
+#
+#   - task: build-go-sidecar
+#     file: git-pfs-ci/tasks/build-go-sidecar.yml
+#
+#   - put: go_sidecar_docker_image
+#     params:
+#       build: go-sidecar-docker-context
+#       tag: go-sidecar-docker-context/sk8s_version
+#       tag_as_latest: true
 
-- name: build-go-sidecar
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-go-sidecar
-      trigger: true
-    - get: sk8s-version
-
-  - task: build-go-sidecar
-    file: git-pfs-ci/tasks/build-go-sidecar.yml
-
-  - put: go_sidecar_docker_image
-    params:
-      build: go-sidecar-docker-context
-      tag: go-sidecar-docker-context/sk8s_version
-      tag_as_latest: true
-
-- name: build-sk8s-containers
+- name: build-sk8s-pr-containers
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
-    - get: git-sk8s
-      trigger: true
+    - get: git-sk8s-pr
+  #    trigger: true
     - get: git-kubernetes-model
       params:
         depth: 1
@@ -157,6 +158,8 @@ jobs:
 
   - task: build-sk8s-containers
     file: git-pfs-ci/tasks/build-sk8s-containers.yml
+    input_mapping: { git-sk8s: git-sk8s-pr }
+
 <% sk8s_docker_images.each do |image| %>
   - put:  <%= image.name %>
     params:
@@ -168,19 +171,22 @@ jobs:
 <% end %>
 <%= slack_notification %>
 
-- name: build-sk8s-chart
+- name: build-sk8s-pr-chart
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
-      passed: [build-sk8s-containers]
-    - get: git-sk8s
-      trigger: true
-      passed: [build-sk8s-containers]
+      passed: [build-sk8s-pr-containers]
+    - get: git-sk8s-pr
+    #  trigger: true
+      passed: [build-sk8s-pr-containers]
+
   - task: build-sk8s-chart
     file: git-pfs-ci/tasks/build-sk8s-chart.yml
+    input_mapping: { git-sk8s: git-sk8s-pr }
     params:
-      SK8S_CHARTS_URL: "https://sk8s_charts_dev.storage.googleapis.com"
+      SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
+
   - put: gcs-sk8s-charts
     params:
       file: sk8s-charts/*.tgz
@@ -191,29 +197,29 @@ jobs:
       predefined_acl: publicRead
 <%= slack_notification %>
 
-- name: deploy-sk8s
+- name: deploy-sk8s-pr
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
-      passed: [build-sk8s-chart]
-      trigger: true
+      passed: [build-sk8s-pr-chart]
+    #  trigger: true
 
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
-      SK8S_CHARTS_URL: "https://sk8s_charts_dev.storage.googleapis.com"
+      SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
 <%= slack_notification %>
 
-- name: run-sk8s-acceptance-tests
+- name: run-sk8s-pr-acceptance-tests
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
-      passed: [deploy-sk8s]
-      trigger: true
+      passed: [deploy-sk8s-pr]
+    #  trigger: true
 
   - task: run-sk8s-acceptance-tests
     file: git-pfs-ci/tasks/run-sk8s-acceptance-tests.yml
@@ -221,5 +227,5 @@ jobs:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
 
-  - put: sk8s-version
-    params: {bump: patch}
+  # - put: sk8s-version
+  #   params: {bump: patch}

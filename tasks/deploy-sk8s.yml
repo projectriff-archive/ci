@@ -17,3 +17,4 @@ run:
 params:
   KUBECONFIG_STRING: replace-me
   K8S_NS_PREFIX: replace-me
+  SK8S_CHARTS_URL: replace-me

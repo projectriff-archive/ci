@@ -14,3 +14,6 @@ outputs:
 
 run:
   path: git-pfs-ci/tasks/scripts/build_sk8s_chart.sh
+
+params:
+  SK8S_CHARTS_URL: replace-me

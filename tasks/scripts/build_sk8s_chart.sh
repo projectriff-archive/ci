@@ -15,6 +15,6 @@ pushd $build_root/git-sk8s/charts
 
   cp "$chart_file" "$build_root/sk8s-charts/"
 
-  helm repo index "$build_root/sk8s-charts" --url "https://sk8s_charts_dev.storage.googleapis.com"
+  helm repo index "$build_root/sk8s-charts" --url "$SK8S_CHARTS_URL"
 
 popd
