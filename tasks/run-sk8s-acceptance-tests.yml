@@ -5,11 +5,7 @@ image_resource:
     repository: sk8s/faas-build
 
 inputs:
-- name: sk8s-version
 - name: git-pfs-ci
-
-outputs:
-- name: sk8s-invoker-build-context
 
 run:
   path: /bin/bash
