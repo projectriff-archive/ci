@@ -52,7 +52,7 @@ kubectl get customresourcedefinitions --all-namespaces -o json |
   xargs -I{} kubectl delete customresourcedefinition {}
 
 # deploy previously constructed helm chart
-helm repo add sk8srepo "SK8S_CHARTS_URL"
+helm repo add sk8srepo "$SK8S_CHARTS_URL"
 helm repo update sk8srepo
 helm search sk8s
 
