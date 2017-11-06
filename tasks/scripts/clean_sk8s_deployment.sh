@@ -18,10 +18,11 @@ if [ ! -z "$existing_tiller_ns_name" ]; then
   set -e
 fi
 
-# delete existing namespace
+# delete existing tiller and sk8s namespaces
 existing_sk8s_ns_name=$(find_existing_sk8s_ns "$K8S_NS_PREFIX" "$SK8S_VERSION")
 set +e
 echo "$existing_sk8s_ns_name" | xargs -I{} kubectl delete ns {} --cascade=true
+echo "$existing_tiller_ns_name" | xargs -I{} kubectl delete ns {} --cascade=true
 set -e
 
 kubectl get customresourcedefinitions --all-namespaces -o json |
