@@ -10,6 +10,8 @@ SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-v
 HELM_VALUES_OVERRIDE=""
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.repository=sk8s/event-dispatcher,"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.image.tag=${SK8S_VERSION},"
+HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.sidecarImage.repository=sk8s/function-sidecar,"
+HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}eventDispatcher.sidecarImage.tag=${SK8S_VERSION},"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicController.image.repository=sk8s/topic-controller,"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicController.image.tag=${SK8S_VERSION},"
 HELM_VALUES_OVERRIDE="${HELM_VALUES_OVERRIDE}topicGateway.image.repository=sk8s/topic-gateway,"
