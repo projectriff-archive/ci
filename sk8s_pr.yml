@@ -1,4 +1,6 @@
 <%
+  charts_bucket_name='sk8s_charts_pr'
+
   DockerImage = Struct.new(:path, :name)
   sk8s_docker_images = [
     DockerImage.new('event-dispatcher', 'sk8s/event-dispatcher'),
@@ -93,14 +95,14 @@ resources:
 - name: gcs-sk8s-charts
   type: gcs-resource
   source:
-    bucket: sk8s_charts_pr
+    bucket: <%= charts_bucket_name %>
     json_key: ((gcp-json-key))
     regexp: sk8s*tgz
 
 - name: gcs-sk8s-chart-index
   type: gcs-resource
   source:
-    bucket: sk8s_charts_pr
+    bucket: <%= charts_bucket_name %>
     json_key: ((gcp-json-key))
     versioned_file: index.yaml
 
@@ -197,7 +199,7 @@ jobs:
       git-sk8s: git-sk8s-pr
       sk8s-version: sk8s-version-placeholder
     params:
-      SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
+      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 
   - put: gcs-sk8s-charts
     params:
@@ -207,10 +209,15 @@ jobs:
     params:
       file: sk8s-charts/index.yaml
       predefined_acl: publicRead
+  - task: config-chart-bucket
+    file: git-pfs-ci/tasks/config-chart-bucket.yml
+    params:
+      GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
+      PROJECT_ID: ((pfs-gcp-ci-project))
+      CHART_BUCKET_NAME: <%= charts_bucket_name %>
 <%= shared_hooks_pending %>
 
-
-- name: deploy-sk8s-pr
+- name: clean-sk8s-pre-deployment
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -219,6 +226,26 @@ jobs:
       trigger: true
     - get: sk8s-version-placeholder
       passed: [build-sk8s-pr-chart]
+
+  - task: clean-sk8s-deployment
+    file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
+    input_mapping:
+      git-sk8s: git-sk8s-pr
+      sk8s-version: sk8s-version-placeholder
+    params:
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      K8S_NS_PREFIX: pfs-sk8s-pr
+<%= shared_hooks_pending %>
+
+- name: deploy-sk8s-pr
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-sk8s-pr
+      passed: [clean-sk8s-pre-deployment]
+      trigger: true
+    - get: sk8s-version-placeholder
+      passed: [clean-sk8s-pre-deployment]
 
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
@@ -229,7 +256,7 @@ jobs:
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-sk8s-pr
-      SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
+      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 <%= shared_hooks_pending %>
 
 - name: run-sk8s-pr-system-tests
@@ -250,7 +277,7 @@ jobs:
       K8S_NS_PREFIX: pfs-sk8s-pr
 <%= shared_hooks_pending %>
 
-- name: clean-sk8s-deployment
+- name: clean-sk8s-post-deployment
   plan:
   - aggregate:
     - get: git-pfs-ci

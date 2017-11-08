@@ -1,0 +1,22 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/pfs-ci-gcloud
+run:
+  path: /bin/bash
+  args:
+  - -exuo
+  - pipefail
+  - -c
+  - |
+    echo "$GOOGLE_CLOUD_KEYFILE_JSON" > gcp.json
+    gcloud -q auth activate-service-account --key-file=gcp.json
+    gcloud config set project "$PROJECT_ID"
+
+    gsutil versioning set on gs://${CHART_BUCKET_NAME}
+    gsutil setmeta -h "Cache-Control:private"  gs://${CHART_BUCKET_NAME}/index.yaml
+params:
+  GOOGLE_CLOUD_KEYFILE_JSON: replace-me
+  PROJECT_ID: replace-me
+  CHART_BUCKET_NAME: replace-me
