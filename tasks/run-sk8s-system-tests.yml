@@ -33,7 +33,6 @@ run:
 
     kafka_pod=$(kubectl -n "$existing_sk8s_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
 
-
     # init test env vars
 
     export SYS_TEST_NS="$existing_sk8s_ns"
@@ -45,6 +44,8 @@ run:
     export SYS_TEST_CLI_PATH="$build_root/gh-faas-cli-release/faas-cli-linux-amd64"
     export SYS_TEST_BASE_DIR="$build_root/git-pfs-ci/integration"
     export SYS_TEST_MSG_RT_TIMEOUT_SEC=25
+
+    chmod +x $SYS_TEST_CLI_PATH
 
     export GOPATH=$(go env GOPATH)
     workdir=$GOPATH/src/github.com/pivotal-cf
