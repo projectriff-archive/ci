@@ -1,0 +1,63 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-cli-build
+
+inputs:
+- name: git-pfs-ci
+- name: git-pfs-system-test
+- name: git-sk8s
+- name: sk8s-version
+- name: gh-faas-cli-release
+
+run:
+  path: /bin/bash
+  args:
+  - -exc
+  - |
+    echo "System Tests for sk8s"
+    start_docker
+
+    build_root=$(pwd)
+
+    mkdir ~/.kube
+    echo "$KUBECONFIG_STRING" > ~/.kube/config
+
+    source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+
+    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
+    existing_sk8s_ns=$(find_existing_sk8s_ns "$K8S_NS_PREFIX" "$SK8S_VERSION")
+
+    http_gw_host=$(kubectl -n "$existing_sk8s_ns" get svc -l component=topic-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')
+
+    kafka_pod=$(kubectl -n "$existing_sk8s_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
+
+
+    # init test env vars
+
+    export SYS_TEST_NS="$existing_sk8s_ns"
+    export SYS_TEST_HTTP_GW_URL="http://${http_gw_host}"
+    export SYS_TEST_KAFKA_POD_NAME="$kafka_pod"
+    export SYS_TEST_DOCKER_ORG="$DOCKER_ORG"
+    export SYS_TEST_DOCKER_USERNAME="$DOCKER_USERNAME"
+    export SYS_TEST_DOCKER_PASSWORD="$DOCKER_PASSWORD"
+    export SYS_TEST_CLI_PATH="$build_root/gh-faas-cli-release/faas-cli-linux-amd64"
+    export SYS_TEST_BASE_DIR="$build_root/git-pfs-ci/integration"
+    export SYS_TEST_MSG_RT_TIMEOUT_SEC=25
+
+    export GOPATH=$(go env GOPATH)
+    workdir=$GOPATH/src/github.com/pivotal-cf
+    mkdir -p $workdir
+    cp -rf git-pfs-system-test $workdir/pfs-system-test
+    cd $workdir/pfs-system-test
+    dep ensure
+    ./test.sh
+
+
+params:
+  KUBECONFIG_STRING: replace-me
+  K8S_NS_PREFIX: replace-me
+  DOCKER_ORG: replace-me
+  DOCKER_USERNAME: replace-me
+  DOCKER_PASSWORD: replace-me

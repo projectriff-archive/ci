@@ -102,6 +102,12 @@ resources:
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
+- name: git-pfs-system-test
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-system-test.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
 
 - name: go_sidecar_docker_image
   type: docker-image
@@ -118,6 +124,13 @@ resources:
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 <% end %>
+
+- name: gh-faas-cli-release
+  type: github-release
+  source:
+    owner: pivotal-cf
+    repository: faas-cli
+    access_token: ((gitbot-access-token))
 
 jobs:
 
@@ -218,7 +231,7 @@ jobs:
       SK8S_CHARTS_URL: "https://sk8s_charts_dev.storage.googleapis.com"
 <%= slack_notification %>
 
-- name: run-sk8s-acceptance-tests
+- name: run-sk8s-system-tests
   serial: true
   plan:
   - aggregate:
@@ -230,12 +243,18 @@ jobs:
     - get: gcs-sk8s-chart-index
       passed: [deploy-sk8s]
       trigger: true
+    - get: git-pfs-system-test
+    - get: gh-faas-cli-release
 
-  - task: run-sk8s-acceptance-tests
-    file: git-pfs-ci/tasks/run-sk8s-acceptance-tests.yml
+  - task: run-sk8s-system-tests
+    file: git-pfs-ci/tasks/run-sk8s-system-tests.yml
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-ci
+      DOCKER_ORG: sk8sci
+      DOCKER_USERNAME: ((docker-sk8s-username))
+      DOCKER_PASSWORD: ((docker-sk8s-password))
+
 <%= slack_notification %>
 
 - name: clean-sk8s-deployment
@@ -244,11 +263,11 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s
-      passed: [run-sk8s-acceptance-tests]
+      passed: [run-sk8s-system-tests]
     - get: sk8s-version
-      passed: [run-sk8s-acceptance-tests]
+      passed: [run-sk8s-system-tests]
     - get: gcs-sk8s-chart-index
-      passed: [run-sk8s-acceptance-tests]
+      passed: [run-sk8s-system-tests]
       trigger: true
 
   - task: clean-sk8s-deployment

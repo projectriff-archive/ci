@@ -232,7 +232,7 @@ jobs:
       SK8S_CHARTS_URL: "https://sk8s_charts_pr.storage.googleapis.com"
 <%= shared_hooks_pending %>
 
-- name: run-sk8s-pr-acceptance-tests
+- name: run-sk8s-pr-system-tests
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -243,8 +243,8 @@ jobs:
     - get: sk8s-version-placeholder
       passed: [deploy-sk8s-pr]
 
-  - task: run-sk8s-acceptance-tests
-    file: git-pfs-ci/tasks/run-sk8s-acceptance-tests.yml
+  - task: run-sk8s-system-tests
+    file: git-pfs-ci/tasks/run-sk8s-system-tests.yml
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-sk8s-pr
@@ -255,10 +255,10 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s-pr
-      passed: [run-sk8s-pr-acceptance-tests]
+      passed: [run-sk8s-pr-system-tests]
       trigger: true
     - get: sk8s-version-placeholder
-      passed: [run-sk8s-pr-acceptance-tests]
+      passed: [run-sk8s-pr-system-tests]
 
   - task: clean-sk8s-deployment
     file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
