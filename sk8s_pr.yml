@@ -150,6 +150,20 @@ resources:
     password: ((docker-sk8s-password))
 <% end %>
 
+- name: git-pfs-system-test
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-system-test.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+- name: gh-faas-cli-release
+  type: github-release
+  source:
+    owner: pivotal-cf
+    repository: faas-cli
+    access_token: ((gitbot-access-token))
+
 jobs:
 
 - name: build-sk8s-pr-containers
@@ -269,12 +283,22 @@ jobs:
       trigger: true
     - get: sk8s-version-placeholder
       passed: [deploy-sk8s-pr]
+    - get: git-pfs-system-test
+    - get: gh-faas-cli-release
 
   - task: run-sk8s-system-tests
     file: git-pfs-ci/tasks/run-sk8s-system-tests.yml
+    privileged: true
+    input_mapping:
+      git-sk8s: git-sk8s-pr
+      sk8s-version: sk8s-version-placeholder
+
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
       K8S_NS_PREFIX: pfs-sk8s-pr
+      DOCKER_ORG: sk8sci
+      DOCKER_USERNAME: ((docker-sk8s-username))
+      DOCKER_PASSWORD: ((docker-sk8s-password))
 <%= shared_hooks_pending %>
 
 - name: clean-sk8s-post-deployment
