@@ -28,18 +28,18 @@ run:
 
     export GOPATH=$(go env GOPATH)
 
-    mkdir -p "$GOPATH/src/github.com/sk8sio/function-sidecar"
-    cp -r git-go-sidecar/* "$GOPATH/src/github.com/sk8sio/function-sidecar/"
+    mkdir -p "$GOPATH/src/github.com/sk8sio"
+    cp -pr git-go-sidecar "$GOPATH/src/github.com/sk8sio/function-sidecar"
 
     pushd "$GOPATH/src/github.com/sk8sio/function-sidecar/"
 
-      make build
+      make build-for-docker
 
-      KAFKA_BROKER=localhost:9092 go test -v ./...
+      KAFKA_BROKER=localhost:9092 make test
 
       pkill -9 java
 
-      cp -r ./* "$build_root/go-sidecar-docker-context/"
+      cp -r . "$build_root/go-sidecar-docker-context/"
 
       cp "$build_root/sk8s-version/version" "$build_root/go-sidecar-docker-context/sk8s_version"
 
