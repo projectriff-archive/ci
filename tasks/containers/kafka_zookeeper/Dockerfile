@@ -13,3 +13,6 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repos
 ENV PATH=$PATH:/kafka/bin
 COPY start_kafka.sh /kafka/bin/start_kafka
 RUN chmod +x /kafka/bin/start_kafka
+RUN wget https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 && \
+  mv dep-linux-amd64 /usr/local/bin/dep && \
+  chmod +x /usr/local/bin/dep
