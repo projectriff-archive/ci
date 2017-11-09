@@ -1,0 +1,46 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/kafka-zookeeper
+
+inputs:
+- name: git-go-http-gateway
+- name: git-pfs-ci
+- name: sk8s-version
+
+outputs:
+- name: go-http-gateway-docker-context
+
+run:
+  path: /bin/bash
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+
+    start_kafka
+
+    build_root=$(pwd)
+
+    SK8S_VERSION=$(head "$build_root/sk8s-version/version")
+
+    export GOPATH=$(go env GOPATH)
+
+    mkdir -p "$GOPATH/src/github.com/sk8sio"
+    cp -pr git-go-http-gateway/ "$GOPATH/src/github.com/sk8sio/http-gateway"
+
+    pushd "$GOPATH/src/github.com/sk8sio/http-gateway/"
+
+      make build-for-docker
+
+      KAFKA_BROKER=localhost:9092 go test -v ./...
+
+      pkill -9 java
+
+      cp -r . "$build_root/go-http-gateway-docker-context/"
+
+      cp "$build_root/sk8s-version/version" "$build_root/go-http-gateway-docker-context/sk8s_version"
+
+    popd
