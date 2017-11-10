@@ -188,8 +188,8 @@ jobs:
 
   - put: go_http_gateway_docker_image
     params:
-      build: build-go-http-gateway-docker-context
-      tag: build-go-http-gateway-docker-context/sk8s_version
+      build: go-http-gateway-docker-context
+      tag: go-http-gateway-docker-context/sk8s_version
       tag_as_latest: true
 <%= slack_notification %>
 
