@@ -80,8 +80,8 @@ resources:
 - name: git-go-sidecar
   type: git
   source:
-    uri: https://github.com/pivotal-jamie-klassen/function-sidecar.git
-    branch: tracing
+    uri: https://github.com/ericbottard/function-sidecar.git
+    branch: master
 
 - name: git-go-http-gateway
   type: git
