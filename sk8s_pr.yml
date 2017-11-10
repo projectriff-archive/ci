@@ -171,6 +171,7 @@ jobs:
     - get: sk8s-version-placeholder
     - get: git-sk8s-pr
       trigger: true
+      version: every
     - get: git-kubernetes-model
       params:
         depth: 1
@@ -196,6 +197,7 @@ jobs:
 <%= shared_hooks_pending %>
 
 - name: build-sk8s-pr-chart
+  serial: true # must not run concurrently, as the helm repo index is merged to include all previous versions
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -203,6 +205,7 @@ jobs:
       passed: [build-sk8s-pr-containers]
     - get: git-sk8s-pr
       trigger: true
+      version: every
       passed: [build-sk8s-pr-containers]
 
   - task: build-sk8s-chart
@@ -234,6 +237,7 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s-pr
+      version: every
       passed: [build-sk8s-pr-chart]
       trigger: true
     - get: sk8s-version-placeholder
@@ -254,6 +258,7 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s-pr
+      version: every
       passed: [clean-sk8s-pre-deployment]
       trigger: true
     - get: sk8s-version-placeholder
@@ -277,6 +282,7 @@ jobs:
     - get: git-pfs-ci
       passed: [deploy-sk8s-pr]
     - get: git-sk8s-pr
+      version: every
       passed: [deploy-sk8s-pr]
       trigger: true
     - get: sk8s-version-placeholder
@@ -304,6 +310,7 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s-pr
+      version: every
       passed: [run-sk8s-pr-system-tests]
       trigger: true
     - get: sk8s-version-placeholder
