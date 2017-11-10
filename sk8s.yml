@@ -8,7 +8,6 @@
     DockerImage.new('function-invokers/node-function-invoker','sk8s/node-function-invoker'),
     #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
     DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
-    DockerImage.new('function-sidecar','sk8s/function-sidecar'),
     DockerImage.new('topic-controller','sk8s/topic-controller'),
     DockerImage.new('topic-gateway','sk8s/topic-gateway'),
     DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
@@ -120,7 +119,7 @@ resources:
 - name: go_sidecar_docker_image
   type: docker-image
   source:
-    repository: ((docker-sk8s-org))/function-sidecar-go
+    repository: ((docker-sk8s-org))/function-sidecar
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 
@@ -154,6 +153,12 @@ jobs:
   plan:
   - put: sk8s-version
     params: {bump: patch}
+
+
+
+######################################################
+# sk8s infra
+######################################################
 
 - name: build-go-sidecar
   serial_groups: [sk8s]
@@ -221,13 +226,26 @@ jobs:
 <% end %>
 <%= slack_notification %>
 
+######################################################
+# helm charts
+######################################################
+
 - name: build-sk8s-chart
   serial_groups: [sk8s]
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
-      passed: [build-sk8s-containers]
+      passed:
+      - build-sk8s-containers
+      - build-go-sidecar
+      - build-go-http-gateway
+    # - get: git-go-http-gateway
+    #   trigger: true
+    #   passed: [build-go-http-gateway]
+    - get: git-go-sidecar
+      trigger: true
+      passed: [build-go-sidecar]
     - get: git-sk8s
       trigger: true
       passed: [build-sk8s-containers]
