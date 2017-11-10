@@ -124,7 +124,7 @@ resources:
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 
-- name: go_http-gateway_docker_image
+- name: go_http_gateway_docker_image
   type: docker-image
   source:
     repository: ((docker-sk8s-org))/http-gateway
@@ -172,6 +172,7 @@ jobs:
       build: go-sidecar-docker-context
       tag: go-sidecar-docker-context/sk8s_version
       tag_as_latest: true
+<%= slack_notification %>
 
 - name: build-go-http-gateway
   serial_groups: [sk8s]
@@ -190,6 +191,7 @@ jobs:
       build: build-go-http-gateway-docker-context
       tag: build-go-http-gateway-docker-context/sk8s_version
       tag_as_latest: true
+<%= slack_notification %>
 
 - name: build-sk8s-containers
   serial_groups: [sk8s]
