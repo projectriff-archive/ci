@@ -9,7 +9,6 @@
     #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
     DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
     DockerImage.new('topic-controller','sk8s/topic-controller'),
-    DockerImage.new('topic-gateway','sk8s/topic-gateway'),
     DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
   ]
 
@@ -76,6 +75,10 @@ resources:
   source:
     url: ((slack-hook-url))
 
+#####################################################
+# Git - sk8s infra
+#####################################################
+
 - name: git-go-sidecar
   type: git
   source:
@@ -102,6 +105,10 @@ resources:
     uri: https://github.com/ericbottard/kubernetes-model
     branch: sk8s-sidecar-scaling
 
+#####################################################
+# Git - CI
+#####################################################
+
 - name: git-pfs-ci
   type: git
   source:
@@ -115,6 +122,10 @@ resources:
     uri: git@github.com:pivotal-cf/pfs-system-test.git
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
+
+#####################################################
+# Docker images
+#####################################################
 
 - name: go_sidecar_docker_image
   type: docker-image
@@ -145,6 +156,12 @@ resources:
     owner: pivotal-cf
     repository: faas-cli
     access_token: ((gitbot-access-token))
+
+
+#####################################################
+# JOBS
+#####################################################
+
 
 jobs:
 

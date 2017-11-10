@@ -8,9 +8,7 @@
     DockerImage.new('function-invokers/node-function-invoker','sk8s/node-function-invoker'),
     #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
     DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
-    DockerImage.new('function-sidecar','sk8s/function-sidecar'),
     DockerImage.new('topic-controller','sk8s/topic-controller'),
-    DockerImage.new('topic-gateway','sk8s/topic-gateway'),
     DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
   ]
 
