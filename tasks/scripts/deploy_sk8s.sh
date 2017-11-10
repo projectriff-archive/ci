@@ -32,8 +32,13 @@ helm repo add sk8srepo "$SK8S_CHARTS_URL"
 helm repo update sk8srepo
 helm search sk8s
 
+RND_HTTP_GW_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
+ZIPKIN_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
+DEPLOY_SK8S_OVERRIDE="httpGateway.service.externalPort=${RND_HTTP_GW_EXTPORT},zipkin.service.externalPort=${ZIPKIN_EXTPORT}"
+
 helm install "sk8srepo/sk8s" \
   --tiller-namespace="$tiller_ns_name" \
   --namespace="$sk8s_ns_name" \
   --name="$helm_release_name" \
-  --version="${SK8S_VERSION}" 
+  --version="${SK8S_VERSION}" \
+  --set "${DEPLOY_SK8S_OVERRIDE}"
