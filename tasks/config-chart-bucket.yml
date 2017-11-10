@@ -15,7 +15,7 @@ run:
     gcloud config set project "$PROJECT_ID"
 
     gsutil versioning set on gs://${CHART_BUCKET_NAME}
-    gsutil setmeta -h "Cache-Control:private,max-age=0,no-transform"  gs://${CHART_BUCKET_NAME}/index.yaml
+    gsutil setmeta -h "Cache-Control:private,max-age=0,no-transform"  gs://${CHART_BUCKET_NAME}/*
 params:
   GOOGLE_CLOUD_KEYFILE_JSON: replace-me
   PROJECT_ID: replace-me
