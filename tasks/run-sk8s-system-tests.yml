@@ -30,7 +30,7 @@ run:
     existing_sk8s_ns=$(find_existing_sk8s_ns "$SK8S_VERSION")
 
     http_gw_host=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')
-    http_gw_port=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}'
+    http_gw_port=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
 
     kafka_pod=$(kubectl -n "$existing_sk8s_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
 
