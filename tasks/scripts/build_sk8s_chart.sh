@@ -11,10 +11,8 @@ pushd $build_root/git-sk8s/charts
 
   helm init --client-only
 
-  export SK8S_IMAGE_TAG="$SK8S_VERSION"
-  export SIDECAR_IMAGE_TAG="$SK8S_VERSION"
-  export HTTP_GATEWAY_IMAGE_TAG="$SK8S_VERSION"
-  ./generate_chart.sh "$SK8S_VERSION"
+  sed -i -e "s/0\.0\.1-SNAPSHOT/$SK8S_VERSION/g" sk8s/values.yaml
+  helm package sk8s --version $SK8S_VERSION
 
   chart_file=$(basename sk8s*tgz)
 
