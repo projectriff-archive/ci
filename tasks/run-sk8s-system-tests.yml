@@ -27,7 +27,7 @@ run:
     source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 
     SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
-    existing_sk8s_ns=$(find_existing_sk8s_ns "$K8S_NS_PREFIX" "$SK8S_VERSION")
+    existing_sk8s_ns=$(find_existing_sk8s_ns "$SK8S_VERSION")
 
     http_gw_host=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')
     http_gw_port=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}'
@@ -59,7 +59,6 @@ run:
 
 params:
   KUBECONFIG_STRING: replace-me
-  K8S_NS_PREFIX: replace-me
   DOCKER_ORG: replace-me
   DOCKER_USERNAME: replace-me
   DOCKER_PASSWORD: replace-me

@@ -11,7 +11,7 @@ mkdir ~/.kube
 echo "$KUBECONFIG_STRING" > ~/.kube/config
 
 # delete existing tiller deployment
-existing_tiller_ns_name=$(find_existing_tiller_ns "$K8S_NS_PREFIX" "$SK8S_VERSION")
+existing_tiller_ns_name=$(find_existing_tiller_ns "$SK8S_VERSION")
 if [ ! -z "$existing_tiller_ns_name" ]; then
   set +e
   helm ls  --tiller-namespace="$existing_tiller_ns_name" | grep -v NAME | awk '{print $1}' | xargs -I{} helm  --tiller-namespace="$existing_tiller_ns_name" delete {} --purge
@@ -19,7 +19,7 @@ if [ ! -z "$existing_tiller_ns_name" ]; then
 fi
 
 # delete existing tiller and sk8s namespaces
-existing_sk8s_ns_name=$(find_existing_sk8s_ns "$K8S_NS_PREFIX" "$SK8S_VERSION")
+existing_sk8s_ns_name=$(find_existing_sk8s_ns "$SK8S_VERSION")
 set +e
 echo "$existing_sk8s_ns_name" | xargs -I{} kubectl delete ns {} --cascade=true
 echo "$existing_tiller_ns_name" | xargs -I{} kubectl delete ns {} --cascade=true

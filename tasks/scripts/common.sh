@@ -1,39 +1,35 @@
 #!/bin/bash
 
 function generate_tiller_ns_name(){
-  local _prefix="$1"
-  local _sk8s_version="$2"
-  local _suffix="$3"
+  local _sk8s_version="$1"
+  local _suffix="$2"
   local _sanitized_version=$(echo "$_sk8s_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
-  echo "${_prefix}-tiller-${_sanitized_version}-${_suffix}"
+  echo "tiller-${_sanitized_version}-${_suffix}"
 }
 
 function generate_sk8s_ns_name(){
-  local _prefix="$1"
-  local _sk8s_version="$2"
-  local _suffix="$3"
+  local _sk8s_version="$1"
+  local _suffix="$2"
   local _sanitized_version=$(echo "$_sk8s_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
-  echo "${_prefix}-sk8s-${_sanitized_version}-${_suffix}"
+  echo "sk8s-${_sanitized_version}-${_suffix}"
 }
 
 function find_existing_tiller_ns(){
-  local _prefix="$1"
-  local _sk8s_version="$2"
+  local _sk8s_version="$1"
   local _sanitized_version=$(echo "$_sk8s_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
 
   set +e
-  existing_tiller_ns_name=$(kubectl get ns | grep "${_prefix}-tiller-${_sanitized_version}-" | awk '{print $1}')
+  existing_tiller_ns_name=$(kubectl get ns | grep "tiller-${_sanitized_version}-" | awk '{print $1}')
   set -e
   echo "$existing_tiller_ns_name"
 }
 
 function find_existing_sk8s_ns(){
-  local _prefix="$1"
-  local _sk8s_version="$2"
+  local _sk8s_version="$1"
   local _sanitized_version=$(echo "$_sk8s_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
 
   set +e
-  existing_sk8s_ns_name=$(kubectl get ns | grep "${_prefix}-sk8s-${_sanitized_version}-" | awk '{print $1}')
+  existing_sk8s_ns_name=$(kubectl get ns | grep "sk8s-${_sanitized_version}-" | awk '{print $1}')
   set -e
   echo "$existing_sk8s_ns_name"
 }

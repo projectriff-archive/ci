@@ -14,4 +14,3 @@ run:
 
 params:
   KUBECONFIG_STRING: replace-me
-  K8S_NS_PREFIX: replace-me

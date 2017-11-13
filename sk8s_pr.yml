@@ -250,7 +250,6 @@ jobs:
       sk8s-version: sk8s-version-placeholder
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      K8S_NS_PREFIX: pfs-sk8s-pr
 <%= shared_hooks_pending %>
 
 - name: deploy-sk8s-pr
@@ -272,7 +271,6 @@ jobs:
 
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      K8S_NS_PREFIX: pfs-sk8s-pr
       SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 <%= shared_hooks_pending %>
 
@@ -299,7 +297,6 @@ jobs:
 
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      K8S_NS_PREFIX: pfs-sk8s-pr
       DOCKER_ORG: sk8sci
       DOCKER_USERNAME: ((docker-sk8s-username))
       DOCKER_PASSWORD: ((docker-sk8s-password))
@@ -323,5 +320,4 @@ jobs:
       sk8s-version: sk8s-version-placeholder
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      K8S_NS_PREFIX: pfs-sk8s-pr
 <%= shared_hooks_complete %>

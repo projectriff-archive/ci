@@ -12,8 +12,8 @@ echo "$KUBECONFIG_STRING" > ~/.kube/config
 
 timestamp=$(date "+%s")
 
-tiller_ns_name=$(generate_tiller_ns_name "$K8S_NS_PREFIX" "$SK8S_VERSION" "$timestamp")
-sk8s_ns_name=$(generate_sk8s_ns_name "$K8S_NS_PREFIX" "$SK8S_VERSION" "$timestamp")
+tiller_ns_name=$(generate_tiller_ns_name "$SK8S_VERSION" "$timestamp")
+sk8s_ns_name=$(generate_sk8s_ns_name "$SK8S_VERSION" "$timestamp")
 helm_release_name="${sk8s_ns_name}"
 
 kubectl create ns "$tiller_ns_name"
