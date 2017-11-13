@@ -3,7 +3,7 @@
 
   DockerImage = Struct.new(:path, :name)
   sk8s_docker_images = [
-    DockerImage.new('event-dispatcher', 'sk8s/event-dispatcher'),
+    DockerImage.new('function-controller', 'sk8s/function-controller'),
     DockerImage.new('function-invokers/java-function-invoker','sk8s/java-function-invoker'),
     DockerImage.new('function-invokers/node-function-invoker','sk8s/node-function-invoker'),
     #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
