@@ -5,12 +5,12 @@ image_resource:
     repository: sk8s/kafka-zookeeper
 
 inputs:
-- name: git-go-sidecar
+- name: git-sidecar
 - name: git-pfs-ci
 - name: sk8s-version
 
 outputs:
-- name: go-sidecar-docker-context
+- name: docker-context
 
 run:
   path: /bin/bash
@@ -25,12 +25,12 @@ run:
     build_root=$(pwd)
 
     source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-go-sidecar" "$build_root/sk8s-version")
+    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sidecar" "$build_root/sk8s-version")
 
     export GOPATH=$(go env GOPATH)
 
     mkdir -p "$GOPATH/src/github.com/sk8sio"
-    cp -pr git-go-sidecar "$GOPATH/src/github.com/sk8sio/function-sidecar"
+    cp -pr git-sidecar "$GOPATH/src/github.com/sk8sio/function-sidecar"
 
     killjava() {
          pkill -9 java
@@ -45,8 +45,8 @@ run:
 
       pkill -9 java
 
-      cp -r . "$build_root/go-sidecar-docker-context/"
+      cp -r . "$build_root/docker-context/"
 
-      cp "$build_root/sk8s-version/version" "$build_root/go-sidecar-docker-context/sk8s_version"
+      cp "$build_root/sk8s-version/version" "$build_root/docker-context/sk8s_version"
 
     popd

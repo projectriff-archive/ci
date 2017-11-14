@@ -79,7 +79,7 @@ resources:
 # Git - sk8s infra
 #####################################################
 
-- name: git-go-sidecar
+- name: git-sidecar
   type: git
   source:
     uri: https://github.com/ericbottard/function-sidecar.git
@@ -182,17 +182,17 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: git-go-sidecar
+    - get: git-sidecar
       trigger: true
     - get: sk8s-version
 
   - task: build-go-sidecar
-    file: git-pfs-ci/tasks/build-go-sidecar.yml
+    file: git-pfs-ci/tasks/build-sidecar.yml
 
   - put: go_sidecar_docker_image
     params:
-      build: go-sidecar-docker-context
-      tag: go-sidecar-docker-context/sk8s_version
+      build: docker-context
+      tag: docker-context/sk8s_version
       tag_as_latest: true
 <%= slack_notification %>
 
@@ -206,12 +206,12 @@ jobs:
     - get: sk8s-version
 
   - task: build-go-http-gateway
-    file: git-pfs-ci/tasks/build-go-http-gateway.yml
+    file: git-pfs-ci/tasks/build-http-gateway.yml
 
   - put: go_http_gateway_docker_image
     params:
-      build: go-http-gateway-docker-context
-      tag: go-http-gateway-docker-context/sk8s_version
+      build: docker-context
+      tag: docker-context/sk8s_version
       tag_as_latest: true
 <%= slack_notification %>
 
@@ -235,8 +235,8 @@ jobs:
 <% sk8s_docker_images.each do |image| %>
   - put:  <%= image.name %>
     params:
-      build: sk8s-docker-contexts/<%= image.path %>
-      tag: sk8s-docker-contexts/sk8s_version
+      build: docker-contexts/<%= image.path %>
+      tag: docker-contexts/sk8s_version
       tag_as_latest: true
       build_args:
         JAR_FILE: '*.jar'
@@ -260,7 +260,7 @@ jobs:
     # - get: git-go-http-gateway
     #   trigger: true
     #   passed: [build-go-http-gateway]
-    - get: git-go-sidecar
+    - get: git-sidecar
       trigger: true
       passed: [build-go-sidecar]
     - get: git-sk8s
