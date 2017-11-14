@@ -9,6 +9,9 @@ inputs:
 - name: git-pfs-ci
 - name: component-version
 
+outputs:
+- name: version-to-tag-git
+
 params:
   SK8S_COMPONENT_GIT_REMOTE: replace-me
 
@@ -22,6 +25,9 @@ run:
     build_root=$(pwd)
 
     source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-    COMPONENT_VERSION=$(head "$build_root/component-version/version")
+    CURRENT_VERSION=$(head "$build_root/component-version/version")
+    RELEASE_VERSION=$(strip_snapshot_from_version $CURRENT_VERSION)
 
     echo "Release component [$SK8S_COMPONENT_GIT_REMOTE], version [$COMPONENT_VERSION]"
+
+    echo "$RELEASE_VERSION" > "$build_root/version-to-tag-git/version"

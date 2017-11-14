@@ -419,5 +419,24 @@ jobs:
       git-component-working-copy: git-<%= component.name %>
     params:
       SK8S_COMPONENT_GIT_REMOTE: git@github.com:<%= component.git_org_name %>/<%= component.git_repo_name %>.git
+
+  - put: git-<%= component.name %>
+    params:
+      tag: version-to-tag-git/version
+      repository: git-<%= component.name %>
+
+  - task: tag-<%= component.name %>-docker-image
+    file: git-pfs-ci/tasks/tag_docker_image.yml
+    input_mapping:
+      component-version: <%= component.name %>-version
+      git-component-working-copy: git-<%= component.name %>
+    params:
+      DOCKERHUB_ORG: ((docker-sk8s-org))
+      DOCKERHUB_USERNAME: ((docker-sk8s-username))
+      DOCKERHUB_PASSWORD: ((docker-sk8s-password))
+      DOCKER_IMAGE: ((docker-sk8s-org))/<%= component.docker_image_name %>
+      TAG_FILE: version-to-tag-git/version
+
+
 <%= slack_notification %>
 <% end %>

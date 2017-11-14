@@ -50,3 +50,7 @@ function determine_sk8s_version(){
     echo "0.0.0-pr${_pr_number}"
   fi
 }
+
+function strip_snapshot_from_version(){
+  echo "$1" | awk -F'-' '{print $1}'
+}

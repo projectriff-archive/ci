@@ -1,0 +1,39 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: concourse/docker-image-resource
+
+params:
+  DOCKERHUB_PASSWORD: replace-me
+  DOCKERHUB_USERNAME: replace-me
+  DOCKERHUB_ORG: replace-me
+  DOCKER_IMAGE: replace-me
+  TAG_FILE: replace-me
+
+run:
+  path: /bin/bash
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+
+    source /opt/resource/common.sh
+    start_docker
+
+    docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
+
+    build_root=$(pwd)
+
+    TAG_VERSION=$(head $build_root/$TAG_FILE)
+
+    echo "Tagging [$DOCKER_IMAGE] with [$TAG_VERSION]"
+
+    docker pull "$DOCKERHUB_ORG/$DOCKER_IMAGE"
+
+    IMAGE_ID=$(docker images "$DOCKERHUB_ORG/$DOCKER_IMAGE" --format {{.ID}})
+
+    docker tag "$IMAGE_ID" "$DOCKERHUB_ORG/$DOCKER_IMAGE:$TAG_VERSION"
+
+    docker push "$DOCKERHUB_ORG/$DOCKER_IMAGE:$TAG_VERSION"
