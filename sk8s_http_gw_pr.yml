@@ -122,9 +122,32 @@ resources:
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 
+
+#####################################################
+# System Tests
+#####################################################
+
+- name: git-pfs-system-test
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-system-test.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+- name: gh-faas-cli-release
+  type: github-release
+  source:
+    owner: pivotal-cf
+    repository: faas-cli
+    access_token: ((gitbot-access-token))
+
+##########################################
+# Jobs
+##########################################
+
 jobs:
 
-- name: build-pr-container
+- name: build-http-gw-pr-container
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -145,3 +168,67 @@ jobs:
       tag: go-http-gateway-docker-context/sk8s_version
       tag_as_latest: false
 <%= shared_hooks_pending %>
+
+- name: build-http-gw-pr-chart
+  serial: true # must not run concurrently, as the helm repo index is merged to include all previous versions
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: sk8s-version-placeholder
+      passed: [build-http-gw-pr-container]
+    - get: git-http-gw-pr
+      trigger: true
+      version: every
+      passed: [build-http-gw-pr-container]
+<%= shared_hooks_pending %>
+
+- name: clean-sk8s-pre-deployment
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-http-gw-pr
+      version: every
+      passed: [build-http-gw-pr-chart]
+      trigger: true
+    - get: sk8s-version-placeholder
+      passed: [build-http-gw-pr-chart]
+<%= shared_hooks_pending %>
+
+- name: deploy-http-gw-pr
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-http-gw-pr
+      version: every
+      passed: [clean-sk8s-pre-deployment]
+      trigger: true
+    - get: sk8s-version-placeholder
+      passed: [clean-sk8s-pre-deployment]
+<%= shared_hooks_pending %>
+
+- name: run-http-gw-pr-system-tests
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+      passed: [deploy-http-gw-pr]
+    - get: git-http-gw-pr
+      version: every
+      passed: [deploy-http-gw-pr]
+      trigger: true
+    - get: sk8s-version-placeholder
+      passed: [deploy-http-gw-pr]
+    - get: git-pfs-system-test
+    - get: gh-faas-cli-release
+<%= shared_hooks_pending %>
+
+- name: clean-sk8s-post-deployment
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-http-gw-pr
+      version: every
+      passed: [run-http-gw-pr-system-tests]
+      trigger: true
+    - get: sk8s-version-placeholder
+      passed: [run-http-gw-pr-system-tests]
+<%= shared_hooks_complete %>
