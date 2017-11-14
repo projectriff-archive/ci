@@ -1,0 +1,28 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-build
+
+inputs:
+- name: git-component-working-copy
+- name: git-pfs-ci
+- name: sk8s-version
+
+params:
+  SK8S_COMPONENT_GIT_REMOTE: replace-me
+
+run:
+  path: /bin/bash
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+
+    build_root=$(pwd)
+
+    source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-component-working-copy" "$build_root/sk8s-version")
+
+    echo "Release component [$SK8S_COMPONENT_GIT_REMOTE], version [$SK8S_VERSION]"

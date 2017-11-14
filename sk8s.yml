@@ -396,3 +396,21 @@ jobs:
 
           kubectl apply -f function-resource.yaml
           kubectl apply -f topic-resource.yaml
+
+
+<% sk8s_components.each do |component| %>
+- name: manual-release-<%= component.name %>
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-<%= component.name %>
+    - get: sk8s-version
+
+  - task: release-<%= component.name %>
+    file: git-pfs-ci/tasks/release_sk8s_component.yml
+    input_mapping:
+      git-component-working-copy: git-<%= component.name %>
+    params:
+      SK8S_COMPONENT_GIT_REMOTE: git@github.com:<%= component.git_org_name %>/<%= component.git_repo_name %>.git
+<%= slack_notification %>
+<% end %>
