@@ -1,0 +1,147 @@
+<%
+
+shared_hooks_pending="""
+  on_success:
+    do:
+    - put: git-http-gw-pr
+      params:
+        path: git-http-gw-pr
+        status: pending
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Passed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+  on_failure:
+    do:
+    - put: git-http-gw-pr
+      params:
+        path: git-http-gw-pr
+        status: failure
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+"""
+
+shared_hooks_complete="""
+  on_success:
+    do:
+    - put: git-http-gw-pr
+      params:
+        path: git-http-gw-pr
+        status: success
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Passed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+  on_failure:
+    do:
+    - put: git-http-gw-pr
+      params:
+        path: git-http-gw-pr
+        status: failure
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+"""
+
+%>
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+- name: gcs-resource
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
+
+##################################################
+# Resources
+##################################################
+
+resources:
+
+- name: git-http-gw-pr
+  type: pull-request
+  source:
+    repo: ericbottard/sk8s-http-gateway
+    private_key: ((git-pfs-ci-ssh-key))
+    access_token: ((gitbot-access-token))
+    base: master
+
+- name: sk8s-version-placeholder
+  type: semver
+  source:
+    driver: gcs
+    bucket: pfs_versions
+    key: sk8s_http_gw_pr_version
+    json_key: ((gcp-json-key))
+
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: ((slack-hook-url))
+
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+#####################################################
+# Docker images
+#####################################################
+
+- name: go_http_gateway_docker_image
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/http-gateway
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
+jobs:
+
+- name: build-pr-container
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: sk8s-version-placeholder
+    - get: git-http-gw-pr
+      trigger: true
+      version: every
+
+  - task: build-go-http-gateway
+    file: git-pfs-ci/tasks/build-go-http-gateway.yml
+    input_mapping:
+      git-go-http-gateway: git-http-gw-pr
+      sk8s-version: sk8s-version-placeholder
+
+  - put: go_http_gateway_docker_image
+    params:
+      build: go-http-gateway-docker-context
+      tag: go-http-gateway-docker-context/sk8s_version
+      tag_as_latest: false
+<%= shared_hooks_pending %>

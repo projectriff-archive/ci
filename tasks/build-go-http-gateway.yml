@@ -24,12 +24,18 @@ run:
 
     build_root=$(pwd)
 
-    SK8S_VERSION=$(head "$build_root/sk8s-version/version")
+    source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-go-http-gateway" "$build_root/sk8s-version")
 
     export GOPATH=$(go env GOPATH)
 
     mkdir -p "$GOPATH/src/github.com/sk8sio"
     cp -pr git-go-http-gateway/ "$GOPATH/src/github.com/sk8sio/http-gateway"
+
+    killjava() {
+         pkill -9 java
+    }
+    trap killjava INT QUIT TERM EXIT
 
     pushd "$GOPATH/src/github.com/sk8sio/http-gateway/"
 
