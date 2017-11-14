@@ -31,6 +31,11 @@ run:
     mkdir -p "$GOPATH/src/github.com/sk8sio"
     cp -pr git-go-sidecar "$GOPATH/src/github.com/sk8sio/function-sidecar"
 
+    killjava() {
+         pkill -9 java
+    }
+    trap killjava INT QUIT TERM EXIT
+
     pushd "$GOPATH/src/github.com/sk8sio/function-sidecar/"
 
       make build-for-docker
