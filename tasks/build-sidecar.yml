@@ -33,7 +33,9 @@ run:
     cp -pr git-sidecar "$GOPATH/src/github.com/sk8sio/function-sidecar"
 
     killjava() {
-         pkill -9 java
+        set +e
+        pkill -9 java
+        set -e
     }
     trap killjava INT QUIT TERM EXIT
 
@@ -43,7 +45,7 @@ run:
 
       KAFKA_BROKER=localhost:9092 make test
 
-      pkill -9 java
+      killjava
 
       cp -r . "$build_root/docker-context/"
 

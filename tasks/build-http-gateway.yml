@@ -33,7 +33,9 @@ run:
     cp -pr git-http-gateway/ "$GOPATH/src/github.com/sk8sio/http-gateway"
 
     killjava() {
-         pkill -9 java
+        set +e
+        pkill -9 java
+        set -e
     }
     trap killjava INT QUIT TERM EXIT
 
@@ -43,8 +45,8 @@ run:
 
       KAFKA_BROKER=localhost:9092 go test -v ./...
 
-      pkill -9 java
-
+      killjava
+      
       cp -r . "$build_root/docker-context/"
 
       cp "$build_root/sk8s-version/version" "$build_root/docker-context/sk8s_version"
