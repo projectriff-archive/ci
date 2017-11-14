@@ -188,8 +188,8 @@ jobs:
 <% sk8s_docker_images.each do |image| %>
   - put:  <%= image.name %>
     params:
-      build: sk8s-docker-contexts/<%= image.path %>
-      tag: sk8s-docker-contexts/sk8s_version
+      build: docker-contexts/<%= image.path %>
+      tag: docker-contexts/sk8s_version
       tag_as_latest: false  # do NOT tag PR containers as latest
       build_args:
         JAR_FILE: '*.jar'
