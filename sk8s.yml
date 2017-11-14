@@ -1,4 +1,18 @@
 <%
+
+  Sk8sComponent=Struct.new(
+  :name,
+  :docker_image_name,
+  :git_org_name,
+  :git_repo_name,
+  :build_task_file)
+
+  sk8s_components = [
+    Sk8sComponent.new('sidecar',          'function-sidecar', 'ericbottard', 'function-sidecar',      'build-sidecar.yml'),
+    Sk8sComponent.new('http-gateway',     'http-gateway',     'ericbottard', 'sk8s-http-gateway',     'build-http-gateway.yml'),
+    Sk8sComponent.new('topic-controller', 'topic-controller', 'ericbottard', 'sk8s-topic-controller', 'build-topic-controller.yml'),
+  ]
+
   charts_bucket_name='sk8s_charts'
 
   DockerImage = Struct.new(:path, :name)
@@ -8,7 +22,7 @@
     DockerImage.new('function-invokers/node-function-invoker','sk8s/node-function-invoker'),
     #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
     DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
-    DockerImage.new('topic-controller','sk8s/topic-controller'),
+  #  DockerImage.new('topic-controller','sk8s/topic-controller'),
     DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
   ]
 
@@ -79,17 +93,13 @@ resources:
 # Git - sk8s infra
 #####################################################
 
-- name: git-sidecar
+<% sk8s_components.each do |component| %>
+- name: git-<%= component.name %>
   type: git
   source:
-    uri: https://github.com/ericbottard/function-sidecar.git
+    uri: https://github.com/<%= component.git_org_name %>/<%= component.git_repo_name %>.git
     branch: master
-
-- name: git-go-http-gateway
-  type: git
-  source:
-    uri: https://github.com/ericbottard/sk8s-http-gateway.git
-    branch: master
+<% end %>
 
 - name: git-sk8s
   type: git
@@ -127,19 +137,14 @@ resources:
 # Docker images
 #####################################################
 
-- name: go_sidecar_docker_image
+<% sk8s_components.each do |component| %>
+- name:  <%= component.name %>-docker-image
   type: docker-image
   source:
-    repository: ((docker-sk8s-org))/function-sidecar
+    repository: ((docker-sk8s-org))/<%= component.docker_image_name %>
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
-
-- name: go_http_gateway_docker_image
-  type: docker-image
-  source:
-    repository: ((docker-sk8s-org))/http-gateway
-    username: ((docker-sk8s-username))
-    password: ((docker-sk8s-password))
+<% end %>
 
 <% sk8s_docker_images.each do |image| %>
 - name:  <%= image.name %>
@@ -162,7 +167,6 @@ resources:
 # JOBS
 #####################################################
 
-
 jobs:
 
 - name: manual-version-bump-patch
@@ -171,49 +175,30 @@ jobs:
   - put: sk8s-version
     params: {bump: patch}
 
-
-
 ######################################################
 # sk8s infra
 ######################################################
 
-- name: build-go-sidecar
-  serial_groups: [sk8s]
+<% sk8s_components.each do |component| %>
+- name: build-<%= component.name %>-container
+  serial_groups: [<%= component.name %>]
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: git-sidecar
+    - get: git-<%= component.name %>
       trigger: true
     - get: sk8s-version
 
-  - task: build-go-sidecar
-    file: git-pfs-ci/tasks/build-sidecar.yml
+  - task: build-<%= component.name %>
+    file: git-pfs-ci/tasks/<%= component.build_task_file %>
 
-  - put: go_sidecar_docker_image
+  - put: <%= component.name %>-docker-image
     params:
       build: docker-context
       tag: docker-context/sk8s_version
       tag_as_latest: true
 <%= slack_notification %>
-
-- name: build-go-http-gateway
-  serial_groups: [sk8s]
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-go-http-gateway
-      trigger: true
-    - get: sk8s-version
-
-  - task: build-go-http-gateway
-    file: git-pfs-ci/tasks/build-http-gateway.yml
-
-  - put: go_http_gateway_docker_image
-    params:
-      build: docker-context
-      tag: docker-context/sk8s_version
-      tag_as_latest: true
-<%= slack_notification %>
+<% end %>
 
 - name: build-sk8s-containers
   serial_groups: [sk8s]
@@ -255,14 +240,14 @@ jobs:
     - get: sk8s-version
       passed:
       - build-sk8s-containers
-      - build-go-sidecar
-      - build-go-http-gateway
-    # - get: git-go-http-gateway
-    #   trigger: true
-    #   passed: [build-go-http-gateway]
-    - get: git-sidecar
+  <% sk8s_components.each do |component| %>
+      - build-<%= component.name %>-container
+  <% end %>
+  <% sk8s_components.each do |component| %>
+    - get: git-<%= component.name %>
       trigger: true
-      passed: [build-go-sidecar]
+      passed: [build-<%= component.name %>-container]
+  <% end %>
     - get: git-sk8s
       trigger: true
       passed: [build-sk8s-containers]
@@ -284,7 +269,6 @@ jobs:
       GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
       PROJECT_ID: ((pfs-gcp-ci-project))
       CHART_BUCKET_NAME: <%= charts_bucket_name %>
-
 <%= slack_notification %>
 
 - name: clean-sk8s-pre-deployment
