@@ -76,6 +76,16 @@ resources:
     json_key: ((gcp-json-key))
     versioned_file: index.yaml
 
+<% sk8s_components.each do |component| %>
+- name: <%= component.name %>-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: pfs_versions
+    key: <%= component.name %>-version
+    json_key: ((gcp-json-key))
+<% end %>
+
 - name: sk8s-version
   type: semver
   source:
@@ -169,16 +179,6 @@ resources:
 
 jobs:
 
-- name: manual-version-bump-patch
-  serial_groups: [sk8s]
-  plan:
-  - put: sk8s-version
-    params: {bump: patch}
-
-######################################################
-# sk8s infra
-######################################################
-
 <% sk8s_components.each do |component| %>
 - name: build-<%= component.name %>-container
   serial_groups: [<%= component.name %>]
@@ -187,10 +187,12 @@ jobs:
     - get: git-pfs-ci
     - get: git-<%= component.name %>
       trigger: true
-    - get: sk8s-version
+    - get: <%= component.name %>-version
 
   - task: build-<%= component.name %>
     file: git-pfs-ci/tasks/<%= component.build_task_file %>
+    input_mapping:
+      sk8s-version: <%= component.name %>-version
 
   - put: <%= component.name %>-docker-image
     params:
@@ -240,9 +242,9 @@ jobs:
     - get: sk8s-version
       passed:
       - build-sk8s-containers
-  <% sk8s_components.each do |component| %>
-      - build-<%= component.name %>-container
-  <% end %>
+  # <% sk8s_components.each do |component| %>
+  #     - build-<%= component.name %>-container
+  # <% end %>
   <% sk8s_components.each do |component| %>
     - get: git-<%= component.name %>
       trigger: true
@@ -353,13 +355,13 @@ jobs:
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
 
-  - put: git-sk8s
-    params:
-      tag: sk8s-version/version
-      repository: git-sk8s
+  # - put: git-sk8s
+  #   params:
+  #     tag: sk8s-version/version
+  #     repository: git-sk8s
 
-  - put: sk8s-version
-    params: {bump: patch}
+  # - put: sk8s-version
+  #   params: {bump: patch}
 <%= slack_notification %>
 
 - name: manual-publish-crds
@@ -397,18 +399,23 @@ jobs:
           kubectl apply -f function-resource.yaml
           kubectl apply -f topic-resource.yaml
 
-
 <% sk8s_components.each do |component| %>
+- name: manual-version-bump-snapshot-<%= component.name %>
+  plan:
+  - put: <%= component.name %>-version
+    params: {bump: patch, pre: SNAPSHOT}
+
 - name: manual-release-<%= component.name %>
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: git-<%= component.name %>
-    - get: sk8s-version
+    - get: <%= component.name %>-version
 
   - task: release-<%= component.name %>
     file: git-pfs-ci/tasks/release_sk8s_component.yml
     input_mapping:
+      component-version: <%= component.name %>-version
       git-component-working-copy: git-<%= component.name %>
     params:
       SK8S_COMPONENT_GIT_REMOTE: git@github.com:<%= component.git_org_name %>/<%= component.git_repo_name %>.git
