@@ -12,7 +12,7 @@ function update_values_tag(){
   local image_name="$2"
   local new_tag="$3"
   local tempfile="/tmp/tempvalues.yml"
-  local cat "$source_file" | tr '\n' '_' |  sed  -e "s#${image_name}_    tag: 0\.0\.1-SNAPSHOT#${image_name}_    tag: ${new_tag}#g"| tr '_' '\n' > "$tempfile"
+  cat "$source_file" | tr '\n' '_' |  sed  -e "s#${image_name}_    tag: 0\.0\.1-SNAPSHOT#${image_name}_    tag: ${new_tag}#g"| tr '_' '\n' > "$tempfile"
   cp  "$tempfile" "$source_file"
 }
 
