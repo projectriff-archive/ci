@@ -36,7 +36,7 @@ run:
 
       make test
 
-      sed -i -e 's/CMD/ENTRYPOINT/g' Dockerfile
+      sed -i -e 's/scratch/alpine/g' Dockerfile
 
       ls -lath
 
