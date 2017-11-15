@@ -21,7 +21,6 @@ run:
   - |
 
     start_kafka
-    sleep 5
 
     build_root=$(pwd)
 
