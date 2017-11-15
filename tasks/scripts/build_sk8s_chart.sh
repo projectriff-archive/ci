@@ -38,6 +38,11 @@ pushd $build_root/git-sk8s/charts
   cat sk8s/templates/function-controller-deployment.yaml  | tr '\n' '#' | sed -e "s/env:/env:#          - name: SK8S_FUNCTION_CONTROLLER_SIDECAR_TAG#            value: ${sidecar_version}/g"  | tr '#' '\n' > "$tmp_fc_deploy"
   cp "$tmp_fc_deploy" sk8s/templates/function-controller-deployment.yaml
 
+  # TOPIC Controller
+  tmp_tc_deploy="/tmp/tmp_tc_deploy"
+  cat sk8s/templates/topic-controller-deployment.yaml |tr '\n' '#' | sed -e 's/liveness.*env/env/g'  |  tr '#' '\n' > "$tmp_tc_deploy"
+  cp "$tmp_tc_deploy" sk8s/templates/topic-controller-deployment.yaml
+
   chart_version=$(grep version sk8s/Chart.yaml  | awk '{print $2}')
 
   helm package sk8s --version "$chart_version"
