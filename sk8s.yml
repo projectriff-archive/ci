@@ -108,6 +108,8 @@ resources:
   type: git
   source:
     uri:  git@github.com:<%= component.git_org_name %>/<%= component.git_repo_name %>.git
+    private_key: ((git-pfs-ci-ssh-key))
+    access_token: ((gitbot-access-token))
     branch: master
 <% end %>
 
