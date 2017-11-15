@@ -200,12 +200,12 @@ jobs:
     params:
       build: docker-context
       tag: docker-context/sk8s_version
-      tag_as_latest: true
+      tag_as_latest: false
 <%= slack_notification %>
 <% end %>
 
 - name: build-sk8s-containers
-  serial_groups: [sk8s]
+  serial_groups: [sk8s-containers]
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -226,7 +226,7 @@ jobs:
     params:
       build: docker-contexts/<%= image.path %>
       tag: docker-contexts/sk8s_version
-      tag_as_latest: true
+      tag_as_latest: false
       build_args:
         JAR_FILE: '*.jar'
 <% end %>
