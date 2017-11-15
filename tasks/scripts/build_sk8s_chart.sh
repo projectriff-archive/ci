@@ -20,6 +20,8 @@ pushd $build_root/git-sk8s/charts
 
   helm init --client-only
 
+  sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-sk8s/charts/sk8s/values.yaml"
+
   update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "function-controller"  "$SK8S_VERSION"
   update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "zipkin-server"        "$SK8S_VERSION"
 
