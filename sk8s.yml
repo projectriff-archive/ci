@@ -107,7 +107,7 @@ resources:
 - name: git-<%= component.name %>
   type: git
   source:
-    uri: https://github.com/<%= component.git_org_name %>/<%= component.git_repo_name %>.git
+    uri:  git@github.com:<%= component.git_org_name %>/<%= component.git_repo_name %>.git
     branch: master
 <% end %>
 
