@@ -7,12 +7,31 @@ build_root=$PWD
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 
+function update_values_tag(){
+  local source_file="$1"
+  local image_name="$2"
+  local new_tag="$3"
+  local tempfile="/tmp/tempvalues.yml"
+  local cat "$source_file" | tr '\n' '_' |  sed  -e "s#${image_name}_    tag: 0\.0\.1-SNAPSHOT#${image_name}_    tag: ${new_tag}#g"| tr '_' '\n' > "$tempfile"
+  cp  "$tempfile" "$source_file"
+}
+
 pushd $build_root/git-sk8s/charts
 
   helm init --client-only
 
-  sed -i -e "s/0\.0\.1-SNAPSHOT/$SK8S_VERSION/g" sk8s/values.yaml
-  helm package sk8s --version $SK8S_VERSION
+  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "function-controller"  "$SK8S_VERSION"
+  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "zipkin-server"        "$SK8S_VERSION"
+
+  topic_controller_version=$(head "$build_root/topic-controller-version/version")
+  http_gw_version=$(head "$build_root/http-gateway-version/version")
+
+  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "topic-controller"     "$topic_controller_version"
+  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "http-gateway"         "$http_gw_version"
+
+  chart_version=$(grep version sk8s/Chart.yaml  | awk '{print $2}')
+
+  helm package sk8s --version "$chart_version"
 
   chart_file=$(basename sk8s*tgz)
 

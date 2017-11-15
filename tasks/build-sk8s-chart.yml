@@ -9,6 +9,10 @@ inputs:
 - name: git-pfs-ci
 - name: sk8s-version
 
+- name: sidecar-version
+- name: topic-controller-version
+- name: http-gateway-version
+
 outputs:
 - name: sk8s-charts
 
