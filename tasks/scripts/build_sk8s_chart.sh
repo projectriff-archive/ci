@@ -26,8 +26,15 @@ pushd $build_root/git-sk8s/charts
   topic_controller_version=$(head "$build_root/topic-controller-version/version")
   http_gw_version=$(head "$build_root/http-gateway-version/version")
 
+  # Topic Controller and HTTP GW versions
   update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "topic-controller"     "$topic_controller_version"
   update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "http-gateway"         "$http_gw_version"
+
+  # SIDECAR version
+  export sidecar_version=$(head "$build_root/sidecar-version/version")
+  tmp_fc_deploy="/tmp/tmp_fc_deploy"
+  cat sk8s/templates/function-controller-deployment.yaml  | tr '\n' '#' | sed -e "s/env:/env:#          - name: SK8S_FUNCTION_CONTROLLER_SIDECAR_TAG#            value: ${sidecar_version}/g"  | tr '#' '\n' > "$tmp_fc_deploy"
+  cp "$tmp_fc_deploy" sk8s/templates/function-controller-deployment.yaml
 
   chart_version=$(grep version sk8s/Chart.yaml  | awk '{print $2}')
 
