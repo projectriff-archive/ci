@@ -2,7 +2,7 @@ FROM alpine
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
   apk update && \
   apk add bash openjdk8 alpine-sdk python go && \
-  wget http://www-us.apache.org/dist/kafka/0.10.2.0/kafka_2.10-0.10.2.0.tgz && \
+  wget http://www-us.apache.org/dist/kafka/0.11.0.1/kafka_2.11-0.11.0.1.tgz && \
   tar -xzf kafka* && \
   rm kafka*.tgz && \
   mv kafka*/ kafka/ && \
