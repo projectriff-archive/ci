@@ -42,7 +42,6 @@ run:
     export SYS_TEST_DOCKER_ORG="$DOCKER_ORG"
     export SYS_TEST_DOCKER_USERNAME="$DOCKER_USERNAME"
     export SYS_TEST_DOCKER_PASSWORD="$DOCKER_PASSWORD"
-    export SYS_TEST_CLI_PATH="$build_root/gh-faas-cli-release/faas-cli-linux-amd64"
     export SYS_TEST_BASE_DIR="$build_root/git-pfs-ci/integration"
     export SYS_TEST_MSG_RT_TIMEOUT_SEC=60
 

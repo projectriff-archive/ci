@@ -167,13 +167,6 @@ resources:
     password: ((docker-sk8s-password))
 <% end %>
 
-- name: gh-faas-cli-release
-  type: github-release
-  source:
-    owner: pivotal-cf
-    repository: faas-cli
-    access_token: ((gitbot-access-token))
-
 
 #####################################################
 # JOBS
@@ -329,7 +322,6 @@ jobs:
       passed: [deploy-sk8s]
       trigger: true
     - get: git-pfs-system-test
-    - get: gh-faas-cli-release
 
   - task: run-sk8s-system-tests
     privileged: true
