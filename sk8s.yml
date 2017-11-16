@@ -395,6 +395,11 @@ jobs:
           kubectl apply -f function-resource.yaml
           kubectl apply -f topic-resource.yaml
 
+- name: manual-version-bump-snapshot-sk8s
+  plan:
+  - put: sk8s-version
+    params: {bump: patch, pre: SNAPSHOT}
+
 <% sk8s_components.each do |component| %>
 - name: manual-version-bump-snapshot-<%= component.name %>
   plan:
