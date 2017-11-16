@@ -9,7 +9,6 @@ inputs:
 - name: git-pfs-system-test
 - name: git-sk8s
 - name: sk8s-version
-- name: gh-faas-cli-release
 
 run:
   path: /bin/bash
