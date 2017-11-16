@@ -44,8 +44,6 @@ run:
     export SYS_TEST_BASE_DIR="$build_root/git-pfs-ci/integration"
     export SYS_TEST_MSG_RT_TIMEOUT_SEC=60
 
-    chmod +x $SYS_TEST_CLI_PATH
-
     export GOPATH=$(go env GOPATH)
     workdir=$GOPATH/src/github.com/pivotal-cf
     mkdir -p $workdir
