@@ -178,6 +178,8 @@ jobs:
 - name: build-<%= component.name %>-container
   serial_groups: [<%= component.name %>]
   plan:
+  - put: <%= component.name %>-version
+    params: {pre: SNAPSHOT}
   - aggregate:
     - get: git-pfs-ci
     - get: git-<%= component.name %>
@@ -200,6 +202,8 @@ jobs:
 - name: build-sk8s-containers
   serial_groups: [sk8s-containers]
   plan:
+  - put: sk8s-version
+    params: {pre: SNAPSHOT}
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
@@ -399,6 +403,7 @@ jobs:
   plan:
   - put: sk8s-version
     params: {bump: patch, pre: SNAPSHOT}
+
 
 <% sk8s_components.each do |component| %>
 - name: manual-version-bump-snapshot-<%= component.name %>
