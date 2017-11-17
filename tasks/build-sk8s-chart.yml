@@ -10,7 +10,7 @@ inputs:
 - name: sk8s-version
 
 - name: sidecar-version
-- name: topic-controller-version
+#- name: topic-controller-version
 - name: http-gateway-version
 
 outputs:

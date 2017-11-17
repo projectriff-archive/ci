@@ -22,13 +22,12 @@ pushd $build_root/git-sk8s/charts
 
   sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-sk8s/charts/sk8s/values.yaml"
 
-  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "function-controller"  "$SK8S_VERSION"
-  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "zipkin-server"        "$SK8S_VERSION"
-
-  topic_controller_version=$(head "$build_root/topic-controller-version/version")
+  #topic_controller_version=$(head "$build_root/topic-controller-version/version")
+  topic_controller_version="$SK8S_VERSION"
   http_gw_version=$(head "$build_root/http-gateway-version/version")
 
-  # Topic Controller and HTTP GW versions
+  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "function-controller"  "$SK8S_VERSION"
+  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "zipkin-server"        "$SK8S_VERSION"
   update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "topic-controller"     "$topic_controller_version"
   update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "http-gateway"         "$http_gw_version"
 
