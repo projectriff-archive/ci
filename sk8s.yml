@@ -10,7 +10,7 @@
   sk8s_components = [
     Sk8sComponent.new('sidecar',          'function-sidecar', 'ericbottard', 'function-sidecar',      'build-sidecar.yml'),
     Sk8sComponent.new('http-gateway',     'http-gateway',     'ericbottard', 'sk8s-http-gateway',     'build-http-gateway.yml'),
-    Sk8sComponent.new('topic-controller', 'topic-controller', 'ericbottard', 'sk8s-topic-controller', 'build-topic-controller.yml'),
+    #Sk8sComponent.new('topic-controller', 'topic-controller', 'ericbottard', 'sk8s-topic-controller', 'build-topic-controller.yml'),
   ]
 
   charts_bucket_name='sk8s_charts'
@@ -22,7 +22,7 @@
     DockerImage.new('function-invokers/node-function-invoker','sk8s/node-function-invoker'),
     #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
     DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
-  #  DockerImage.new('topic-controller','sk8s/topic-controller'),
+    DockerImage.new('topic-controller','sk8s/topic-controller'),
     DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
   ]
 
