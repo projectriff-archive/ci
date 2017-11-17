@@ -7,15 +7,6 @@ build_root=$PWD
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 
-function update_values_tag(){
-  local source_file="$1"
-  local image_name="$2"
-  local new_tag="$3"
-  local tempfile="/tmp/tempvalues.yml"
-  cat "$source_file" | tr '\n' '_' |  sed  -e "s#${image_name}_    tag: 0\.0\.1-SNAPSHOT#${image_name}_    tag: ${new_tag}#g"| tr '_' '\n' > "$tempfile"
-  cp  "$tempfile" "$source_file"
-}
-
 pushd $build_root/git-sk8s/charts
 
   helm init --client-only
@@ -25,23 +16,41 @@ pushd $build_root/git-sk8s/charts
   #topic_controller_version=$(head "$build_root/topic-controller-version/version")
   topic_controller_version="$SK8S_VERSION"
   http_gw_version=$(head "$build_root/http-gateway-version/version")
-
-  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "function-controller"  "$SK8S_VERSION"
-  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "zipkin-server"        "$SK8S_VERSION"
-  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "topic-controller"     "$topic_controller_version"
-  update_values_tag "$build_root/git-sk8s/charts/sk8s/values.yaml" "http-gateway"         "$http_gw_version"
-
-  # SIDECAR version
-  export sidecar_version=$(head "$build_root/sidecar-version/version")
-  tmp_fc_deploy="/tmp/tmp_fc_deploy"
-  cat sk8s/templates/function-controller-deployment.yaml  | tr '\n' '#' | sed -e "s/env:/env:#          - name: SK8S_FUNCTION_CONTROLLER_SIDECAR_TAG#            value: ${sidecar_version}/g"  | tr '#' '\n' > "$tmp_fc_deploy"
-  cp "$tmp_fc_deploy" sk8s/templates/function-controller-deployment.yaml
+  sidecar_version=$(head "$build_root/sidecar-version/version")
 
   chart_version=$(grep version sk8s/Chart.yaml  | awk '{print $2}')
 
   helm package sk8s --version "$chart_version"
 
   chart_file=$(basename sk8s*tgz)
+
+  cat > "${build_root}/sk8s-charts-install/sk8s-${chart_version}-install-example.sh" << EOM
+#!/bin/bash
+
+script_name=\`basename "\$0"\`
+
+set -euo pipefail
+
+if (( \$# < 1 )); then
+    echo
+    echo "Usage:"
+    echo
+    echo "   \$script_name <chart-name> <extra-helm-args>"
+    echo
+    exit 1
+fi
+
+set -x
+
+chart_name="\$1"
+shift
+
+helm install "\${chart_name}" \
+--version="${chart_version}" \
+--set functionController.image.tag=${SK8S_VERSION},functionController.sidecar.image.tag=${sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gw_version},zipkin.image.tag=${SK8S_VERSION} \
+"\$@"
+
+EOM
 
   cp "$chart_file" "$build_root/sk8s-charts/"
 
