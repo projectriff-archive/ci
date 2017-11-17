@@ -9,6 +9,8 @@ mkdir -p $model_dir
 cp -r $build_root/git-kubernetes-model $model_dir/kubernetes-model
 cd $model_dir/kubernetes-model
 
+export GOPATH=$(go env GOPATH)
+
 make
 
 cp -r ~/.m2/repository "$build_root/m2-repo/"
