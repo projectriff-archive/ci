@@ -20,5 +20,3 @@ Container images and Helm charts built from `sk8s` are versioned using the Conco
 ### Helm Charts
 Charts (and a corresponding `index.yaml` for the latest build) are published to https://sk8s_charts.storage.googleapis.com
 
-### CI Flow
-![PFS CI flow](faas_ci_process.png)
