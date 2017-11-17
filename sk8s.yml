@@ -125,7 +125,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ericbottard/kubernetes-model
-    branch: sk8s
+    branch: sk8s-add-container
 
 #####################################################
 # Git - CI
