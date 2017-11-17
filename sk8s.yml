@@ -125,7 +125,7 @@ resources:
   type: git
   source:
     uri: https://github.com/ericbottard/kubernetes-model
-    branch: sk8s-add-container
+    branch: sk8s
 
 #####################################################
 # Git - CI
@@ -178,8 +178,6 @@ jobs:
 - name: build-<%= component.name %>-container
   serial_groups: [<%= component.name %>]
   plan:
-  - put: <%= component.name %>-version
-    params: {pre: SNAPSHOT}
   - aggregate:
     - get: git-pfs-ci
     - get: git-<%= component.name %>
@@ -202,8 +200,6 @@ jobs:
 - name: build-sk8s-containers
   serial_groups: [sk8s-containers]
   plan:
-  - put: sk8s-version
-    params: {pre: SNAPSHOT}
   - aggregate:
     - get: git-pfs-ci
     - get: sk8s-version
@@ -287,6 +283,10 @@ jobs:
       passed: [build-sk8s-chart]
     - get: sk8s-version
       passed: [build-sk8s-chart]
+  <% sk8s_components.each do |component| %>
+    - get: <%= component.name %>-version
+      passed: [build-sk8s-chart]
+  <% end %>
     - get: gcs-sk8s-chart-index
       passed: [build-sk8s-chart]
       trigger: true
@@ -306,6 +306,10 @@ jobs:
       passed: [clean-sk8s-pre-deployment]
     - get: sk8s-version
       passed: [clean-sk8s-pre-deployment]
+  <% sk8s_components.each do |component| %>
+    - get: <%= component.name %>-version
+      passed: [clean-sk8s-pre-deployment]
+  <% end %>
     - get: gcs-sk8s-chart-index
       passed: [clean-sk8s-pre-deployment]
       trigger: true
@@ -326,6 +330,10 @@ jobs:
       passed: [deploy-sk8s]
     - get: sk8s-version
       passed: [deploy-sk8s]
+  <% sk8s_components.each do |component| %>
+    - get: <%= component.name %>-version
+      passed: [deploy-sk8s]
+  <% end %>
     - get: gcs-sk8s-chart-index
       passed: [deploy-sk8s]
       trigger: true
@@ -350,6 +358,10 @@ jobs:
       passed: [run-sk8s-system-tests]
     - get: sk8s-version
       passed: [run-sk8s-system-tests]
+  <% sk8s_components.each do |component| %>
+    - get: <%= component.name %>-version
+      passed: [run-sk8s-system-tests]
+  <% end %>
     - get: gcs-sk8s-chart-index
       passed: [run-sk8s-system-tests]
       trigger: true
@@ -358,6 +370,13 @@ jobs:
     file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+
+  - put: sk8s-version
+    params: {pre: SNAPSHOT}
+  <% sk8s_components.each do |component| %>
+  - put: <%= component.name %>-version
+    params: {pre: SNAPSHOT}
+  <% end %>
 
   # - put: git-sk8s
   #   params:
