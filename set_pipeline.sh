@@ -71,14 +71,15 @@ main() {
   fly --target faas sync > /dev/null
   erb "${pipeline_filename}" > /dev/null
 
-  gsp_key=$(lpass show --note 2537969198239534930)
+  gcp_key=$(lpass show --note Shared-pfs-eng/pfs-gcp-ci-svc)
   fly --target faas set-pipeline  --pipeline "${pipeline_name}" \
     --config <(erb "${pipeline_filename}") \
     --var branch-name="${branch_name}" \
-    --var gcp-json-key="$gsp_key" \
-    -l <(lpass show --note 6968658724120942125) \
+    --var gcp-json-key="$gcp_key" \
+    -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-pipeline-secrets) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-bosh-creds-pfsenv01) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-bosh-creds-pfsenv02) \
+    -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-gke-ci) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-pfsenv01) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-pfsenv02)
     ${@:2}

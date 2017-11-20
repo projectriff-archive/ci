@@ -1,5 +1,11 @@
 <%
 
+  K8sEnvironment=Struct.new(
+    :name,
+    :lpass_name
+  )
+
+
   Sk8sComponent=Struct.new(
   :name,
   :docker_image_name,
@@ -24,6 +30,11 @@
     DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
     DockerImage.new('topic-controller','sk8s/topic-controller'),
     DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
+  ]
+
+  k8s_envs = [
+    K8sEnvironment.new('kubo', 'pfs-gcp-kubeconfig-pfsenv01'),
+    K8sEnvironment.new('gke', 'pfs-gcp-kubeconfig-gke-ci')
   ]
 
 slack_notification="""
@@ -274,8 +285,9 @@ jobs:
       CHART_BUCKET_NAME: <%= charts_bucket_name %>
 <%= slack_notification %>
 
-- name: clean-sk8s-pre-deployment
-  serial_groups: [sk8s]
+<% k8s_envs.each do |k8s_env| %>
+- name: clean-sk8s-pre-deploy-<%= k8s_env.name %>
+  serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -294,48 +306,48 @@ jobs:
   - task: clean-sk8s-deployment
     file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
     params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
 <%= slack_notification %>
 
-- name: deploy-sk8s
-  serial_groups: [sk8s]
+- name: deploy-sk8s-<%= k8s_env.name %>
+  serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s
-      passed: [clean-sk8s-pre-deployment]
+      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
     - get: sk8s-version
-      passed: [clean-sk8s-pre-deployment]
+      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
   <% sk8s_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [clean-sk8s-pre-deployment]
+      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
   <% end %>
     - get: gcs-sk8s-chart-index
-      passed: [clean-sk8s-pre-deployment]
+      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
       trigger: true
 
   - task: deploy-sk8s
     file: git-pfs-ci/tasks/deploy-sk8s.yml
     params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 <%= slack_notification %>
 
-- name: run-sk8s-system-tests
-  serial_groups: [sk8s]
+- name: run-sk8s-system-tests-<%= k8s_env.name %>
+  serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s
-      passed: [deploy-sk8s]
+      passed: [deploy-sk8s-<%= k8s_env.name %>]
     - get: sk8s-version
-      passed: [deploy-sk8s]
+      passed: [deploy-sk8s-<%= k8s_env.name %>]
   <% sk8s_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [deploy-sk8s]
+      passed: [deploy-sk8s-<%= k8s_env.name %>]
   <% end %>
     - get: gcs-sk8s-chart-index
-      passed: [deploy-sk8s]
+      passed: [deploy-sk8s-<%= k8s_env.name %>]
       trigger: true
     - get: git-pfs-system-test
 
@@ -343,33 +355,52 @@ jobs:
     privileged: true
     file: git-pfs-ci/tasks/run-sk8s-system-tests.yml
     params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       DOCKER_ORG: sk8sci
       DOCKER_USERNAME: ((docker-sk8s-username))
       DOCKER_PASSWORD: ((docker-sk8s-password))
 <%= slack_notification %>
 
-- name: clean-sk8s-post-deployment
-  serial_groups: [sk8s]
+- name: clean-sk8s-post-deploy-<%= k8s_env.name %>
+  serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s
-      passed: [run-sk8s-system-tests]
+      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
     - get: sk8s-version
-      passed: [run-sk8s-system-tests]
+      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
   <% sk8s_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [run-sk8s-system-tests]
+      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
   <% end %>
     - get: gcs-sk8s-chart-index
-      passed: [run-sk8s-system-tests]
+      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
       trigger: true
 
   - task: clean-sk8s-deployment
     file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
     params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+<%= slack_notification %>
+<% end %>
+
+- name: bump-versions
+  serial_groups: [sk8s]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-sk8s
+      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+    - get: sk8s-version
+      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+  <% sk8s_components.each do |component| %>
+    - get: <%= component.name %>-version
+      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+  <% end %>
+    - get: gcs-sk8s-chart-index
+      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+      trigger: true
 
   - put: sk8s-version
     params: {pre: SNAPSHOT}
@@ -377,14 +408,6 @@ jobs:
   - put: <%= component.name %>-version
     params: {pre: SNAPSHOT}
   <% end %>
-
-  # - put: git-sk8s
-  #   params:
-  #     tag: sk8s-version/version
-  #     repository: git-sk8s
-
-  # - put: sk8s-version
-  #   params: {bump: patch}
 <%= slack_notification %>
 
 - name: manual-publish-crds
@@ -392,7 +415,8 @@ jobs:
   - aggregate:
     - get: git-sk8s
 
-  - task: publish-crds
+<% k8s_envs.each do |k8s_env| %>
+  - task: publish-crds-<%= k8s_env.name %>
     config:
       platform: linux
       image_resource:
@@ -403,7 +427,7 @@ jobs:
       - name: git-sk8s
 
       params:
-        KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
+        KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
 
       run:
         path: /bin/sh
@@ -421,6 +445,7 @@ jobs:
 
           kubectl apply -f function-resource.yaml
           kubectl apply -f topic-resource.yaml
+<% end %>
 
 - name: manual-version-bump-snapshot-sk8s
   plan:
