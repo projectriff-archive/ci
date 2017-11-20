@@ -41,7 +41,7 @@ run:
 
     pushd "$GOPATH/src/github.com/sk8sio/function-sidecar/"
 
-      #KAFKA_BROKER=localhost:9092 make clean test
+      KAFKA_BROKER=localhost:9092 make clean test
 
       make build-for-docker
 
