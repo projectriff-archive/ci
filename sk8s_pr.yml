@@ -1,23 +1,27 @@
 <%
-  charts_bucket_name='sk8s_charts_pr'
+    Sk8sComponent=Struct.new(
+    :name,
+    :docker_image_name,
+    :git_org_name,
+    :git_repo_name,
+    :build_task_file)
 
-  DockerImage = Struct.new(:path, :name)
-  sk8s_docker_images = [
-    DockerImage.new('function-controller', 'sk8s/function-controller'),
-    DockerImage.new('function-invokers/java-function-invoker','sk8s/java-function-invoker'),
-    DockerImage.new('function-invokers/node-function-invoker','sk8s/node-function-invoker'),
-    #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
-    DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
-    DockerImage.new('topic-controller','sk8s/topic-controller'),
-    DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
-  ]
+    sk8s_components = [
+      Sk8sComponent.new('sidecar',          'function-sidecar', 'ericbottard', 'function-sidecar',      'build-sidecar.yml'),
+      Sk8sComponent.new('http-gateway',     'http-gateway',     'ericbottard', 'sk8s-http-gateway',     'build-http-gateway.yml'),
+      #Sk8sComponent.new('topic-controller', 'topic-controller', 'ericbottard', 'sk8s-topic-controller', 'build-topic-controller.yml'),
+    ]
+%>
 
-shared_hooks_pending="""
+<%
+def gen_shared_hooks_pending(item_name)
+
+return """
   on_success:
     do:
-    - put: git-sk8s-pr
+    - put: git-#{item_name}-pr
       params:
-        path: git-sk8s-pr
+        path: git-#{item_name}-pr
         status: pending
     - put: slack-alert
       params:
@@ -28,9 +32,9 @@ shared_hooks_pending="""
 
   on_failure:
     do:
-    - put: git-sk8s-pr
+    - put: git-#{item_name}-pr
       params:
-        path: git-sk8s-pr
+        path: git-#{item_name}-pr
         status: failure
     - put: slack-alert
       params:
@@ -40,13 +44,16 @@ shared_hooks_pending="""
           https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 """
+end
 
-shared_hooks_complete="""
+def gen_shared_hooks_complete(item_name)
+
+return """
   on_success:
     do:
-    - put: git-sk8s-pr
+    - put: git-#{item_name}-pr
       params:
-        path: git-sk8s-pr
+        path: git-#{item_name}-pr
         status: success
     - put: slack-alert
       params:
@@ -57,9 +64,9 @@ shared_hooks_complete="""
 
   on_failure:
     do:
-    - put: git-sk8s-pr
+    - put: git-#{item_name}-pr
       params:
-        path: git-sk8s-pr
+        path: git-#{item_name}-pr
         status: failure
     - put: slack-alert
       params:
@@ -68,7 +75,7 @@ shared_hooks_complete="""
           $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
           https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 """
-
+end
 %>
 
 resource_types:
@@ -83,26 +90,7 @@ resource_types:
   source:
     repository: jtarchie/pr
 
-- name: gcs-resource
-  type: docker-image
-  source:
-    repository: frodenas/gcs-resource
-
 resources:
-
-- name: gcs-sk8s-charts
-  type: gcs-resource
-  source:
-    bucket: <%= charts_bucket_name %>
-    json_key: ((gcp-json-key))
-    regexp: sk8s*tgz
-
-- name: gcs-sk8s-chart-index
-  type: gcs-resource
-  source:
-    bucket: <%= charts_bucket_name %>
-    json_key: ((gcp-json-key))
-    versioned_file: index.yaml
 
 - name: sk8s-version-placeholder
   type: semver
@@ -125,11 +113,21 @@ resources:
     access_token: ((gitbot-access-token))
     base: master
 
+<% sk8s_components.each do |component| %>
+- name: git-<%= component.name %>-pr
+  type: pull-request
+  source:
+    repo: <%= component.git_org_name %>/<%= component.git_repo_name %>
+    private_key: ((git-pfs-ci-ssh-key))
+    access_token: ((gitbot-access-token))
+    base: master
+<% end %>
+
 - name: git-kubernetes-model
   type: git
   source:
     uri: https://github.com/ericbottard/kubernetes-model
-    branch: sk8s-sidecar-scaling
+    branch: sk8s
 
 - name: git-pfs-ci
   type: git
@@ -138,33 +136,9 @@ resources:
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
-
-<% sk8s_docker_images.each do |image| %>
-- name:  <%= image.name %>
-  type: docker-image
-  source:
-    repository: <%= image.name %>
-    username: ((docker-sk8s-username))
-    password: ((docker-sk8s-password))
-<% end %>
-
-- name: git-pfs-system-test
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/pfs-system-test.git
-    private_key: ((git-pfs-ci-ssh-key))
-    branch: master
-
-- name: gh-faas-cli-release
-  type: github-release
-  source:
-    owner: pivotal-cf
-    repository: faas-cli
-    access_token: ((gitbot-access-token))
-
 jobs:
 
-- name: build-sk8s-pr-containers
+- name: build-sk8s-pr
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -184,140 +158,22 @@ jobs:
     input_mapping:
       git-sk8s: git-sk8s-pr
       sk8s-version: sk8s-version-placeholder
+<%= gen_shared_hooks_complete('sk8s') %>
 
-<% sk8s_docker_images.each do |image| %>
-  - put:  <%= image.name %>
-    params:
-      build: docker-contexts/<%= image.path %>
-      tag: docker-contexts/sk8s_version
-      tag_as_latest: false  # do NOT tag PR containers as latest
-      build_args:
-        JAR_FILE: '*.jar'
+<% sk8s_components.each do |component | %>
+- name: build-<%= component.name %>-pr
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: sk8s-version-placeholder
+    - get: git-<%= component.name %>-pr
+      trigger: true
+      version: every
+
+  - task: build-<%= component.name %>
+    file: git-pfs-ci/tasks/<%= component.build_task_file %>
+    input_mapping:
+      git-<%= component.name %>: git-<%= component.name %>-pr
+      sk8s-version: sk8s-version-placeholder
+<%= gen_shared_hooks_complete(component.name) %>
 <% end %>
-<%= shared_hooks_pending %>
-
-- name: build-sk8s-pr-chart
-  serial: true # must not run concurrently, as the helm repo index is merged to include all previous versions
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: sk8s-version-placeholder
-      passed: [build-sk8s-pr-containers]
-    - get: git-sk8s-pr
-      trigger: true
-      version: every
-      passed: [build-sk8s-pr-containers]
-
-  - task: build-sk8s-chart
-    file: git-pfs-ci/tasks/build-sk8s-chart.yml
-    input_mapping:
-      git-sk8s: git-sk8s-pr
-      sk8s-version: sk8s-version-placeholder
-    params:
-      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
-
-  - put: gcs-sk8s-charts
-    params:
-      file: sk8s-charts/*.tgz
-      predefined_acl: publicRead
-  - put: gcs-sk8s-chart-index
-    params:
-      file: sk8s-charts/index.yaml
-      predefined_acl: publicRead
-  - task: config-chart-bucket
-    file: git-pfs-ci/tasks/config-chart-bucket.yml
-    params:
-      GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
-      PROJECT_ID: ((pfs-gcp-ci-project))
-      CHART_BUCKET_NAME: <%= charts_bucket_name %>
-<%= shared_hooks_pending %>
-
-- name: clean-sk8s-pre-deployment
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-sk8s-pr
-      version: every
-      passed: [build-sk8s-pr-chart]
-      trigger: true
-    - get: sk8s-version-placeholder
-      passed: [build-sk8s-pr-chart]
-
-  - task: clean-sk8s-deployment
-    file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
-    input_mapping:
-      git-sk8s: git-sk8s-pr
-      sk8s-version: sk8s-version-placeholder
-    params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-<%= shared_hooks_pending %>
-
-- name: deploy-sk8s-pr
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-sk8s-pr
-      version: every
-      passed: [clean-sk8s-pre-deployment]
-      trigger: true
-    - get: sk8s-version-placeholder
-      passed: [clean-sk8s-pre-deployment]
-
-  - task: deploy-sk8s
-    file: git-pfs-ci/tasks/deploy-sk8s.yml
-    input_mapping:
-      git-sk8s: git-sk8s-pr
-      sk8s-version: sk8s-version-placeholder
-
-    params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
-<%= shared_hooks_pending %>
-
-- name: run-sk8s-pr-system-tests
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-      passed: [deploy-sk8s-pr]
-    - get: git-sk8s-pr
-      version: every
-      passed: [deploy-sk8s-pr]
-      trigger: true
-    - get: sk8s-version-placeholder
-      passed: [deploy-sk8s-pr]
-    - get: git-pfs-system-test
-    - get: gh-faas-cli-release
-
-  - task: run-sk8s-system-tests
-    file: git-pfs-ci/tasks/run-sk8s-system-tests.yml
-    privileged: true
-    input_mapping:
-      git-sk8s: git-sk8s-pr
-      sk8s-version: sk8s-version-placeholder
-
-    params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-      DOCKER_ORG: sk8sci
-      DOCKER_USERNAME: ((docker-sk8s-username))
-      DOCKER_PASSWORD: ((docker-sk8s-password))
-<%= shared_hooks_pending %>
-
-- name: clean-sk8s-post-deployment
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-sk8s-pr
-      version: every
-      passed: [run-sk8s-pr-system-tests]
-      trigger: true
-    - get: sk8s-version-placeholder
-      passed: [run-sk8s-pr-system-tests]
-
-  - task: clean-sk8s-deployment
-    file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
-    input_mapping:
-      git-sk8s: git-sk8s-pr
-      sk8s-version: sk8s-version-placeholder
-    params:
-      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-pfsenv01))
-<%= shared_hooks_complete %>
