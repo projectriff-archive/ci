@@ -47,8 +47,6 @@ run:
 
       killjava
 
-      sed -i -e 's/scratch/alpine/g' Dockerfile
-
       ls -lath
 
       cp -pr . "$build_root/docker-context/"
