@@ -29,7 +29,13 @@ run:
       minikube stop
     }
     trap stop_minikube EXIT
-    sleep 5
+    for i in {1..50}; do
+       kubectl get po &> /dev/null
+       if [ $? -ne 1 ]; then
+          break
+      fi
+      sleep 2
+    done
 
     git-pfs-ci/tasks/scripts/deploy_sk8s.sh
     git-pfs-ci/tasks/scripts/run_sk8s_system_tests.sh
