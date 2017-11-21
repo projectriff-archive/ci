@@ -19,7 +19,7 @@ run:
   - -exc
   - |
     apk update
-    apk add git curl openssl jq
+    apk add git curl openssl jq socat
 
     curl -sL https://raw.githubusercontent.com/concourse/docker-image-resource/master/assets/common.sh > common.sh
     source common.sh
