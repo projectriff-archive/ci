@@ -22,7 +22,7 @@ helm init --tiller-namespace="$tiller_ns_name"
 
 set +e
 for i in {1..50}; do
-  kubectl get pod -n "$tiller_ns_name" | grep Running
+  kubectl get pod -n "$tiller_ns_name" | grep Running | grep '1/1'
   if [ $? -eq 0 ]; then
       break
   fi
