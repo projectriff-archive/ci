@@ -18,6 +18,8 @@ run:
   - pipefail
   - -exc
   - |
+    apk update
+    apk add git
     git-pfs-ci/tasks/scripts/deploy_sk8s.sh
     git-pfs-ci/tasks/scripts/run_sk8s_system_tests.sh
 
