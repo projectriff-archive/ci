@@ -1,0 +1,29 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: whindes/alpine-minikube
+    tag: 22.3
+
+inputs:
+- name: git-pfs-ci
+- name: git-pfs-system-test
+- name: git-sk8s
+- name: sk8s-version
+
+run:
+  path: /bin/bash
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+    git-pfs-ci/tasks/scripts/deploy_sk8s.sh
+    git-pfs-ci/tasks/scripts/run_sk8s_system_tests.sh
+
+params:
+  KUBECONFIG_STRING: ""
+  SK8S_CHARTS_URL: replace-me
+  DOCKER_ORG: replace-me
+  DOCKER_USERNAME: replace-me
+  DOCKER_PASSWORD: replace-me
