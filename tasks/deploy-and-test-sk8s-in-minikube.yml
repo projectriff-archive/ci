@@ -19,14 +19,17 @@ run:
   - -exc
   - |
     apk update
-    apk add git curl
+    apk add git curl openssl
 
     curl -sL https://raw.githubusercontent.com/concourse/docker-image-resource/master/assets/common.sh > common.sh
     source common.sh
     start_docker
     minikube start
     stop_minikube() {
-      minikube stop
+      set +e
+      killall -9 docker
+      killall -9 dockerd
+      killall -9 minikube
     }
     trap stop_minikube EXIT
 
