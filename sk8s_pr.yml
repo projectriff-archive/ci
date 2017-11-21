@@ -9,7 +9,7 @@
     sk8s_components = [
       Sk8sComponent.new('sidecar',          'function-sidecar', 'ericbottard', 'function-sidecar',      'build-sidecar.yml'),
       Sk8sComponent.new('http-gateway',     'http-gateway',     'ericbottard', 'sk8s-http-gateway',     'build-http-gateway.yml'),
-      #Sk8sComponent.new('topic-controller', 'topic-controller', 'ericbottard', 'sk8s-topic-controller', 'build-topic-controller.yml'),
+      Sk8sComponent.new('topic-controller', 'topic-controller', 'ericbottard', 'sk8s-topic-controller', 'build-topic-controller.yml'),
     ]
 %>
 
