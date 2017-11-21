@@ -2,14 +2,12 @@
 set -exuo pipefail
 
 echo "System Tests for sk8s"
-start_docker
 
 build_root=$(pwd)
 
-mkdir ~/.kube
-echo "$KUBECONFIG_STRING" > ~/.kube/config
-
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+init_docker
+init_kubeconfig
 
 SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 existing_sk8s_ns=$(find_existing_sk8s_ns "$SK8S_VERSION")

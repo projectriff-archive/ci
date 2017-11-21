@@ -1,5 +1,18 @@
 #!/bin/bash
 
+function init_kubeconfig(){
+  if [ ! -z "$KUBECONFIG_STRING" ]; then
+    mkdir ~/.kube
+    echo "$KUBECONFIG_STRING" > ~/.kube/config
+  fi
+}
+
+function init_docker(){
+  if [ ! -z "$KUBECONFIG_STRING" ]; then
+    start_docker
+  fi
+}
+
 function generate_tiller_ns_name(){
   local _sk8s_version="$1"
   local _suffix="$2"

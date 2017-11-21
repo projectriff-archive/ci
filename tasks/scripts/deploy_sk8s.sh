@@ -5,10 +5,9 @@ set -exuo pipefail
 build_root=$PWD
 
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
+init_kubeconfig
 
-mkdir ~/.kube
-echo "$KUBECONFIG_STRING" > ~/.kube/config
+SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 
 timestamp=$(date "+%s")
 
