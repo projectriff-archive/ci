@@ -19,7 +19,16 @@ kubectl create ns "$tiller_ns_name"
 kubectl create ns "$sk8s_ns_name"
 
 helm init --tiller-namespace="$tiller_ns_name"
-sleep 15 # wait for helm to be ready
+
+set +e
+for i in {1..50}; do
+  kubectl get pod -n "$tiller_ns_name" | grep Running
+  if [ $? -eq 0 ]; then
+      break
+  fi
+  sleep 5
+done
+set -e
 
 # clear out existing CRDs; safe to do in non-prod
 kubectl get customresourcedefinitions --all-namespaces -o json |
