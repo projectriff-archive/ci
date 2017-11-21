@@ -376,6 +376,38 @@ jobs:
 <%= slack_notification %>
 <% end %>
 
+#
+# Minkube
+#
+- name: deploy-and-test-sk8s-minikube
+  serial_groups: [sk8s-minikube]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-sk8s
+      passed: [build-sk8s-chart]
+    - get: sk8s-version
+      passed: [build-sk8s-chart]
+  <% sk8s_components.each do |component| %>
+    - get: <%= component.name %>-version
+      passed: [build-sk8s-chart]
+  <% end %>
+    - get: gcs-sk8s-chart-index
+      passed: [build-sk8s-chart]
+      trigger: true
+    - get: git-pfs-system-test
+
+  - task: deploy-and-test-sk8s
+    file: git-pfs-ci/tasks/deploy-and-test-sk8s-in-minikube.yml
+    privileged: true
+    params:
+      KUBECONFIG_STRING: ""
+      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+      DOCKER_ORG: sk8sci
+      DOCKER_USERNAME: ((docker-sk8s-username))
+      DOCKER_PASSWORD: ((docker-sk8s-password))
+<%= slack_notification %>
+
 - name: bump-versions
   serial_groups: [sk8s]
   plan:
