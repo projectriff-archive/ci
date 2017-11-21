@@ -32,9 +32,9 @@ run:
 
     pushd "$GOPATH/src/github.com/sk8sio/topic-controller/"
 
-      make build-for-docker
-
       make test
+
+      make build-for-docker
 
       ls -lath
 
