@@ -23,13 +23,6 @@ return """
       params:
         path: git-#{item_name}-pr
         status: pending
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Passed
-          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-
   on_failure:
     do:
     - put: git-#{item_name}-pr
@@ -55,13 +48,6 @@ return """
       params:
         path: git-#{item_name}-pr
         status: success
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Passed
-          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-
   on_failure:
     do:
     - put: git-#{item_name}-pr
