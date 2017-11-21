@@ -51,8 +51,19 @@ run:
     cp -rf git-pfs-system-test $workdir/pfs-system-test
     cd $workdir/pfs-system-test
     dep ensure
-    ./test.sh
 
+    set +e
+    ./test.sh
+    set -e
+
+    test_retcode="$?"
+    if [ "0" != "$test_retcode" ]; then
+      echo "Tests Failed. Printing logs from all pods in [$existing_sk8s_ns]"
+
+      kubectl get pods -n "$existing_sk8s_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | xargs -I{} kubectl logs {} -n "$existing_sk8s_ns"
+    fi
+
+    exit $test_retcode
 
 params:
   KUBECONFIG_STRING: replace-me
