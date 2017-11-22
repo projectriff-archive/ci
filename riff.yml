@@ -1,10 +1,8 @@
 <%
-
   K8sEnvironment=Struct.new(
     :name,
     :lpass_name
   )
-
 
   RiffComponent=Struct.new(
   :name,
@@ -14,21 +12,22 @@
   :build_task_file)
 
   riff_components = [
-    RiffComponent.new('function-sidecar', 'function-sidecar', 'projectriff', 'function-sidecar',      'build-sidecar.yml'),
-    RiffComponent.new('http-gateway',     'http-gateway',     'projectriff', 'http-gateway',          'build-http-gateway.yml'),
-    RiffComponent.new('topic-controller', 'topic-controller', 'projectriff', 'topic-controller',      'build-topic-controller.yml'),
+    RiffComponent.new('function-sidecar',     'function-sidecar',     'projectriff', 'function-sidecar',      'build-sidecar.yml'),
+    RiffComponent.new('http-gateway',         'http-gateway',         'projectriff', 'http-gateway',          'build-http-gateway.yml'),
+    RiffComponent.new('topic-controller',     'topic-controller',     'projectriff', 'topic-controller',      'build-topic-controller.yml'),
+    RiffComponent.new('function-controller',  'function-controller',  'projectriff', 'function-controller',   'build-function-controller.yml'),
 
     RiffComponent.new(  'node-function-invoker',
                         'node-function-invoker',
                         'projectriff',
                         'node-function-invoker',
-                        'build-simple-function-invoker.yml'),
+                        'build-node-function-invoker.yml'),
 
     RiffComponent.new(  'shell-function-invoker',
                         'shell-function-invoker',
                         'projectriff',
                         'shell-function-invoker',
-                        'build-simple-function-invoker.yml'),
+                        'build-shell-function-invoker.yml'),
 
     RiffComponent.new(  'java-function-invoker',
                         'java-function-invoker',
@@ -39,41 +38,31 @@
 
   charts_bucket_name='riff_charts'
 
-  DockerImage = Struct.new(:path, :name)
-  sk8s_docker_images = [
-    # DockerImage.new('function-controller', 'sk8s/function-controller'),
-    # DockerImage.new('function-invokers/java-function-invoker','sk8s/java-function-invoker'),
-    # DockerImage.new('function-invokers/node-function-invoker','sk8s/node-function-invoker'),
-    # #DockerImage.new('function-invokers/python2-function-invoker', 'sk8s/python2-function-invoker'),
-    # DockerImage.new('function-invokers/shell-function-invoker', 'sk8s/shell-function-invoker'),
-    # DockerImage.new('topic-controller','sk8s/topic-controller'),
-    # DockerImage.new('zipkin-server', 'sk8s/zipkin-server')
-  ]
-
   k8s_envs = [
     # K8sEnvironment.new('kubo', 'pfs-gcp-kubeconfig-pfsenv01'),
     # K8sEnvironment.new('gke', 'pfs-gcp-kubeconfig-gke-ci')
   ]
-
-slack_notification="""
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-"""
+  slack_notification=""
+#
+# slack_notification="""
+#   on_failure:
+#     do:
+#     - put: slack-alert
+#       params:
+#         channel: '#pfs-ops'
+#         text: |
+#           $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+#           https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+# """
 
 %>
 
 resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-    tag: latest
+# - name: slack-notification
+#   type: docker-image
+#   source:
+#     repository: cfcommunity/slack-notification-resource
+#     tag: latest
 
 - name: gcs-resource
   type: docker-image
@@ -82,14 +71,14 @@ resource_types:
 
 resources:
 
-- name: gcs-sk8s-charts
+- name: gcs-riff-charts
   type: gcs-resource
   source:
     bucket: <%= charts_bucket_name %>
     json_key: ((gcp-json-key))
-    regexp: sk8s*tgz
+    regexp: riff*tgz
 
-- name: gcs-sk8s-chart-index
+- name: gcs-riff-chart-index
   type: gcs-resource
   source:
     bucket: <%= charts_bucket_name %>
@@ -106,21 +95,14 @@ resources:
     json_key: ((gcp-json-key))
 <% end %>
 
-- name: sk8s-version
-  type: semver
-  source:
-    driver: gcs
-    bucket: riff_versions
-    key: sk8s_version
-    json_key: ((gcp-json-key))
-
-- name: slack-alert
-  type: slack-notification
-  source:
-    url: ((slack-hook-url))
+#
+# - name: slack-alert
+#   type: slack-notification
+#   source:
+#     url: ((slack-hook-url))
 
 #####################################################
-# Git - sk8s infra
+# Git - Riff infra
 #####################################################
 
 <% riff_components.each do |component| %>
@@ -128,25 +110,22 @@ resources:
   type: git
   source:
     uri: https://github.com/<%= component.git_org_name %>/<%= component.git_repo_name %>.git
-    #uri:  git@github.com:<%= component.git_org_name %>/<%= component.git_repo_name %>.git
     #private_key: ((git-pfs-ci-ssh-key))
     #access_token: ((gitbot-access-token))
     branch: master
 <% end %>
 
-- name: git-sk8s
+- name: git-helm-charts
   type: git
   source:
-    uri: git@github.com:markfisher/sk8s.git
-    private_key: ((git-pfs-ci-ssh-key))
-    access_token: ((gitbot-access-token))
+    uri: https://github.com/projectriff/helm-charts.git
     branch: master
 
 - name: git-kubernetes-model
   type: git
   source:
-    uri: https://github.com/ericbottard/kubernetes-model
-    branch: sk8s
+    uri: https://github.com/projectriff/kubernetes-model.git
+    branch: riff
 
 #####################################################
 # Git - CI
@@ -179,16 +158,6 @@ resources:
     password: ((docker-riff-password))
 <% end %>
 
-<% sk8s_docker_images.each do |image| %>
-- name:  <%= image.name %>
-  type: docker-image
-  source:
-    repository: <%= image.name %>
-    username: ((docker-riff-username))
-    password: ((docker-riff-password))
-<% end %>
-
-
 #####################################################
 # JOBS
 #####################################################
@@ -204,11 +173,12 @@ jobs:
     - get: git-<%= component.name %>
       trigger: true
     - get: <%= component.name %>-version
+<% if component.name == 'function-controller' %>
+    - get: git-kubernetes-model
+<% end %>
 
   - task: build-<%= component.name %>
     file: git-pfs-ci/tasks/<%= component.build_task_file %>
-    input_mapping:
-      sk8s-version: <%= component.name %>-version
 
   - put: <%= component.name %>-docker-image
     params:
@@ -217,34 +187,6 @@ jobs:
       tag_as_latest: false
 <%= slack_notification %>
 <% end %>
-
-- name: build-sk8s-containers
-  serial_groups: [sk8s-containers]
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: sk8s-version
-    - get: git-sk8s
-      trigger: true
-    - get: git-kubernetes-model
-      params:
-        depth: 1
-
-  - task: build-fabric8-model
-    file: git-pfs-ci/tasks/build-fabric8-model.yml
-
-  - task: build-sk8s-containers
-    file: git-pfs-ci/tasks/build-sk8s-containers.yml
-<% sk8s_docker_images.each do |image| %>
-  - put:  <%= image.name %>
-    params:
-      build: docker-contexts/<%= image.path %>
-      tag: docker-contexts/sk8s_version
-      tag_as_latest: false
-      build_args:
-        JAR_FILE: '*.jar'
-<% end %>
-<%= slack_notification %>
 
 ######################################################
 # helm charts
@@ -255,9 +197,10 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
+    - get: git-helm-charts
     - get: sk8s-version
-      passed:
-      - build-sk8s-containers
+      # passed:
+      # - build-sk8s-containers
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed:
@@ -269,21 +212,21 @@ jobs:
       passed: [build-<%= component.name %>-container]
   <% end %>
     - get: git-sk8s
-      trigger: true
-      passed: [build-sk8s-containers]
+    #  trigger: true
+    #  passed: [build-sk8s-containers]
   - task: build-sk8s-chart
     file: git-pfs-ci/tasks/build-sk8s-chart.yml
     params:
       SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
-  - put: gcs-sk8s-charts
+  - put: gcs-riff-charts
     params:
       file: sk8s-charts/*.tgz
       predefined_acl: publicRead
-  - put: gcs-sk8s-charts
+  - put: gcs-riff-charts
     params:
       file: sk8s-charts-install/*
       predefined_acl: publicRead
-  - put: gcs-sk8s-chart-index
+  - put: gcs-riff-chart-index
     params:
       file: sk8s-charts/index.yaml
       predefined_acl: publicRead
@@ -309,7 +252,7 @@ jobs:
     - get: <%= component.name %>-version
       passed: [build-sk8s-chart]
   <% end %>
-    - get: gcs-sk8s-chart-index
+    - get: gcs-riff-chart-index
       passed: [build-sk8s-chart]
       trigger: true
 
@@ -332,7 +275,7 @@ jobs:
     - get: <%= component.name %>-version
       passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
   <% end %>
-    - get: gcs-sk8s-chart-index
+    - get: gcs-riff-chart-index
       passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
       trigger: true
 
@@ -356,7 +299,7 @@ jobs:
     - get: <%= component.name %>-version
       passed: [deploy-sk8s-<%= k8s_env.name %>]
   <% end %>
-    - get: gcs-sk8s-chart-index
+    - get: gcs-riff-chart-index
       passed: [deploy-sk8s-<%= k8s_env.name %>]
       trigger: true
     - get: git-pfs-system-test
@@ -384,7 +327,7 @@ jobs:
     - get: <%= component.name %>-version
       passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
   <% end %>
-    - get: gcs-sk8s-chart-index
+    - get: gcs-riff-chart-index
       passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
       trigger: true
 
@@ -411,7 +354,7 @@ jobs:
     - get: <%= component.name %>-version
       passed: [build-sk8s-chart]
   <% end %>
-    - get: gcs-sk8s-chart-index
+    - get: gcs-riff-chart-index
       passed: [build-sk8s-chart]
       trigger: true
     - get: git-pfs-system-test
@@ -440,7 +383,7 @@ jobs:
     - get: <%= component.name %>-version
       passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
   <% end %>
-    - get: gcs-sk8s-chart-index
+    - get: gcs-riff-chart-index
       passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
       trigger: true
 

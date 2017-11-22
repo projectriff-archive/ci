@@ -5,6 +5,7 @@ image_resource:
     repository: sk8s/kafka-zookeeper
 
 inputs:
+- name: function-sidecar-version
 - name: git-function-sidecar
 - name: git-pfs-ci
 - name: sk8s-version
@@ -25,7 +26,7 @@ run:
     build_root=$(pwd)
 
     source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-function-sidecar" "$build_root/sk8s-version")
+    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-function-sidecar" "$build_root/function-sidecar-version")
 
     export GOPATH=$(go env GOPATH)
 
