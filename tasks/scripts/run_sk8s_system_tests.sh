@@ -12,7 +12,16 @@ init_kubeconfig
 SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 existing_sk8s_ns=$(find_existing_sk8s_ns "$SK8S_VERSION")
 
-http_gw_host=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')
+set +e
+pgrep localkube
+minikube_retcode=$?
+set -e
+
+host_jsonpath='{.items[0].status.loadBalancer.ingress[].ip}'
+if [ "0" == "${minikube_retcode}" ]; then
+  host_jsonpath='{.items[0].spec.clusterIP}'
+fi
+http_gw_host=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath=$host_jsonpath)
 http_gw_port=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
 
 kafka_pod=$(kubectl -n "$existing_sk8s_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
