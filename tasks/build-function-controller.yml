@@ -1,0 +1,36 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/java-build
+
+inputs:
+- name: git-function-controller
+- name: git-pfs-ci
+- name: sk8s-version
+
+outputs:
+- name: docker-context
+
+run:
+  path: /bin/bash
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+
+    build_root=$(pwd)
+
+    source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-function-controller" "$build_root/sk8s-version")
+
+    pushd "$build_root/git-function-controller/"
+
+      ./mvnw clean package
+
+      cp -pr . "$build_root/docker-context/"
+
+      echo "$SK8S_VERSION" > "$build_root/docker-context/sk8s_version"
+
+    popd
