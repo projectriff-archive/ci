@@ -41,6 +41,6 @@ run:
 
       cp -pr ./function-controller/* "$build_root/docker-context/"
 
-      echo "$RIFF_VERSION" > "$build_root/docker-context/sk8s_version"
+      echo "$RIFF_VERSION" > "$build_root/docker-context/docker_version"
 
     popd

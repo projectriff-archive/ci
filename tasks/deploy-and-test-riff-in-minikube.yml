@@ -58,7 +58,7 @@ run:
 
 params:
   KUBECONFIG_STRING: ""
-  SK8S_CHARTS_URL: replace-me
+  HELM_CHARTS_URL: replace-me
   DOCKER_ORG: replace-me
   DOCKER_USERNAME: replace-me
   DOCKER_PASSWORD: replace-me

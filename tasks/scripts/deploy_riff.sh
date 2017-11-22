@@ -36,7 +36,7 @@ kubectl get customresourcedefinitions --all-namespaces -o json |
   xargs -I{} kubectl delete customresourcedefinition {}
 
 # deploy previously constructed helm chart
-helm repo add riffrepo "$SK8S_CHARTS_URL"
+helm repo add riffrepo "$HELM_CHARTS_URL"
 helm repo update riffrepo
 helm search riff
 
@@ -46,7 +46,7 @@ DEPLOY_SK8S_OVERRIDE="httpGateway.service.externalPort=${RND_HTTP_GW_EXTPORT},zi
 
 chart_version_actual=$(helm inspect riffrepo/riff | grep version | awk '{print $2}')
 
-curl -sL "${SK8S_CHARTS_URL}/riff-${chart_version_actual}-install-example.sh" > chart_install.sh
+curl -sL "${HELM_CHARTS_URL}/riff-${chart_version_actual}-install-example.sh" > chart_install.sh
 chmod +x  chart_install.sh
 ./chart_install.sh "riffrepo/riff" \
   --tiller-namespace="$tiller_ns_name" \

@@ -57,16 +57,16 @@ EOM
   cp "$chart_file" "$build_root/sk8s-charts/"
 
   set +e
-  curl -sfL "$SK8S_CHARTS_URL/index.yaml" > existing_index.yaml
+  curl -sfL "$HELM_CHARTS_URL/index.yaml" > existing_index.yaml
   if [ "0" != "$?" ]; then
     rm -f existing_index.yaml
   fi
   set -e
 
   if [ -f existing_index.yaml ]; then
-    helm repo index "$build_root/sk8s-charts" --url "$SK8S_CHARTS_URL" --merge existing_index.yaml
+    helm repo index "$build_root/sk8s-charts" --url "$HELM_CHARTS_URL" --merge existing_index.yaml
   else
-    helm repo index "$build_root/sk8s-charts" --url "$SK8S_CHARTS_URL"
+    helm repo index "$build_root/sk8s-charts" --url "$HELM_CHARTS_URL"
   fi
 
   echo "$chart_version" > "$build_root/sk8s-charts-latest-version/latest_version"

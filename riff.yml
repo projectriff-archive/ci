@@ -196,7 +196,7 @@ jobs:
   - put: <%= component.name %>-docker-image
     params:
       build: docker-context
-      tag: docker-context/sk8s_version
+      tag: docker-context/docker_version
       tag_as_latest: false
 <%= slack_notification %>
 <% end %>
@@ -226,7 +226,7 @@ jobs:
   - task: build-riff-chart
     file: git-pfs-ci/tasks/build-riff-chart.yml
     params:
-      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
   - put: gcs-riff-chart-latest-version
     params:
       file: sk8s-charts-latest-version/latest_version
@@ -292,7 +292,7 @@ jobs:
     file: git-pfs-ci/tasks/deploy-riff.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 <%= slack_notification %>
 
 - name: run-riff-system-tests-<%= k8s_env.name %>
@@ -369,7 +369,7 @@ jobs:
     privileged: true
     params:
       KUBECONFIG_STRING: ""
-      SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
       DOCKER_ORG: ((docker-riff-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))

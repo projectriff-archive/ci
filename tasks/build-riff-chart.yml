@@ -22,4 +22,4 @@ run:
   path: git-pfs-ci/tasks/scripts/build_riff_chart.sh
 
 params:
-  SK8S_CHARTS_URL: replace-me
+  HELM_CHARTS_URL: replace-me

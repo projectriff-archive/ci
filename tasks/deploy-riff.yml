@@ -13,4 +13,4 @@ run:
 
 params:
   KUBECONFIG_STRING: replace-me
-  SK8S_CHARTS_URL: replace-me
+  HELM_CHARTS_URL: replace-me
