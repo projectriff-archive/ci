@@ -211,7 +211,7 @@ jobs:
       - build-<%= component.name %>-container
   <% end %>
   <% riff_components.each do |component| %>
-    - get: git-<%= component.name %>
+    - get: <%= component.name %>-docker-image
       trigger: true
       passed: [build-<%= component.name %>-container]
   <% end %>
@@ -380,7 +380,7 @@ jobs:
 
   <% riff_components.each do |component| %>
   - put: <%= component.name %>-version
-    params: {pre: SNAPSHOT}
+    params: {pre: build}
   <% end %>
 <%= slack_notification %>
 
@@ -423,10 +423,10 @@ jobs:
 
 
 <% riff_components.each do |component| %>
-- name: manual-version-bump-snapshot-<%= component.name %>
+- name: manual-version-bump-build-<%= component.name %>
   plan:
   - put: <%= component.name %>-version
-    params: {bump: patch, pre: SNAPSHOT}
+    params: {bump: patch, pre: build}
 #
 # - name: manual-release-<%= component.name %>
 #   plan:
