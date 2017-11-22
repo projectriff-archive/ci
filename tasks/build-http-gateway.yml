@@ -25,7 +25,7 @@ run:
     build_root=$(pwd)
 
     source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-http-gateway" "$build_root/http-gateway-version")
+    RIFF_VERSION=$(determine_riff_version "$build_root/git-http-gateway" "$build_root/http-gateway-version")
 
     export GOPATH=$(go env GOPATH)
 
@@ -51,6 +51,6 @@ run:
 
       cp -pr . "$build_root/docker-context/"
 
-      echo "$SK8S_VERSION" > "$build_root/docker-context/sk8s_version"
+      echo "$RIFF_VERSION" > "$build_root/docker-context/sk8s_version"
 
     popd

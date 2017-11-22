@@ -7,12 +7,12 @@ build_root=$PWD
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 init_kubeconfig
 
-SK8S_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
+RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
 
 timestamp=$(date "+%s")
 
-tiller_ns_name=$(generate_tiller_ns_name "$SK8S_VERSION" "$timestamp")
-sk8s_ns_name=$(generate_sk8s_ns_name "$SK8S_VERSION" "$timestamp")
+tiller_ns_name=$(generate_tiller_ns_name "$RIFF_VERSION" "$timestamp")
+sk8s_ns_name=$(generate_riff_ns_name "$RIFF_VERSION" "$timestamp")
 helm_release_name="${sk8s_ns_name}"
 
 kubectl create ns "$tiller_ns_name"

@@ -9,8 +9,8 @@ source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 init_docker
 init_kubeconfig
 
-SK8S_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
-existing_sk8s_ns=$(find_existing_sk8s_ns "$SK8S_VERSION")
+RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
+existing_sk8s_ns=$(find_existing_riff_ns "$RIFF_VERSION")
 
 set +e
 pgrep localkube
@@ -28,7 +28,7 @@ kafka_pod=$(kubectl -n "$existing_sk8s_ns"  get pod -l component=kafka-broker -o
 
 # init test env vars
 
-export SYS_TEST_JAVA_INVOKER_VERSION="$SK8S_VERSION"
+export SYS_TEST_JAVA_INVOKER_VERSION="$RIFF_VERSION"
 export SYS_TEST_NS="$existing_sk8s_ns"
 export SYS_TEST_HTTP_GW_URL="http://${http_gw_host}:${http_gw_port}"
 export SYS_TEST_KAFKA_POD_NAME="$kafka_pod"

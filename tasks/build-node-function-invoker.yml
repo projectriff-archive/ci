@@ -23,12 +23,12 @@ run:
     build_root=$(pwd)
 
     source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-    SK8S_VERSION=$(determine_sk8s_version "$build_root/git-node-function-invoker" "$build_root/node-function-invoker-version")
+    RIFF_VERSION=$(determine_riff_version "$build_root/git-node-function-invoker" "$build_root/node-function-invoker-version")
 
     pushd "$build_root/git-node-function-invoker"
 
       cp -pr . "$build_root/docker-context/"
 
-      echo "$SK8S_VERSION" > "$build_root/docker-context/sk8s_version"
+      echo "$RIFF_VERSION" > "$build_root/docker-context/sk8s_version"
 
     popd
