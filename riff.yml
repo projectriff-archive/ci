@@ -205,8 +205,8 @@ jobs:
 # helm charts
 ######################################################
 
-- name: build-sk8s-chart
-  serial_groups: [sk8s]
+- name: build-riff-chart
+  serial_groups: [riff]
   plan:
   - aggregate:
     - get: git-pfs-ci
@@ -223,8 +223,8 @@ jobs:
       params:
         depth: 1
   <% end %>
-  - task: build-sk8s-chart
-    file: git-pfs-ci/tasks/build-sk8s-chart.yml
+  - task: build-riff-chart
+    file: git-pfs-ci/tasks/build-riff-chart.yml
     params:
       SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
   - put: gcs-riff-chart-latest-version
@@ -252,93 +252,93 @@ jobs:
 <%= slack_notification %>
 
 <% k8s_envs.each do |k8s_env| %>
-- name: clean-sk8s-pre-deploy-<%= k8s_env.name %>
-  serial_groups: [sk8s-<%= k8s_env.name %>]
+- name: clean-riff-pre-deploy-<%= k8s_env.name %>
+  serial_groups: [riff-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
-      passed: [build-sk8s-chart]
+      passed: [build-riff-chart]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [build-sk8s-chart]
+      passed: [build-riff-chart]
   <% end %>
     - get: gcs-riff-chart-index
-      passed: [build-sk8s-chart]
+      passed: [build-riff-chart]
       trigger: true
 
-  - task: clean-sk8s-deployment
-    file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
+  - task: clean-riff-deployment
+    file: git-pfs-ci/tasks/clean-riff-deployment.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
 <%= slack_notification %>
 
-- name: deploy-sk8s-<%= k8s_env.name %>
-  serial_groups: [sk8s-<%= k8s_env.name %>]
+- name: deploy-riff-<%= k8s_env.name %>
+  serial_groups: [riff-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
-      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
+      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
+      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
   <% end %>
     - get: gcs-riff-chart-index
-      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
+      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
       trigger: true
 
-  - task: deploy-sk8s
-    file: git-pfs-ci/tasks/deploy-sk8s.yml
+  - task: deploy-riff
+    file: git-pfs-ci/tasks/deploy-riff.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 <%= slack_notification %>
 
-- name: run-sk8s-system-tests-<%= k8s_env.name %>
-  serial_groups: [sk8s-<%= k8s_env.name %>]
+- name: run-riff-system-tests-<%= k8s_env.name %>
+  serial_groups: [riff-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: git-riff
     - get: gcs-riff-chart-latest-version
-      passed: [deploy-sk8s-<%= k8s_env.name %>]
+      passed: [deploy-riff-<%= k8s_env.name %>]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [deploy-sk8s-<%= k8s_env.name %>]
+      passed: [deploy-riff-<%= k8s_env.name %>]
   <% end %>
     - get: gcs-riff-chart-index
-      passed: [deploy-sk8s-<%= k8s_env.name %>]
+      passed: [deploy-riff-<%= k8s_env.name %>]
       trigger: true
     - get: git-pfs-system-test
 
-  - task: run-sk8s-system-tests
+  - task: run-riff-system-tests
     privileged: true
-    file: git-pfs-ci/tasks/run-sk8s-system-tests.yml
+    file: git-pfs-ci/tasks/run-riff-system-tests.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      DOCKER_ORG: sk8sci
+      DOCKER_ORG: ((docker-riff-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
 <%= slack_notification %>
 
-- name: clean-sk8s-post-deploy-<%= k8s_env.name %>
-  serial_groups: [sk8s-<%= k8s_env.name %>]
+- name: clean-riff-post-deploy-<%= k8s_env.name %>
+  serial_groups: [riff-<%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
-      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
+      passed: [run-riff-system-tests-<%= k8s_env.name %>]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
+      passed: [run-riff-system-tests-<%= k8s_env.name %>]
   <% end %>
     - get: gcs-riff-chart-index
-      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
+      passed: [run-riff-system-tests-<%= k8s_env.name %>]
       trigger: true
 
-  - task: clean-sk8s-deployment
-    file: git-pfs-ci/tasks/clean-sk8s-deployment.yml
+  - task: clean-riff-deployment
+    file: git-pfs-ci/tasks/clean-riff-deployment.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
 <%= slack_notification %>
@@ -347,45 +347,45 @@ jobs:
 #
 # Minkube
 #
-- name: deploy-and-test-sk8s-minikube
-  serial_groups: [sk8s-minikube]
+- name: deploy-and-test-riff-minikube
+  serial_groups: [riff-minikube]
   plan:
   - aggregate:
     - get: git-riff
     - get: gcs-riff-chart-latest-version
-      passed: [build-sk8s-chart]
+      passed: [build-riff-chart]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [build-sk8s-chart]
+      passed: [build-riff-chart]
   <% end %>
     - get: gcs-riff-chart-index
-      passed: [build-sk8s-chart]
+      passed: [build-riff-chart]
       trigger: true
     - get: git-pfs-system-test
 
-  - task: deploy-and-test-sk8s
-    file: git-pfs-ci/tasks/deploy-and-test-sk8s-in-minikube.yml
+  - task: deploy-and-test-riff
+    file: git-pfs-ci/tasks/deploy-and-test-riff-in-minikube.yml
     privileged: true
     params:
       KUBECONFIG_STRING: ""
       SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
-      DOCKER_ORG: sk8sci
+      DOCKER_ORG: ((docker-riff-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
 <%= slack_notification %>
 
 - name: bump-versions
-  serial_groups: [sk8s]
+  serial_groups: [riff]
   plan:
   - aggregate:
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
+      passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-riff-minikube"]) %>
   <% end %>
     - get: gcs-riff-chart-index
-      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
+      passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-riff-minikube"]) %>
       trigger: true
 
   <% riff_components.each do |component| %>
