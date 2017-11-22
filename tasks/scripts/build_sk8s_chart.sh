@@ -7,24 +7,26 @@ build_root=$PWD
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 
-pushd $build_root/git-sk8s/charts
+mv $build_root/git-helm-charts $build_root/riff
+
+pushd $build_root/riff
 
   helm init --client-only
 
-  sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-sk8s/charts/sk8s/values.yaml"
+  sed -i -e 's/IfNotPresent/Always/g' "$build_root/riff/values.yaml"
 
-  #topic_controller_version=$(head "$build_root/topic-controller-version/version")
-  topic_controller_version="$SK8S_VERSION"
-  http_gw_version=$(head "$build_root/http-gateway-version/version")
-  sidecar_version=$(head "$build_root/sidecar-version/version")
+  function_controller_version=$(head "$build_root/function-controller-version/version")
+  function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
+  topic_controller_version=$(head "$build_root/topic-controller-version/version")
+  http_gateway_version=$(head "$build_root/http-gateway-version/version")
 
-  chart_version=$(grep version sk8s/Chart.yaml  | awk '{print $2}')
+  chart_version=$(grep version Chart.yaml  | awk '{print $2}')
 
-  helm package sk8s --version "$chart_version"
+  helm package riff --version "$chart_version"
 
-  chart_file=$(basename sk8s*tgz)
+  chart_file=$(basename riff*tgz)
 
-  cat > "${build_root}/sk8s-charts-install/sk8s-${chart_version}-install-example.sh" << EOM
+  cat > "${build_root}/sk8s-charts-install/riff-${chart_version}-install-example.sh" << EOM
 #!/bin/bash
 
 script_name=\`basename "\$0"\`
@@ -47,7 +49,7 @@ shift
 
 helm install "\${chart_name}" \
 --version="${chart_version}" \
---set functionController.image.tag=${SK8S_VERSION},functionController.sidecar.image.tag=${sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gw_version},zipkin.image.tag=${SK8S_VERSION} \
+--set functionController.image.tag=${function_controller_version},functionController.sidecar.image.tag=${function_sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gateway_version},zipkin.image.tag=${SK8S_VERSION} \
 "\$@"
 
 EOM

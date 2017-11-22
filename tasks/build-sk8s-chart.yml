@@ -6,11 +6,13 @@ image_resource:
 
 inputs:
 - name: git-sk8s
+- name: git-helm-charts
 - name: git-pfs-ci
 - name: sk8s-version
 
-- name: sidecar-version
-#- name: topic-controller-version
+- name: function-controller-version
+- name: function-sidecar-version
+- name: topic-controller-version
 - name: http-gateway-version
 
 outputs:
