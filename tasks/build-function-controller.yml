@@ -28,10 +28,10 @@ run:
 
     export GOPATH=$(go env GOPATH)
 
-    mkdir -p "$GOPATH/src/github.com/projectriff"
-    cp -pr git-kubernetes-model/ "$GOPATH/src/github.com/projectriff/kubernetes-model"
+    mkdir -p "$GOPATH/src/github.com/fabric8io"
+    cp -pr git-kubernetes-model/ "$GOPATH/src/github.com/fabric8io/kubernetes-model"
 
-    pushd "$GOPATH/src/github.com/projectriff/kubernetes-model/"
+    pushd "$GOPATH/src/github.com/fabric8io/kubernetes-model/"
       make
     popd
 
