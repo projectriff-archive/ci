@@ -22,7 +22,7 @@ pushd $build_root/riff
 
   chart_version=$(grep version Chart.yaml  | awk '{print $2}')
 
-  helm package riff --version "$chart_version"
+  helm package . --version "$chart_version"
 
   chart_file=$(basename riff*tgz)
 
