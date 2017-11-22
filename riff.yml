@@ -156,7 +156,7 @@ resources:
   source:
     uri: git@github.com:pivotal-cf/pfs-system-test.git
     private_key: ((git-pfs-ci-ssh-key))
-    branch: master
+    branch: riff
 
 #####################################################
 # Docker images
