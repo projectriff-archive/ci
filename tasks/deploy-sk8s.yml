@@ -7,7 +7,7 @@ image_resource:
 inputs:
 - name: git-pfs-ci
 - name: git-sk8s
-- name: sk8s-version
+- name: gcs-riff-chart-latest-version
 
 run:
   path: git-pfs-ci/tasks/scripts/deploy_sk8s.sh

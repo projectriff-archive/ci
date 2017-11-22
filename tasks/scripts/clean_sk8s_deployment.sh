@@ -7,7 +7,7 @@ build_root=$PWD
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 init_kubeconfig
 
-SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
+SK8S_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
 
 # delete existing tiller deployment
 existing_tiller_ns_name=$(find_existing_tiller_ns "$SK8S_VERSION")

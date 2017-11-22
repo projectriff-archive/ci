@@ -5,10 +5,8 @@ image_resource:
     repository: sk8s/faas-build
 
 inputs:
-- name: git-sk8s
 - name: git-helm-charts
 - name: git-pfs-ci
-- name: sk8s-version
 
 - name: function-controller-version
 - name: function-sidecar-version
@@ -18,6 +16,7 @@ inputs:
 outputs:
 - name: sk8s-charts
 - name: sk8s-charts-install
+- name: sk8s-charts-latest-version
 
 run:
   path: git-pfs-ci/tasks/scripts/build_sk8s_chart.sh

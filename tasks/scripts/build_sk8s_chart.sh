@@ -5,7 +5,6 @@ set -exuo pipefail
 build_root=$PWD
 
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 
 cp -pr $build_root/git-helm-charts $build_root/riff
 
@@ -49,7 +48,7 @@ shift
 
 helm install "\${chart_name}" \
 --version="${chart_version}" \
---set functionController.image.tag=${function_controller_version},functionController.sidecar.image.tag=${function_sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gateway_version},zipkin.image.tag=${SK8S_VERSION} \
+--set functionController.image.tag=${function_controller_version},functionController.sidecar.image.tag=${function_sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gateway_version} \
 "\$@"
 
 EOM
@@ -68,5 +67,7 @@ EOM
   else
     helm repo index "$build_root/sk8s-charts" --url "$SK8S_CHARTS_URL"
   fi
+
+  echo "$chart_version" > "$build_root/sk8s-charts-latest-version/latest_version"
 
 popd

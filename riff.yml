@@ -85,6 +85,13 @@ resources:
     json_key: ((gcp-json-key))
     versioned_file: index.yaml
 
+- name: gcs-riff-chart-latest-version
+  type: gcs-resource
+  source:
+    bucket: <%= charts_bucket_name %>
+    json_key: ((gcp-json-key))
+    versioned_file: latest_version
+
 <% riff_components.each do |component| %>
 - name: <%= component.name %>-version
   type: semver
@@ -198,9 +205,6 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-helm-charts
-    - get: sk8s-version
-      # passed:
-      # - build-sk8s-containers
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed:
@@ -211,13 +215,14 @@ jobs:
       trigger: true
       passed: [build-<%= component.name %>-container]
   <% end %>
-    - get: git-sk8s
-    #  trigger: true
-    #  passed: [build-sk8s-containers]
   - task: build-sk8s-chart
     file: git-pfs-ci/tasks/build-sk8s-chart.yml
     params:
       SK8S_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+  - put: gcs-riff-chart-latest-version
+    params:
+      file: sk8s-charts-latest-version/latest_version
+      predefined_acl: publicRead
   - put: gcs-riff-charts
     params:
       file: sk8s-charts/*.tgz
@@ -243,11 +248,9 @@ jobs:
   serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
+    - get: gcs-riff-chart-latest-version
+      passed: [build-sk8s-chart]
     - get: git-pfs-ci
-    - get: git-sk8s
-      passed: [build-sk8s-chart]
-    - get: sk8s-version
-      passed: [build-sk8s-chart]
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed: [build-sk8s-chart]
@@ -266,11 +269,9 @@ jobs:
   serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
+    - get: gcs-riff-chart-latest-version
+      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
     - get: git-pfs-ci
-    - get: git-sk8s
-      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
-    - get: sk8s-version
-      passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed: [clean-sk8s-pre-deploy-<%= k8s_env.name %>]
@@ -290,11 +291,9 @@ jobs:
   serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
+    - get: gcs-riff-chart-latest-version
+      passed: [deploy-sk8s-<%= k8s_env.name %>]
     - get: git-pfs-ci
-    - get: git-sk8s
-      passed: [deploy-sk8s-<%= k8s_env.name %>]
-    - get: sk8s-version
-      passed: [deploy-sk8s-<%= k8s_env.name %>]
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed: [deploy-sk8s-<%= k8s_env.name %>]
@@ -318,11 +317,9 @@ jobs:
   serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
+    - get: gcs-riff-chart-latest-version
+      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
     - get: git-pfs-ci
-    - get: git-sk8s
-      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
-    - get: sk8s-version
-      passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed: [run-sk8s-system-tests-<%= k8s_env.name %>]
@@ -345,11 +342,9 @@ jobs:
   serial_groups: [sk8s-minikube]
   plan:
   - aggregate:
+    - get: gcs-riff-chart-latest-version
+      passed: [build-sk8s-chart]
     - get: git-pfs-ci
-    - get: git-sk8s
-      passed: [build-sk8s-chart]
-    - get: sk8s-version
-      passed: [build-sk8s-chart]
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed: [build-sk8s-chart]
@@ -375,10 +370,6 @@ jobs:
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: git-sk8s
-      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
-    - get: sk8s-version
-      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
       passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
@@ -387,8 +378,6 @@ jobs:
       passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
       trigger: true
 
-  - put: sk8s-version
-    params: {pre: SNAPSHOT}
   <% riff_components.each do |component| %>
   - put: <%= component.name %>-version
     params: {pre: SNAPSHOT}
@@ -398,7 +387,7 @@ jobs:
 - name: manual-publish-crds
   plan:
   - aggregate:
-    - get: git-sk8s
+    - get: git-helm-charts
 
 <% k8s_envs.each do |k8s_env| %>
   - task: publish-crds-<%= k8s_env.name %>
@@ -409,7 +398,7 @@ jobs:
         source:
           repository: sk8s/faas-build
       inputs:
-      - name: git-sk8s
+      - name: git-helm-charts
 
       params:
         KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
@@ -425,17 +414,12 @@ jobs:
           mkdir -p ~/.kube
           echo "$KUBECONFIG_STRING" > ~/.kube/config
 
-          cat git-sk8s/charts/sk8s/templates/function-resource.yaml | grep -v '{{' > function-resource.yaml
-          cat git-sk8s/charts/sk8s/templates/topic-resource.yaml | grep -v '{{' > topic-resource.yaml
+          cat git-helm-charts/templates/function-resource.yaml | grep -v '{{' > function-resource.yaml
+          cat git-helm-charts/templates/topic-resource.yaml | grep -v '{{' > topic-resource.yaml
 
           kubectl apply -f function-resource.yaml
           kubectl apply -f topic-resource.yaml
 <% end %>
-
-- name: manual-version-bump-snapshot-sk8s
-  plan:
-  - put: sk8s-version
-    params: {bump: patch, pre: SNAPSHOT}
 
 
 <% riff_components.each do |component| %>
