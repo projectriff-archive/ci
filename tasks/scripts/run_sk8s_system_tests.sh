@@ -9,7 +9,7 @@ source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 init_docker
 init_kubeconfig
 
-SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
+SK8S_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
 existing_sk8s_ns=$(find_existing_sk8s_ns "$SK8S_VERSION")
 
 set +e
@@ -35,7 +35,7 @@ export SYS_TEST_KAFKA_POD_NAME="$kafka_pod"
 export SYS_TEST_DOCKER_ORG="$DOCKER_ORG"
 export SYS_TEST_DOCKER_USERNAME="$DOCKER_USERNAME"
 export SYS_TEST_DOCKER_PASSWORD="$DOCKER_PASSWORD"
-export SYS_TEST_BASE_DIR="$build_root/git-sk8s"
+export SYS_TEST_BASE_DIR="$build_root/git-riff"
 export SYS_TEST_MSG_RT_TIMEOUT_SEC=60
 
 export GOPATH=$(go env GOPATH)

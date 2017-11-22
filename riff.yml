@@ -122,6 +122,12 @@ resources:
     branch: master
 <% end %>
 
+- name: git-riff
+  type: git
+  source:
+    uri: https://github.com/projectriff/riff.git
+    branch: master
+
 - name: git-helm-charts
   type: git
   source:
@@ -293,6 +299,7 @@ jobs:
   serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
+    - git: git-riff
     - get: gcs-riff-chart-latest-version
       passed: [deploy-sk8s-<%= k8s_env.name %>]
     - get: git-pfs-ci
