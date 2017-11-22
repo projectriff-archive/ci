@@ -211,9 +211,11 @@ jobs:
       - build-<%= component.name %>-container
   <% end %>
   <% riff_components.each do |component| %>
-    - get: <%= component.name %>-docker-image
+    - get: git-<%= component.name %>
       trigger: true
       passed: [build-<%= component.name %>-container]
+      params:
+        depth: 1
   <% end %>
   - task: build-sk8s-chart
     file: git-pfs-ci/tasks/build-sk8s-chart.yml
