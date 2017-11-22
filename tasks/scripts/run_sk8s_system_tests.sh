@@ -38,9 +38,9 @@ dep ensure
 
 set +e
 ./test.sh
+test_retcode="$?"
 set -e
 
-test_retcode="$?"
 if [ "0" != "$test_retcode" ]; then
   echo "Tests Failed. Printing logs from all pods in [$existing_sk8s_ns]"
 
