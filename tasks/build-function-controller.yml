@@ -39,7 +39,7 @@ run:
 
       ./mvnw clean package
 
-      cp -pr . "$build_root/docker-context/"
+      cp -pr ./function-controller/ "$build_root/docker-context/"
 
       echo "$SK8S_VERSION" > "$build_root/docker-context/sk8s_version"
 
