@@ -54,7 +54,7 @@ helm install "\${chart_name}" \
 
 EOM
 
-  cp "$chart_file" "$build_root/sk8s-charts/"
+  cp "$chart_file" "$build_root/helm-charts/"
 
   set +e
   curl -sfL "$HELM_CHARTS_URL/index.yaml" > existing_index.yaml
@@ -64,9 +64,9 @@ EOM
   set -e
 
   if [ -f existing_index.yaml ]; then
-    helm repo index "$build_root/sk8s-charts" --url "$HELM_CHARTS_URL" --merge existing_index.yaml
+    helm repo index "$build_root/helm-charts" --url "$HELM_CHARTS_URL" --merge existing_index.yaml
   else
-    helm repo index "$build_root/sk8s-charts" --url "$HELM_CHARTS_URL"
+    helm repo index "$build_root/helm-charts" --url "$HELM_CHARTS_URL"
   fi
 
   echo "$chart_version" > "$build_root/helm-charts-latest-version/latest_version"

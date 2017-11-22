@@ -17,10 +17,10 @@ if [ ! -z "$existing_tiller_ns_name" ]; then
   set -e
 fi
 
-# delete existing tiller and sk8s namespaces
-existing_sk8s_ns_name=$(find_existing_riff_ns "$RIFF_VERSION")
+# delete existing tiller and helm namespaces
+existing_riff_ns_name=$(find_existing_riff_ns "$RIFF_VERSION")
 set +e
-echo "$existing_sk8s_ns_name" | xargs -I{} kubectl delete ns {} --cascade=true
+echo "$existing_riff_ns_name" | xargs -I{} kubectl delete ns {} --cascade=true
 echo "$existing_tiller_ns_name" | xargs -I{} kubectl delete ns {} --cascade=true
 set -e
 

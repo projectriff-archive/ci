@@ -1,7 +1,7 @@
 #!/bin/bash
 set -exuo pipefail
 
-echo "System Tests for sk8s"
+echo "System Tests for riff"
 
 build_root=$(pwd)
 
@@ -10,7 +10,7 @@ init_docker
 init_kubeconfig
 
 RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
-existing_sk8s_ns=$(find_existing_riff_ns "$RIFF_VERSION")
+existing_riff_ns=$(find_existing_riff_ns "$RIFF_VERSION")
 
 set +e
 pgrep localkube
@@ -21,15 +21,15 @@ host_jsonpath='{.items[0].status.loadBalancer.ingress[].ip}'
 if [ "0" == "${minikube_retcode}" ]; then
   host_jsonpath='{.items[0].spec.clusterIP}'
 fi
-http_gw_host=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath=$host_jsonpath)
-http_gw_port=$(kubectl -n "$existing_sk8s_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
+http_gw_host=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath=$host_jsonpath)
+http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
 
-kafka_pod=$(kubectl -n "$existing_sk8s_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
+kafka_pod=$(kubectl -n "$existing_riff_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
 
 # init test env vars
 
 export SYS_TEST_JAVA_INVOKER_VERSION="$RIFF_VERSION"
-export SYS_TEST_NS="$existing_sk8s_ns"
+export SYS_TEST_NS="$existing_riff_ns"
 export SYS_TEST_HTTP_GW_URL="http://${http_gw_host}:${http_gw_port}"
 export SYS_TEST_KAFKA_POD_NAME="$kafka_pod"
 export SYS_TEST_DOCKER_ORG="$DOCKER_ORG"
@@ -51,9 +51,9 @@ test_retcode="$?"
 set -e
 
 if [ "0" != "$test_retcode" ]; then
-  echo "Tests Failed. Printing logs from all pods in [$existing_sk8s_ns]"
+  echo "Tests Failed. Printing logs from all pods in [$existing_riff_ns]"
 
-  kubectl get pods -n "$existing_sk8s_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | xargs -I{} kubectl logs {} -n "$existing_sk8s_ns"
+  kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | xargs -I{} kubectl logs {} -n "$existing_riff_ns"
 fi
 
 exit $test_retcode
