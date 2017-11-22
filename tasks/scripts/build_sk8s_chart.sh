@@ -7,7 +7,7 @@ build_root=$PWD
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 SK8S_VERSION=$(determine_sk8s_version "$build_root/git-sk8s" "$build_root/sk8s-version")
 
-mv $build_root/git-helm-charts $build_root/riff
+cp -pr $build_root/git-helm-charts $build_root/riff
 
 pushd $build_root/riff
 
