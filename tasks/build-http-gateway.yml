@@ -29,8 +29,8 @@ run:
 
     export GOPATH=$(go env GOPATH)
 
-    mkdir -p "$GOPATH/src/github.com/sk8sio"
-    cp -pr git-http-gateway/ "$GOPATH/src/github.com/sk8sio/http-gateway"
+    mkdir -p "$GOPATH/src/github.com/projectriff"
+    cp -pr git-http-gateway/ "$GOPATH/src/github.com/projectriff/http-gateway"
 
     killjava() {
         set +e
@@ -39,7 +39,7 @@ run:
     }
     trap killjava INT QUIT TERM EXIT
 
-    pushd "$GOPATH/src/github.com/sk8sio/http-gateway/"
+    pushd "$GOPATH/src/github.com/projectriff/http-gateway/"
 
       make build-for-docker
 

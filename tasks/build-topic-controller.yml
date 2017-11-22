@@ -27,10 +27,10 @@ run:
 
     export GOPATH=$(go env GOPATH)
 
-    mkdir -p "$GOPATH/src/github.com/sk8sio"
-    cp -pr git-topic-controller "$GOPATH/src/github.com/sk8sio/topic-controller"
+    mkdir -p "$GOPATH/src/github.com/projectriff"
+    cp -pr git-topic-controller "$GOPATH/src/github.com/projectriff/topic-controller"
 
-    pushd "$GOPATH/src/github.com/sk8sio/topic-controller/"
+    pushd "$GOPATH/src/github.com/projectriff/topic-controller/"
 
       make build-for-docker
 
