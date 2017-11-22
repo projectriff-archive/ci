@@ -26,7 +26,7 @@ pushd $build_root/riff
 
   chart_file=$(basename riff*tgz)
 
-  cat > "${build_root}/sk8s-charts-install/riff-${chart_version}-install-example.sh" << EOM
+  cat > "${build_root}/helm-charts-install/riff-${chart_version}-install-example.sh" << EOM
 #!/bin/bash
 
 script_name=\`basename "\$0"\`
