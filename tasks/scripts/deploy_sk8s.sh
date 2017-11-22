@@ -44,11 +44,11 @@ RND_HTTP_GW_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
 ZIPKIN_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
 DEPLOY_SK8S_OVERRIDE="httpGateway.service.externalPort=${RND_HTTP_GW_EXTPORT},zipkin.service.externalPort=${ZIPKIN_EXTPORT}"
 
-chart_version_actual=$(helm inspect sk8srepo/sk8s | grep version | awk '{print $2}')
+chart_version_actual=$(helm inspect riffrepo/riff | grep version | awk '{print $2}')
 
-curl -sL "${SK8S_CHARTS_URL}/sk8s-${chart_version_actual}-install-example.sh" > chart_install.sh
+curl -sL "${SK8S_CHARTS_URL}/riff-${chart_version_actual}-install-example.sh" > chart_install.sh
 chmod +x  chart_install.sh
-./chart_install.sh "sk8srepo/sk8s" \
+./chart_install.sh "riffrepo/riff" \
   --tiller-namespace="$tiller_ns_name" \
   --namespace="$sk8s_ns_name" \
   --name="$helm_release_name" \

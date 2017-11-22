@@ -299,7 +299,7 @@ jobs:
   serial_groups: [sk8s-<%= k8s_env.name %>]
   plan:
   - aggregate:
-    - git: git-riff
+    - get: git-riff
     - get: gcs-riff-chart-latest-version
       passed: [deploy-sk8s-<%= k8s_env.name %>]
     - get: git-pfs-ci
@@ -351,6 +351,7 @@ jobs:
   serial_groups: [sk8s-minikube]
   plan:
   - aggregate:
+    - get: git-riff
     - get: gcs-riff-chart-latest-version
       passed: [build-sk8s-chart]
     - get: git-pfs-ci
