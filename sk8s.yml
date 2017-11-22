@@ -414,15 +414,15 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-sk8s
-      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
     - get: sk8s-version
-      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
   <% sk8s_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
   <% end %>
     - get: gcs-sk8s-chart-index
-      passed:   <%= k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name } %>
+      passed:   <%= (k8s_envs.map {|k8s_env| "clean-sk8s-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-sk8s-minikube"]) %>
       trigger: true
 
   - put: sk8s-version
