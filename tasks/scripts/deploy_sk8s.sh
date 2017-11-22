@@ -36,9 +36,9 @@ kubectl get customresourcedefinitions --all-namespaces -o json |
   xargs -I{} kubectl delete customresourcedefinition {}
 
 # deploy previously constructed helm chart
-helm repo add sk8srepo "$SK8S_CHARTS_URL"
-helm repo update sk8srepo
-helm search sk8s
+helm repo add riffrepo "$SK8S_CHARTS_URL"
+helm repo update riffrepo
+helm search riff
 
 RND_HTTP_GW_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
 ZIPKIN_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
