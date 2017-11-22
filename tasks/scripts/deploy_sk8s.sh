@@ -53,3 +53,13 @@ chmod +x  chart_install.sh
   --namespace="$sk8s_ns_name" \
   --name="$helm_release_name" \
   --set "${DEPLOY_SK8S_OVERRIDE}"
+
+set +e
+for i in {1..50}; do
+  kubectl get pod -n "$sk8s_ns_name" | grep http-gateway | grep Running | grep '1/1'
+  if [ $? -eq 0 ]; then
+      break
+  fi
+  sleep 5
+done
+set -e
