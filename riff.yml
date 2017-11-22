@@ -229,19 +229,19 @@ jobs:
       HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
   - put: gcs-riff-chart-latest-version
     params:
-      file: sk8s-charts-latest-version/latest_version
+      file: helm-charts-latest-version/latest_version
       predefined_acl: publicRead
   - put: gcs-riff-charts
     params:
-      file: sk8s-charts/*.tgz
+      file: helm-charts/*.tgz
       predefined_acl: publicRead
   - put: gcs-riff-charts
     params:
-      file: sk8s-charts-install/*
+      file: helm-charts-install/*
       predefined_acl: publicRead
   - put: gcs-riff-chart-index
     params:
-      file: sk8s-charts/index.yaml
+      file: helm-charts/index.yaml
       predefined_acl: publicRead
   - task: config-chart-bucket
     file: git-pfs-ci/tasks/config-chart-bucket.yml

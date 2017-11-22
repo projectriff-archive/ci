@@ -69,6 +69,6 @@ EOM
     helm repo index "$build_root/sk8s-charts" --url "$HELM_CHARTS_URL"
   fi
 
-  echo "$chart_version" > "$build_root/sk8s-charts-latest-version/latest_version"
+  echo "$chart_version" > "$build_root/helm-charts-latest-version/latest_version"
 
 popd

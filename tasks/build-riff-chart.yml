@@ -14,9 +14,9 @@ inputs:
 - name: http-gateway-version
 
 outputs:
-- name: sk8s-charts
-- name: sk8s-charts-install
-- name: sk8s-charts-latest-version
+- name: helm-charts
+- name: helm-charts-install
+- name: helm-charts-latest-version
 
 run:
   path: git-pfs-ci/tasks/scripts/build_riff_chart.sh
