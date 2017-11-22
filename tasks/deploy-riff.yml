@@ -9,7 +9,7 @@ inputs:
 - name: gcs-riff-chart-latest-version
 
 run:
-  path: git-pfs-ci/tasks/scripts/deploy_sk8s.sh
+  path: git-pfs-ci/tasks/scripts/deploy_riff.sh
 
 params:
   KUBECONFIG_STRING: replace-me
