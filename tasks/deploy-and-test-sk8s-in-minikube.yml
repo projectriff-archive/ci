@@ -8,7 +8,6 @@ image_resource:
 inputs:
 - name: git-pfs-ci
 - name: git-pfs-system-test
-- name: git-sk8s
 - name: gcs-riff-chart-latest-version
 
 run:
