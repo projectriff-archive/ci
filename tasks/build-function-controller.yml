@@ -26,10 +26,13 @@ run:
     source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
     SK8S_VERSION=$(determine_sk8s_version "$build_root/git-function-controller" "$build_root/sk8s-version")
 
-    pushd "$build_root/git-kubernetes-model"
+    export GOPATH=$(go env GOPATH)
 
+    mkdir -p "$GOPATH/src/github.com/projectriff"
+    cp -pr git-kubernetes-model/ "$GOPATH/src/github.com/projectriff/kubernetes-model"
+
+    pushd "$GOPATH/src/github.com/projectriff/kubernetes-model/"
       make
-
     popd
 
     pushd "$build_root/git-function-controller/"
