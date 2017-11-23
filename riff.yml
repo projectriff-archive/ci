@@ -198,6 +198,10 @@ jobs:
       build: docker-context
       tag: docker-context/docker_version
       tag_as_latest: false
+    <% if component.name == 'function-controller' %>
+      build_args:
+        JAR_FILE: "*.jar"
+    <% end %>
 <%= slack_notification %>
 <% end %>
 
