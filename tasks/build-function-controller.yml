@@ -37,9 +37,6 @@ run:
 
     pushd "$build_root/git-function-controller/"
 
-      # tmp override, until release process is coordinated to use the projectriff orf
-      sed -i -e 's#projectriff/function-sidecar#riffci/function-sidecar#g' "$build_root/git-function-controller/function-controller/src/main/java/io/projectriff/controller/function/FunctionDeployer.java"
-
       ./mvnw clean package
 
       cp -pr ./function-controller/* "$build_root/docker-context/"

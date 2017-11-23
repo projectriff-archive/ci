@@ -13,7 +13,6 @@ pushd $build_root/riff
   helm init --client-only
 
   sed -i -e 's/IfNotPresent/Always/g' "$build_root/riff/values.yaml"
-  sed -i -e 's/projectriff/riffci/g' "$build_root/riff/values.yaml"
 
   function_controller_version=$(head "$build_root/function-controller-version/version")
   function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
