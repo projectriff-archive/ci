@@ -3,9 +3,9 @@ name: pfs-gcp-concourse
 
 releases:
 - name: concourse
-  version: 3.6.0
+  version: 3.5.0
 - name: garden-runc
-  version: 1.9.0
+  version: 1.6.0
 
 stemcells:
 - alias: trusty
@@ -38,7 +38,7 @@ instance_groups:
 
 - name: db
   instances: 1
-  vm_type: large
+  vm_type: medium
   stemcell: trusty
   persistent_disk_type: default
   azs: [z1]
