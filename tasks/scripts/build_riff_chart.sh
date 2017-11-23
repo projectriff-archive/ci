@@ -52,8 +52,6 @@ helm install "\${chart_name}" \
 "\$@"
 
 EOM
-  cp "${build_root}/helm-charts-install/riff-${chart_version}-install-example.sh" "${build_root}/helm-charts-install/riff-latest-install-example.sh"
-
 
   cp "$chart_file" "$build_root/helm-charts/"
 
