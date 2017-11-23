@@ -60,6 +60,6 @@ run:
 params:
   KUBECONFIG_STRING: ""
   HELM_CHARTS_URL: replace-me
-  DOCKER_ORG: replace-me
+  DOCKER_TEST_ORG: replace-me
   DOCKER_USERNAME: replace-me
   DOCKER_PASSWORD: replace-me

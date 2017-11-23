@@ -321,7 +321,7 @@ jobs:
     file: git-pfs-ci/tasks/run-riff-system-tests.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      DOCKER_ORG: ((docker-riff-org))
+      DOCKER_TEST_ORG: ((docker-test-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
 <%= slack_notification %>
@@ -374,7 +374,7 @@ jobs:
     params:
       KUBECONFIG_STRING: ""
       HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
-      DOCKER_ORG: ((docker-riff-org))
+      DOCKER_TEST_ORG: ((docker-test-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
 <%= slack_notification %>
