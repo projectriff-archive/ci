@@ -2,8 +2,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: whindes/alpine-minikube
-    tag: 22.3
+    repository: sk8sci/test-minikube
 
 inputs:
 - name: git-riff
@@ -19,12 +18,19 @@ run:
   - pipefail
   - -exc
   - |
-    apk update
-    apk add openjdk8 maven alpine-sdk git curl openssl jq socat util-linux wget
+    add-apt-repository -y ppa:openjdk-r/ppa
+    apt-get update
+    apt-get install -y openjdk-8-jdk maven jq socat
 
-    echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
-    apk update
-    apk add go
+    wget https://github.com/Dreyer/nsenter/releases/download/2.25.226-42f0/nsenter.tar.gz
+    tar -xzf nsenter.tar.gz
+    mv 2.25.226-42f0/bin/nsenter /usr/local/bin/
+
+    export GOROOT=/usr/local/go
+    export GOPATH=/root/go
+    export PATH=$GOROOT/bin:$PATH
+    wget https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz
+    tar -C /usr/local -xzf go1.9.linux-amd64.tar.gz
 
     wget https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64
     mv dep-linux-amd64 /usr/local/bin/dep
