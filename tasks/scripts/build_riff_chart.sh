@@ -12,18 +12,14 @@ pushd $build_root/riff
 
   helm init --client-only
 
-  chart_version=$(grep version Chart.yaml  | awk '{print $2}')
-
   sed -i -e 's/IfNotPresent/Always/g' "$build_root/riff/values.yaml"
-  cp "$build_root/riff/values.yaml" "$build_root/helm-charts/values-snapshot.yaml"
-
-  sed -i -e "s/0.0.1-SNAPSHOT/${chart_version}-SNAPSHOT/g" "$build_root/helm-charts/values-snapshot.yaml"
 
   function_controller_version=$(head "$build_root/function-controller-version/version")
   function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
   topic_controller_version=$(head "$build_root/topic-controller-version/version")
   http_gateway_version=$(head "$build_root/http-gateway-version/version")
 
+  chart_version=$(grep version Chart.yaml  | awk '{print $2}')
 
   helm package . --version "$chart_version"
 

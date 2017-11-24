@@ -85,13 +85,6 @@ resources:
     json_key: ((gcp-json-key))
     versioned_file: index.yaml
 
-- name: gcs-riff-chart-values-snapshot
-  type: gcs-resource
-  source:
-    bucket: <%= charts_bucket_name %>
-    json_key: ((gcp-json-key))
-    versioned_file: values-snapshot.yaml
-
 - name: gcs-riff-chart-latest-version
   type: gcs-resource
   source:
@@ -253,10 +246,6 @@ jobs:
   - put: gcs-riff-chart-index
     params:
       file: helm-charts/index.yaml
-      predefined_acl: publicRead
-  - put: gcs-riff-chart-values-snapshot
-    params:
-      file: helm-charts/values-snapshot.yaml
       predefined_acl: publicRead
   - task: config-chart-bucket
     file: git-pfs-ci/tasks/config-chart-bucket.yml
