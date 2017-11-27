@@ -437,45 +437,10 @@ jobs:
           kubectl apply -f topic-resource.yaml
 <% end %>
 
-
-<% riff_components.each do |component| %>
-- name: manual-version-bump-build-<%= component.name %>
+- name: manual-images-version-bump-patch
   plan:
+  <% riff_components.each do |component| %>
   - put: <%= component.name %>-version
-    params: {bump: patch, pre: build}
-#
-# - name: manual-release-<%= component.name %>
-#   plan:
-#   - aggregate:
-#     - get: git-pfs-ci
-#     - get: git-<%= component.name %>
-#     - get: <%= component.name %>-version
-#
-#   - task: release-<%= component.name %>
-#     file: git-pfs-ci/tasks/release_sk8s_component.yml
-#     input_mapping:
-#       component-version: <%= component.name %>-version
-#       git-component-working-copy: git-<%= component.name %>
-#     params:
-#       SK8S_COMPONENT_GIT_REMOTE: git@github.com:<%= component.git_org_name %>/<%= component.git_repo_name %>.git
-#
-#   - put: git-<%= component.name %>
-#     params:
-#       tag: version-to-tag-git/version
-#       repository: git-<%= component.name %>
-#
-#   - task: tag-<%= component.name %>-docker-image
-#     file: git-pfs-ci/tasks/tag_docker_image.yml
-#     input_mapping:
-#       component-version: <%= component.name %>-version
-#       git-component-working-copy: git-<%= component.name %>
-#     params:
-#       DOCKERHUB_ORG: ((docker-riff-org))
-#       DOCKERHUB_USERNAME: ((docker-riff-username))
-#       DOCKERHUB_PASSWORD: ((docker-riff-password))
-#       DOCKER_IMAGE: ((docker-riff-org))/<%= component.docker_image_name %>
-#       TAG_FILE: version-to-tag-git/version
-
-
+    params: {bump: patch}
+  <% end %>
 <%= slack_notification %>
-<% end %>
