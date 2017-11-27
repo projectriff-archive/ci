@@ -12,8 +12,6 @@ pushd $build_root/git-helm-charts
 
   helm init --client-only
 
-  sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-helm-charts/riff/values.yaml"
-
   function_controller_version=$(head "$build_root/function-controller-version/version")
   function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
   topic_controller_version=$(head "$build_root/topic-controller-version/version")
