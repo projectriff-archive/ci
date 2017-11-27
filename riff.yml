@@ -437,6 +437,14 @@ jobs:
           kubectl apply -f topic-resource.yaml
 <% end %>
 
+- name: manual-images-version-bump-build
+  plan:
+  <% riff_components.each do |component| %>
+  - put: <%= component.name %>-version
+    params: {pre: build}
+  <% end %>
+<%= slack_notification %>
+
 - name: manual-images-version-bump-patch
   plan:
   <% riff_components.each do |component| %>
