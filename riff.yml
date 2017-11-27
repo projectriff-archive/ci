@@ -36,7 +36,7 @@
                         'build-java-function-invoker.yml'),
   ]
 
-  charts_bucket_name='riff_charts'
+  charts_bucket_name='riff-charts'
 
   k8s_envs = [
     K8sEnvironment.new('kubo', 'pfs-gcp-kubeconfig-pfsenv01'),
