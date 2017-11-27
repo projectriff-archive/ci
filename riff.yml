@@ -304,6 +304,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-riff
+      trigger: true
     - get: gcs-riff-chart-latest-version
       passed: [deploy-riff-<%= k8s_env.name %>]
     - get: git-pfs-ci
@@ -356,6 +357,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-riff
+      trigger: true
     - get: gcs-riff-chart-latest-version
       passed: [build-riff-chart]
     - get: git-pfs-ci
