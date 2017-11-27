@@ -20,7 +20,7 @@ run:
   - |
     add-apt-repository -y ppa:openjdk-r/ppa
     apt-get update
-    apt-get install -y openjdk-8-jdk maven jq socat
+    apt-get install -y openjdk-8-jdk maven jq socat git
 
     wget https://github.com/Dreyer/nsenter/releases/download/2.25.226-42f0/nsenter.tar.gz
     tar -xzf nsenter.tar.gz
