@@ -441,6 +441,14 @@ jobs:
   plan:
   <% riff_components.each do |component| %>
   - put: <%= component.name %>-version
-    params: {bump: patch}
+    params: {bump: patch, pre: build}
+  <% end %>
+<%= slack_notification %>
+
+- name: manual-images-version-bump-release
+  plan:
+  <% riff_components.each do |component| %>
+  - put: <%= component.name %>-version
+    params: {bump: final}
   <% end %>
 <%= slack_notification %>
