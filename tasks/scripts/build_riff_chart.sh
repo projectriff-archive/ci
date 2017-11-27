@@ -8,20 +8,20 @@ source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 
 cp -pr $build_root/git-helm-charts $build_root/riff
 
-pushd $build_root/riff
+pushd $build_root/git-helm-charts
 
   helm init --client-only
 
-  sed -i -e 's/IfNotPresent/Always/g' "$build_root/riff/values.yaml"
+  sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-helm-charts/riff/values.yaml"
 
   function_controller_version=$(head "$build_root/function-controller-version/version")
   function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
   topic_controller_version=$(head "$build_root/topic-controller-version/version")
   http_gateway_version=$(head "$build_root/http-gateway-version/version")
 
-  chart_version=$(grep version Chart.yaml  | awk '{print $2}')
+  chart_version=$(grep version "$build_root/git-helm-charts/riff/Chart.yaml"  | awk '{print $2}')
 
-  helm package . --version "$chart_version"
+  helm package riff --version "$chart_version"
 
   chart_file=$(basename riff*tgz)
 
