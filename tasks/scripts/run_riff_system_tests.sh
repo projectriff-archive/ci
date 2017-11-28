@@ -13,13 +13,10 @@ RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
 JAVA_INVOKER_VERSION=$(head "$build_root/java-function-invoker-version/version")
 existing_riff_ns=$(find_existing_riff_ns "$RIFF_VERSION")
 
-set +e
-pgrep localkube
-minikube_retcode=$?
-set -e
+current_kubeconfig_context="$(kubectl config current-context)"
 
 host_jsonpath='{.items[0].status.loadBalancer.ingress[].ip}'
-if [ "0" == "${minikube_retcode}" ]; then
+if [ "minikube" == "${current_kubeconfig_context}" ]; then
   host_jsonpath='{.items[0].spec.clusterIP}'
 fi
 http_gw_host=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath=$host_jsonpath)
