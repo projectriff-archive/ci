@@ -15,12 +15,13 @@ existing_riff_ns=$(find_existing_riff_ns "$RIFF_VERSION")
 
 current_kubeconfig_context="$(kubectl config current-context)"
 
-host_jsonpath='{.items[0].status.loadBalancer.ingress[].ip}'
 if [ "minikube" == "${current_kubeconfig_context}" ]; then
-  host_jsonpath='{.items[0].spec.clusterIP}'
+  http_gw_host=$(basename $(kubectl config view | grep 'server:' | awk '{print $2}') | cut -d':' -f1)
+  http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].nodePort}')
+else
+  http_gw_host=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')
+  http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
 fi
-http_gw_host=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath=$host_jsonpath)
-http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
 
 kafka_pod=$(kubectl -n "$existing_riff_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
 
