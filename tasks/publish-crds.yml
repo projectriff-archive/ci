@@ -1,0 +1,31 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-build
+    
+inputs:
+- name: git-pfs-ci
+- name: git-helm-charts
+
+params:
+  KUBECONFIG_STRING: replace-me
+  KUBECONFIG_CERT: replace-me
+  KUBECONFIG_KEY: replace-me
+
+run:
+  path: /bin/sh
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+
+    source git-pfs-ci/tasks/scripts/common.sh
+    init_kubeconfig
+
+    cat git-helm-charts/templates/function-resource.yaml | grep -v '{{' > function-resource.yaml
+    cat git-helm-charts/templates/topic-resource.yaml | grep -v '{{' > topic-resource.yaml
+
+    kubectl apply -f function-resource.yaml
+    kubectl apply -f topic-resource.yaml
