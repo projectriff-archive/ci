@@ -13,3 +13,5 @@ run:
 
 params:
   KUBECONFIG_STRING: replace-me
+  KUBECONFIG_CERT: replace-me
+  KUBECONFIG_KEY: replace-me

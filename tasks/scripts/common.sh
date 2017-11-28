@@ -4,6 +4,9 @@ function init_kubeconfig(){
   if [ ! -z "$KUBECONFIG_STRING" ]; then
     mkdir ~/.kube
     echo "$KUBECONFIG_STRING" > ~/.kube/config
+    mkdir -p ~/.kube/certs
+    echo "$KUBECONFIG_CERT" > ~/.kube/certs/kube.crt
+    echo "$KUBECONFIG_KEY" > ~/.kube/certs/kube.key
   fi
 }
 
