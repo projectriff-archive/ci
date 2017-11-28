@@ -40,7 +40,8 @@
 
   k8s_envs = [
     K8sEnvironment.new('kubo', 'pfs-gcp-kubeconfig-pfsenv01'),
-    K8sEnvironment.new('gke', 'pfs-gcp-kubeconfig-gke-ci')
+    K8sEnvironment.new('gke', 'pfs-gcp-kubeconfig-gke-ci'),
+    K8sEnvironment.new('minikube', 'pfs-gcp-kubeconfig-minikube-ci')
   ]
   slack_notification=""
 #
@@ -275,6 +276,8 @@ jobs:
     file: git-pfs-ci/tasks/clean-riff-deployment.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
 <%= slack_notification %>
 
 - name: deploy-riff-<%= k8s_env.name %>
@@ -296,6 +299,8 @@ jobs:
     file: git-pfs-ci/tasks/deploy-riff.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
       HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 <%= slack_notification %>
 
@@ -321,6 +326,8 @@ jobs:
     file: git-pfs-ci/tasks/run-riff-system-tests.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
       DOCKER_TEST_ORG: ((docker-test-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
@@ -345,39 +352,9 @@ jobs:
     file: git-pfs-ci/tasks/clean-riff-deployment.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-<%= slack_notification %>
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))<%= slack_notification %>
 <% end %>
-
-#
-# Minkube
-#
-- name: deploy-and-test-riff-minikube
-  serial_groups: [riff-minikube]
-  plan:
-  - aggregate:
-    - get: git-riff
-    - get: gcs-riff-chart-latest-version
-      passed: [build-riff-chart]
-    - get: git-pfs-ci
-  <% riff_components.each do |component| %>
-    - get: <%= component.name %>-version
-      passed: [build-riff-chart]
-  <% end %>
-    - get: gcs-riff-chart-index
-      passed: [build-riff-chart]
-      trigger: true
-    - get: git-pfs-system-test
-
-  - task: deploy-and-test-riff
-    file: git-pfs-ci/tasks/deploy-and-test-riff-in-minikube.yml
-    privileged: true
-    params:
-      KUBECONFIG_STRING: ""
-      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
-      DOCKER_TEST_ORG: ((docker-test-org))
-      DOCKER_USERNAME: ((docker-riff-username))
-      DOCKER_PASSWORD: ((docker-riff-password))
-<%= slack_notification %>
 
 - name: bump-versions
   serial_groups: [riff]
@@ -386,11 +363,9 @@ jobs:
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      #passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-riff-minikube"]) %>
       passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat([]) %>
   <% end %>
     - get: gcs-riff-chart-index
-      #passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat(["deploy-and-test-riff-minikube"]) %>
       passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat([]) %>
       trigger: true
 
@@ -403,39 +378,18 @@ jobs:
 - name: manual-publish-crds
   plan:
   - aggregate:
+    - get: git-pfs-ci
     - get: git-helm-charts
 
 <% k8s_envs.each do |k8s_env| %>
   - task: publish-crds-<%= k8s_env.name %>
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: sk8s/faas-build
-      inputs:
-      - name: git-helm-charts
-
-      params:
-        KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-
-      run:
-        path: /bin/sh
-        args:
-        - -o
-        - pipefail
-        - -exc
-        - |
-
-          mkdir -p ~/.kube
-          echo "$KUBECONFIG_STRING" > ~/.kube/config
-
-          cat git-helm-charts/templates/function-resource.yaml | grep -v '{{' > function-resource.yaml
-          cat git-helm-charts/templates/topic-resource.yaml | grep -v '{{' > topic-resource.yaml
-
-          kubectl apply -f function-resource.yaml
-          kubectl apply -f topic-resource.yaml
+    file: git-pfs-ci/tasks/publish-crds.yml
+    params:
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
 <% end %>
+<%= slack_notification %>
 
 - name: manual-images-version-bump-build
   plan:

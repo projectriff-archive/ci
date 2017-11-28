@@ -80,6 +80,7 @@ main() {
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-bosh-creds-pfsenv01) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-ci-bosh-creds-pfsenv02) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-gke-ci) \
+    -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-minikube-ci) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-pfsenv01) \
     -l <(lpass show --note Shared-pfs-eng/pfs-gcp-kubeconfig-pfsenv02)
     ${@:2}
