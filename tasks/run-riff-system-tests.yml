@@ -10,6 +10,7 @@ inputs:
 - name: git-riff
 - name: gcs-riff-chart-latest-version
 - name: java-function-invoker-version
+- name: node-function-invoker-version
 
 run:
   path: git-pfs-ci/tasks/scripts/run_riff_system_tests.sh
