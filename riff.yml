@@ -191,6 +191,9 @@ jobs:
     - get: git-kubernetes-model
 <% end %>
 
+  - put: <%= component.name %>-version
+    params: {pre: build}
+
   - task: build-<%= component.name %>
     file: git-pfs-ci/tasks/<%= component.build_task_file %>
 
@@ -355,25 +358,6 @@ jobs:
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
       KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))<%= slack_notification %>
 <% end %>
-
-- name: bump-versions
-  serial_groups: [riff]
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-  <% riff_components.each do |component| %>
-    - get: <%= component.name %>-version
-      passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat([]) %>
-  <% end %>
-    - get: gcs-riff-chart-index
-      passed:   <%= (k8s_envs.map {|k8s_env| "clean-riff-post-deploy-" + k8s_env.name }).concat([]) %>
-      trigger: true
-
-  <% riff_components.each do |component| %>
-  - put: <%= component.name %>-version
-    params: {pre: build}
-  <% end %>
-<%= slack_notification %>
 
 - name: manual-publish-crds
   plan:
