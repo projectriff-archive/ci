@@ -35,7 +35,7 @@ export SYS_TEST_DOCKER_ORG="$DOCKER_TEST_ORG"
 export SYS_TEST_DOCKER_USERNAME="$DOCKER_USERNAME"
 export SYS_TEST_DOCKER_PASSWORD="$DOCKER_PASSWORD"
 export SYS_TEST_BASE_DIR="$build_root/git-riff"
-export SYS_TEST_MSG_RT_TIMEOUT_SEC=60
+export SYS_TEST_MSG_RT_TIMEOUT_SEC=120
 
 export GOPATH=$(go env GOPATH)
 workdir=$GOPATH/src/github.com/pivotal-cf
