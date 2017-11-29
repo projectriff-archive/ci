@@ -29,6 +29,7 @@ kafka_pod=$(kubectl -n "$existing_riff_ns"  get pod -l component=kafka-broker -o
 # init test env vars
 
 export SYS_TEST_JAVA_INVOKER_VERSION="$JAVA_INVOKER_VERSION"
+export SYS_TEST_NODE_INVOKER_VERSION="$NODE_INVOKER_VERSION"
 export SYS_TEST_NS="$existing_riff_ns"
 export SYS_TEST_HTTP_GW_URL="http://${http_gw_host}:${http_gw_port}"
 export SYS_TEST_KAFKA_POD_NAME="$kafka_pod"
