@@ -1,0 +1,34 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-build
+
+inputs:
+- name: git-pfs-ci
+- name: git-python2-function-invoker
+- name: python2-function-invoker-version
+
+outputs:
+- name: docker-context
+
+run:
+  path: /bin/bash
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+
+    build_root=$(pwd)
+
+    source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+    RIFF_VERSION=$(determine_riff_version "$build_root/git-python2-function-invoker" "$build_root/python2-function-invoker-version")
+
+    pushd "$build_root/git-python2-function-invoker"
+
+      cp -pr . "$build_root/docker-context/"
+
+      echo "$RIFF_VERSION" > "$build_root/docker-context/docker_version"
+
+    popd

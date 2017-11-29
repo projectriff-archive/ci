@@ -34,6 +34,12 @@
                         'projectriff',
                         'java-function-invoker',
                         'build-java-function-invoker.yml'),
+
+    RiffComponent.new(  'python2-function-invoker',
+                        'python2-function-invoker',
+                        'projectriff',
+                        'python2-function-invoker',
+                        'build-python2-function-invoker.yml'),
   ]
 
   charts_bucket_name='riff-charts'
