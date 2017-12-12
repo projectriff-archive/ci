@@ -9,7 +9,7 @@ params:
   DOCKERHUB_USERNAME: replace-me
   DOCKERHUB_ORG: replace-me
   DOCKER_IMAGE: replace-me
-  TAG_FILE: replace-me
+  SOURCE_VERSION_FILE: replace-me
 
 run:
   path: /bin/bash
@@ -26,14 +26,15 @@ run:
 
     build_root=$(pwd)
 
-    TAG_VERSION=$(head $build_root/$TAG_FILE)
+    EXISTING_VERSION=$(head $build_root/$SOURCE_VERSION_FILE)
+    TAG_VERSION=$(echo $EXISTING_VERSION | awk -F'-' '{print $1}')
 
-    echo "Tagging [$DOCKER_IMAGE] with [$TAG_VERSION]"
+    echo "Tagging [${DOCKER_IMAGE}:${EXISTING_VERSION}] as [${DOCKER_IMAGE}:${TAG_VERSION}]"
 
-    docker pull "$DOCKERHUB_ORG/$DOCKER_IMAGE"
+    docker pull "${DOCKERHUB_ORG}/${DOCKER_IMAGE}:${EXISTING_VERSION}"
 
     IMAGE_ID=$(docker images "$DOCKERHUB_ORG/$DOCKER_IMAGE" --format {{.ID}})
 
     docker tag "$IMAGE_ID" "$DOCKERHUB_ORG/$DOCKER_IMAGE:$TAG_VERSION"
 
-    docker push "$DOCKERHUB_ORG/$DOCKER_IMAGE:$TAG_VERSION"
+    docker push "${DOCKERHUB_ORG}/${DOCKER_IMAGE}:${TAG_VERSION}"
