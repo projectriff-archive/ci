@@ -13,7 +13,6 @@ params:
   DOCKERHUB_USERNAME: replace-me
   DOCKERHUB_ORG: replace-me
   DOCKER_IMAGE: replace-me
-  SOURCE_VERSION_FILE: replace-me
 
 run:
   path: /bin/bash
@@ -30,7 +29,7 @@ run:
 
     build_root=$(pwd)
 
-    EXISTING_VERSION=$(head $build_root/$SOURCE_VERSION_FILE)
+    EXISTING_VERSION=$(head $build_root/source-semver/version)
     TAG_VERSION=$(echo $EXISTING_VERSION | awk -F'-' '{print $1}')
 
     echo "Tagging [${DOCKER_IMAGE}:${EXISTING_VERSION}] as [${DOCKER_IMAGE}:${TAG_VERSION}]"
