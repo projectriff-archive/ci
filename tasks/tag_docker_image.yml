@@ -11,7 +11,8 @@ inputs:
 params:
   DOCKERHUB_PASSWORD: replace-me
   DOCKERHUB_USERNAME: replace-me
-  DOCKERHUB_ORG: replace-me
+  DOCKERHUB_ORG_SOURCE: replace-me
+  DOCKERHUB_ORG_TARGET: replace-me
   DOCKER_IMAGE: replace-me
 
 run:
@@ -34,10 +35,10 @@ run:
 
     echo "Tagging [${DOCKER_IMAGE}:${EXISTING_VERSION}] as [${DOCKER_IMAGE}:${TAG_VERSION}]"
 
-    docker pull "${DOCKERHUB_ORG}/${DOCKER_IMAGE}:${EXISTING_VERSION}"
+    docker pull "${DOCKERHUB_ORG_SOURCE}/${DOCKER_IMAGE}:${EXISTING_VERSION}"
 
     IMAGE_ID=$(docker images "$DOCKERHUB_ORG/$DOCKER_IMAGE" --format {{.ID}})
 
     docker tag "$IMAGE_ID" "$DOCKERHUB_ORG/$DOCKER_IMAGE:$TAG_VERSION"
 
-    docker push "${DOCKERHUB_ORG}/${DOCKER_IMAGE}:${TAG_VERSION}"
+    docker push "${DOCKERHUB_ORG_TARGET}/${DOCKER_IMAGE}:${TAG_VERSION}"
