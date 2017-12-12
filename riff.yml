@@ -397,10 +397,24 @@ jobs:
   <% end %>
 <%= slack_notification %>
 
-- name: manual-images-version-bump-release
+- name: manual-images-release
   plan:
-  <% riff_components.each do |component| %>
-  - put: <%= component.name %>-version
-    params: {bump: final}
-  <% end %>
+  - get: git-pfs-ci
+<% riff_components.each do |component| %>
+  - get: <%= component.name %>-version
+    passed:
+    - build-<%= component.name %>-container
+<% end %>
+<% riff_components.each do |component| %>
+  - task: release-<%= component.name %>
+    file: git-pfs-ci/tasks/tag_docker_image.yml
+    input_mapping: { source-semver: <%= component.name %>-version }
+    privileged: true
+    params:
+      DOCKERHUB_ORG_SOURCE: ((docker-riff-org))
+      DOCKERHUB_ORG_TARGET: ((docker-riff-org))
+      DOCKERHUB_USERNAME: ((docker-riff-username))
+      DOCKERHUB_PASSWORD: ((docker-riff-password))
+      DOCKER_IMAGE: <%= component.docker_image_name %>
+<% end %>
 <%= slack_notification %>
