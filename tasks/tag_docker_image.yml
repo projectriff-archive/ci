@@ -4,6 +4,10 @@ image_resource:
   source:
     repository: concourse/docker-image-resource
 
+inputs:
+- name: git-pfs-ci
+- name: source-semver
+
 params:
   DOCKERHUB_PASSWORD: replace-me
   DOCKERHUB_USERNAME: replace-me
