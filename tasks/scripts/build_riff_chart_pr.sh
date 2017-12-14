@@ -21,6 +21,7 @@ pushd $build_root/git-helm-charts
   case "$RIFF_COMPONENT_SHORTNAME" in
   "httpgw")
     chart_image_override="httpGateway.image.repository=${DOCKERHUB_ORG}/http-gateway"
+    function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
     function_controller_version=$(head "$build_root/function-controller-version/version")
     topic_controller_version=$(head "$build_root/topic-controller-version/version")
     http_gateway_version="$chart_version"
@@ -28,6 +29,7 @@ pushd $build_root/git-helm-charts
     ;;
   "tctrl")
     chart_image_override="topicController.image.repository=${DOCKERHUB_ORG}/topic-controller"
+    function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
     function_controller_version=$(head "$build_root/function-controller-version/version")
     http_gateway_version=$(head "$build_root/http-gateway-version/version")
     topic_controller_version="$chart_version"
@@ -35,9 +37,15 @@ pushd $build_root/git-helm-charts
     ;;
   "fctrl")
     chart_image_override="functionController.image.repository=${DOCKERHUB_ORG}/function-controller"
+    function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
     topic_controller_version=$(head "$build_root/topic-controller-version/version")
     http_gateway_version=$(head "$build_root/http-gateway-version/version")
     function_controller_version="$chart_version"
+
+    ;;
+  "sc")
+    echo "No Sidecar PR support"
+    exit 1
 
     ;;
   *)
