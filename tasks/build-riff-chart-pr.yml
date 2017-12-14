@@ -9,12 +9,10 @@ inputs:
 - name: git-pfs-ci
 
 - name: function-controller-version
-- name: function-sidecar-version
 - name: topic-controller-version
 - name: http-gateway-version
 
 - name: git-function-controller-pr
-- name: git-function-sidecar-pr
 - name: git-topic-controller-pr
 - name: git-http-gateway-pr
 
@@ -28,3 +26,4 @@ run:
 
 params:
   HELM_CHARTS_URL: replace-me
+  DOCKERHUB_ORG: replace-me

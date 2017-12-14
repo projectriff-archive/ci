@@ -16,40 +16,36 @@ pushd $build_root/git-helm-charts
   sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-helm-charts/riff/values.yaml"
 
   function_controller_version=$(determine_riff_version "$build_root/git-function-controller-pr" "$build_root/function-controller-version")
-  function_sidecar_version=$(determine_riff_version "$build_root/git-function-sidecar-pr" "$build_root/function-sidecar-version")
   topic_controller_version=$(determine_riff_version "$build_root/git-topic-controller-pr" "$build_root/topic-controller-version")
   http_gateway_version=$(determine_riff_version "$build_root/git-http-gateway-pr" "$build_root/http-gateway-version")
 
   chart_name=""
   chart_version=""
+  chart_image_override=""
   set +e
     echo "$function_controller_version" | grep pr
     if [ 0 -eq $? ]; then
       suffix=$(echo "$function_controller_version" | cut -d'-' -f2)
       chart_name="rifffctl${suffix}"
       chart_version="${function_controller_version}"
+      chart_image_override="functionController.image.repository=${DOCKERHUB_ORG}/function-controller"
     else
-      echo "$function_sidecar_version" | grep pr
+      echo "$topic_controller_version" | grep pr
       if [ 0 -eq $? ]; then
-        suffix=$(echo "$function_sidecar_version" | cut -d'-' -f2)
-        chart_name="rifffsdcr${suffix}"
-        chart_version="${function_sidecar_version}"
+        suffix=$(echo "$topic_controller_version" | cut -d'-' -f2)
+        chart_name="rifftctrl${suffix}"
+        chart_version="${topic_controller_version}"
+        chart_image_override="topicController.image.repository=${DOCKERHUB_ORG}/topic-controller"
       else
-        echo "$topic_controller_version" | grep pr
+        echo "$http_gateway_version" | grep pr
         if [ 0 -eq $? ]; then
-          suffix=$(echo "$topic_controller_version" | cut -d'-' -f2)
-          chart_name="rifftctrl${suffix}"
-          chart_version="${topic_controller_version}"
+          suffix=$(echo "$http_gateway_version" | cut -d'-' -f2)
+          chart_name="riffhttpgw${suffix}"
+          chart_version="${http_gateway_version}"
+          chart_image_override="httpGateway.image.repository=${DOCKERHUB_ORG}/http-gateway"
         else
-          echo "$http_gateway_version" | grep pr
-          if [ 0 -eq $? ]; then
-            suffix=$(echo "$http_gateway_version" | cut -d'-' -f2)
-            chart_name="riffhttpgw${suffix}"
-            chart_version="${http_gateway_version}"
-          else
-            echo "Failed to determine PR riff component"
-            exit 1
-          fi
+          echo "Failed to determine PR riff component"
+          exit 1
         fi
       fi
     fi
@@ -98,7 +94,7 @@ shift
 
 helm install "\${chart_name}" \
 --version="${chart_version}" \
---set functionController.image.tag=${function_controller_version},functionController.sidecar.image.tag=${function_sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gateway_version} \
+--set functionController.image.tag=${function_controller_version},functionController.sidecar.image.tag=${function_sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gateway_version},${chart_image_override} \
 "\$@"
 
 EOM
