@@ -12,6 +12,9 @@ pushd $build_root/git-helm-charts
 
   helm init --client-only
 
+  # override pull policy for PRs, since the name PR version can easily have multiple commits
+  sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-helm-charts/riff/values.yaml"
+
   function_controller_version=$(determine_riff_version "$build_root/git-function-controller-pr" "$build_root/function-controller-version")
   function_sidecar_version=$(determine_riff_version "$build_root/git-function-sidecar-pr" "$build_root/function-sidecar-version")
   topic_controller_version=$(determine_riff_version "$build_root/git-topic-controller-pr" "$build_root/topic-controller-version")
