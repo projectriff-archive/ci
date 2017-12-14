@@ -309,11 +309,14 @@ jobs:
   - aggregate:
     - get: gcs-riff-chart-latest-name
       passed: [build-riff-chart-<%= component.name %>-pr]
+      version: every
     - get: gcs-riff-chart-latest-version
       passed: [build-riff-chart-<%= component.name %>-pr]
+      version: every
     - get: git-pfs-ci
     - get: gcs-riff-chart-index
       passed: [build-riff-chart-<%= component.name %>-pr]
+      version: every
       trigger: true
 
   - task: clean-riff-deployment
@@ -330,11 +333,14 @@ jobs:
   - aggregate:
     - get: gcs-riff-chart-latest-name
       passed: [clean-riff-pre-deploy-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
     - get: gcs-riff-chart-latest-version
       passed: [clean-riff-pre-deploy-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
     - get: git-pfs-ci
     - get: gcs-riff-chart-index
       passed: [clean-riff-pre-deploy-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
       trigger: true
 
   - task: deploy-riff
@@ -353,11 +359,14 @@ jobs:
     - get: git-riff
     - get: gcs-riff-chart-latest-name
       passed: [deploy-riff-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
     - get: gcs-riff-chart-latest-version
       passed: [deploy-riff-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
     - get: git-pfs-ci
     - get: gcs-riff-chart-index
       passed: [deploy-riff-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
       trigger: true
     - get: git-pfs-system-test
   <% invokers_systest.each do |invoker| %>
@@ -382,11 +391,14 @@ jobs:
   - aggregate:
     - get: gcs-riff-chart-latest-name
       passed: [run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
     - get: gcs-riff-chart-latest-version
       passed: [run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
     - get: git-pfs-ci
     - get: gcs-riff-chart-index
       passed: [run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
       trigger: true
 
   - task: clean-riff-deployment
