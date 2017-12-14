@@ -20,7 +20,7 @@ function generate_tiller_ns_name(){
   local _riff_name="$1"
   local _riff_version="$2"
   local _suffix="$3"
-  local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
+  local _sanitized_version=$(echo "$_riff_version" | sed 's/[^0-9buildpr]//g' |  awk '{print tolower($0)}')
   echo "t-${_riff_name}-${_sanitized_version}-${_suffix}"
 }
 
@@ -28,14 +28,14 @@ function generate_riff_ns_name(){
   local _riff_name="$1"
   local _riff_version="$2"
   local _suffix="$3"
-  local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
+  local _sanitized_version=$(echo "$_riff_version" | sed 's/[^0-9buildpr]//g' |  awk '{print tolower($0)}')
   echo "m-${_riff_name}-${_sanitized_version}-${_suffix}"
 }
 
 function find_existing_tiller_ns(){
   local _riff_name="$1"
   local _riff_version="$2"
-  local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
+  local _sanitized_version=$(echo "$_riff_version" | sed 's/[^0-9buildpr]//g' |  awk '{print tolower($0)}')
 
   set +e
   existing_tiller_ns_name=$(kubectl get ns | grep "t-${_riff_name}-${_sanitized_version}-" | awk '{print $1}')
@@ -46,7 +46,7 @@ function find_existing_tiller_ns(){
 function find_existing_riff_ns(){
   local _riff_name="$1"
   local _riff_version="$2"
-  local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
+  local _sanitized_version=$(echo "$_riff_version" | sed 's/[^0-9buildpr]//g' |  awk '{print tolower($0)}')
 
   set +e
   existing_riff_ns_name=$(kubectl get ns | grep "m-${_riff_name}-${_sanitized_version}-" | awk '{print $1}')
