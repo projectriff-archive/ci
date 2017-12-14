@@ -45,11 +45,11 @@ RND_HTTP_GW_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
 ZIPKIN_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
 DEPLOY_OVERRIDE="httpGateway.service.externalPort=${RND_HTTP_GW_EXTPORT},zipkin.service.externalPort=${ZIPKIN_EXTPORT}"
 
-chart_version_actual=$(helm inspect riffrepo/riff | grep version | awk '{print $2}')
+chart_version_actual=$(helm inspect riffrepo/"${RIFF_NAME}" | grep version | awk '{print $2}')
 
 curl -sL "${HELM_CHARTS_URL}/riff-${chart_version_actual}-install-example.sh" > chart_install.sh
 chmod +x  chart_install.sh
-./chart_install.sh "riffrepo/riff" \
+./chart_install.sh "riffrepo/${RIFF_NAME}" \
   --tiller-namespace="$tiller_ns_name" \
   --namespace="$riff_ns_name" \
   --name="$helm_release_name" \
