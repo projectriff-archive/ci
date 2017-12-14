@@ -1,0 +1,30 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-build
+
+inputs:
+- name: git-helm-charts
+- name: git-pfs-ci
+
+- name: function-controller-version
+- name: function-sidecar-version
+- name: topic-controller-version
+- name: http-gateway-version
+
+- name: git-function-controller-pr
+- name: git-function-sidecar-pr
+- name: git-topic-controller-pr
+- name: git-http-gateway-pr
+
+outputs:
+- name: helm-charts
+- name: helm-charts-install
+- name: helm-charts-latest-version
+
+run:
+  path: git-pfs-ci/tasks/scripts/build_riff_chart.sh
+
+params:
+  HELM_CHARTS_URL: replace-me
