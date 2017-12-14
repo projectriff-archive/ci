@@ -10,7 +10,7 @@ init_kubeconfig
 RIFF_NAME=$(head "$build_root/gcs-riff-chart-latest-name/latest_name")
 RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
 
-timestamp=$(date "+%s")
+timestamp=$(date "+%s" | cut -c 5-10)
 
 tiller_ns_name=$(generate_tiller_ns_name "$RIFF_NAME" "$RIFF_VERSION" "$timestamp")
 riff_ns_name=$(generate_riff_ns_name "$RIFF_NAME" "$RIFF_VERSION" "$timestamp")
