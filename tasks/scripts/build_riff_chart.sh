@@ -67,5 +67,6 @@ EOM
   fi
 
   echo "$chart_version" > "$build_root/helm-charts-latest-version/latest_version"
+  echo "riff" > "$build_root/helm-charts-latest-name/latest_name"
 
 popd
