@@ -17,35 +17,39 @@ function init_docker(){
 }
 
 function generate_tiller_ns_name(){
-  local _riff_version="$1"
-  local _suffix="$2"
+  local _riff_name="$1"
+  local _riff_version="$2"
+  local _suffix="$3"
   local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
-  echo "tiller-${_sanitized_version}-${_suffix}"
+  echo "tiller-${_riff_name}-${_sanitized_version}-${_suffix}"
 }
 
 function generate_riff_ns_name(){
-  local _riff_version="$1"
-  local _suffix="$2"
+  local _riff_name="$1"
+  local _riff_version="$2"
+  local _suffix="$3"
   local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
-  echo "riff-${_sanitized_version}-${_suffix}"
+  echo "${_riff_name}-${_sanitized_version}-${_suffix}"
 }
 
 function find_existing_tiller_ns(){
-  local _riff_version="$1"
+  local _riff_name="$1"
+  local _riff_version="$2"
   local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
 
   set +e
-  existing_tiller_ns_name=$(kubectl get ns | grep "tiller-${_sanitized_version}-" | awk '{print $1}')
+  existing_tiller_ns_name=$(kubectl get ns | grep "tiller-${_riff_name}-${_sanitized_version}-" | awk '{print $1}')
   set -e
   echo "$existing_tiller_ns_name"
 }
 
 function find_existing_riff_ns(){
-  local _riff_version="$1"
+  local _riff_name="$1"
+  local _riff_version="$2"
   local _sanitized_version=$(echo "$_riff_version" | sed 's/\./-/g' |  awk '{print tolower($0)}')
 
   set +e
-  existing_riff_ns_name=$(kubectl get ns | grep "riff-${_sanitized_version}-" | awk '{print $1}')
+  existing_riff_ns_name=$(kubectl get ns | grep "${_riff_name}-${_sanitized_version}-" | awk '{print $1}')
   set -e
   echo "$existing_riff_ns_name"
 }

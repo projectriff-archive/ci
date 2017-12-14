@@ -9,10 +9,13 @@ source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 init_docker
 init_kubeconfig
 
+RIFF_NAME=$(head "$build_root/gcs-riff-chart-latest-name/latest_name")
 RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
+
 JAVA_INVOKER_VERSION=$(head "$build_root/java-function-invoker-version/version")
 NODE_INVOKER_VERSION=$(head "$build_root/node-function-invoker-version/version")
-existing_riff_ns=$(find_existing_riff_ns "$RIFF_VERSION")
+
+existing_riff_ns=$(find_existing_riff_ns "$RIFF_NAME" "$RIFF_VERSION")
 
 current_kubeconfig_context="$(kubectl config current-context)"
 
