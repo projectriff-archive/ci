@@ -12,9 +12,7 @@ inputs:
 - name: topic-controller-version
 - name: http-gateway-version
 
-- name: git-function-controller-pr
-- name: git-topic-controller-pr
-- name: git-http-gateway-pr
+- name: git-riff-component-pr
 
 outputs:
 - name: helm-charts
@@ -27,3 +25,4 @@ run:
 params:
   HELM_CHARTS_URL: replace-me
   DOCKERHUB_ORG: replace-me
+  RIFF_COMPONENT_SHORTNAME: replace-me

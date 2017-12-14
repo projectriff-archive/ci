@@ -15,51 +15,36 @@ pushd $build_root/git-helm-charts
   # override pull policy for PRs, since the name PR version can easily have multiple commits
   sed -i -e 's/IfNotPresent/Always/g' "$build_root/git-helm-charts/riff/values.yaml"
 
-  function_controller_version=$(determine_riff_version "$build_root/git-function-controller-pr" "$build_root/function-controller-version")
-  topic_controller_version=$(determine_riff_version "$build_root/git-topic-controller-pr" "$build_root/topic-controller-version")
-  http_gateway_version=$(determine_riff_version "$build_root/git-http-gateway-pr" "$build_root/http-gateway-version")
+  chart_version=$(determine_riff_version "$build_root/git-riff-component-pr" "/dev/null")
+  chart_name="riff${RIFF_COMPONENT_SHORTNAME}"
 
-  chart_name=""
-  chart_version=""
-  chart_image_override=""
-  set +e
-    echo "$function_controller_version" | grep pr
-    if [ 0 -eq $? ]; then
-      suffix=$(echo "$function_controller_version" | cut -d'-' -f2)
-      chart_name="rifffctl${suffix}"
-      chart_version="${function_controller_version}"
-      chart_image_override="functionController.image.repository=${DOCKERHUB_ORG}/function-controller"
-    else
-      echo "$topic_controller_version" | grep pr
-      if [ 0 -eq $? ]; then
-        suffix=$(echo "$topic_controller_version" | cut -d'-' -f2)
-        chart_name="rifftctrl${suffix}"
-        chart_version="${topic_controller_version}"
-        chart_image_override="topicController.image.repository=${DOCKERHUB_ORG}/topic-controller"
-      else
-        echo "$http_gateway_version" | grep pr
-        if [ 0 -eq $? ]; then
-          suffix=$(echo "$http_gateway_version" | cut -d'-' -f2)
-          chart_name="riffhttpgw${suffix}"
-          chart_version="${http_gateway_version}"
-          chart_image_override="httpGateway.image.repository=${DOCKERHUB_ORG}/http-gateway"
-        else
-          echo "Failed to determine PR riff component"
-          exit 1
-        fi
-      fi
-    fi
-  set -e
+  case "$RIFF_COMPONENT_SHORTNAME" in
+  "httpgw")
+    chart_image_override="httpGateway.image.repository=${DOCKERHUB_ORG}/http-gateway"
+    function_controller_version=$(head "$build_root/function-controller-version/version")
+    topic_controller_version=$(head "$build_root/topic-controller-version/version")
+    http_gateway_version="$chart_version"
 
-  if [ -z $chart_name ]; then
-    echo "Failed to determine PR chart name"
+    ;;
+  "tctrl")
+    chart_image_override="topicController.image.repository=${DOCKERHUB_ORG}/topic-controller"
+    function_controller_version=$(head "$build_root/function-controller-version/version")
+    http_gateway_version=$(head "$build_root/http-gateway-version/version")
+    topic_controller_version="$chart_version"
+
+    ;;
+  "fctrl")
+    chart_image_override="functionController.image.repository=${DOCKERHUB_ORG}/function-controller"
+    topic_controller_version=$(head "$build_root/topic-controller-version/version")
+    http_gateway_version=$(head "$build_root/http-gateway-version/version")
+    function_controller_version="$chart_version"
+
+    ;;
+  *)
+    echo "Invalid component specified for PR chart: [$RIFF_COMPONENT_SHORTNAME]"
     exit 1
-  fi
-
-  if [ -z $chart_version ]; then
-    echo "Failed to determine PR chart version"
-    exit 1
-  fi
+    ;;
+  esac
 
   cat "$build_root/git-helm-charts/riff/Chart.yaml" | sed -e "s/name: riff/name: $chart_name/g" -e "s/version.*/version: $chart_version/g" > "$build_root/git-helm-charts/riff/Chart.yaml.new"
 
