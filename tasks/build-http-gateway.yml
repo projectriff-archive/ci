@@ -40,6 +40,7 @@ run:
     trap killjava INT QUIT TERM EXIT
 
     pushd "$GOPATH/src/github.com/sk8sio/http-gateway/"
+      make test
 
       make build-for-docker
 
