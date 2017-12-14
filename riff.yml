@@ -99,6 +99,13 @@ resources:
     json_key: ((gcp-json-key))
     versioned_file: latest_version
 
+- name: gcs-riff-chart-latest-name
+  type: gcs-resource
+  source:
+    bucket: <%= charts_bucket_name %>
+    json_key: ((gcp-json-key))
+    versioned_file: latest_name
+
 <% riff_components.each do |component| %>
 - name: <%= component.name %>-version
   type: semver
@@ -245,6 +252,10 @@ jobs:
     params:
       file: helm-charts-latest-version/latest_version
       predefined_acl: publicRead
+  - put: gcs-riff-chart-latest-name
+    params:
+      file: helm-charts-latest-name/latest_name
+      predefined_acl: publicRead
   - put: gcs-riff-charts
     params:
       file: helm-charts/*.tgz
@@ -272,6 +283,8 @@ jobs:
   - aggregate:
     - get: gcs-riff-chart-latest-version
       passed: [build-riff-chart]
+    - get: gcs-riff-chart-latest-name
+      passed: [build-riff-chart]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
@@ -294,6 +307,8 @@ jobs:
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
+      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
+    - get: gcs-riff-chart-latest-name
       passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
@@ -319,6 +334,8 @@ jobs:
   - aggregate:
     - get: git-riff
     - get: gcs-riff-chart-latest-version
+      passed: [deploy-riff-<%= k8s_env.name %>]
+    - get: gcs-riff-chart-latest-name
       passed: [deploy-riff-<%= k8s_env.name %>]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
@@ -347,6 +364,8 @@ jobs:
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
+      passed: [run-riff-system-tests-<%= k8s_env.name %>]
+    - get: gcs-riff-chart-latest-name
       passed: [run-riff-system-tests-<%= k8s_env.name %>]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
