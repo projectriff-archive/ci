@@ -17,6 +17,7 @@ outputs:
 - name: helm-charts
 - name: helm-charts-install
 - name: helm-charts-latest-version
+- name: helm-charts-latest-name
 
 run:
   path: git-pfs-ci/tasks/scripts/build_riff_chart.sh
