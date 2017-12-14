@@ -39,15 +39,25 @@ kubectl get customresourcedefinitions --all-namespaces -o json |
 # deploy previously constructed helm chart
 helm repo add riffrepo "$HELM_CHARTS_URL"
 helm repo update riffrepo
-helm search riff
+helm search "$RIFF_NAME"
 
 RND_HTTP_GW_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
 ZIPKIN_EXTPORT=$(( ( RANDOM % 1000 )  + 40000 ))
 DEPLOY_OVERRIDE="httpGateway.service.externalPort=${RND_HTTP_GW_EXTPORT},zipkin.service.externalPort=${ZIPKIN_EXTPORT}"
 
-chart_version_actual=$(helm inspect riffrepo/"${RIFF_NAME}" | grep version | awk '{print $2}')
+chart_version_reported=$(helm search riffrepo/"${RIFF_NAME}" | grep "${RIFF_VERSION}" | grep riffrepo/"${RIFF_NAME}" | awk '{print $2}')
+if [ "$chart_version_reported" != "$RIFF_VERSION" ]; then
+  echo "Detected chart version from Helm search [${chart_version_reported}] for [riffrepo/${RIFF_NAME}] does not match target [${RIFF_VERSION}]"
+  exit 1
+fi
 
-curl -sL "${HELM_CHARTS_URL}/riff-${chart_version_actual}-install-example.sh" > chart_install.sh
+chart_version_actual=$(helm inspect riffrepo/"${RIFF_NAME}" --version="${chart_version_reported}" | grep version | awk '{print $2}')
+if [ "$chart_version_actual" != "$chart_version_reported" ]; then
+  echo "Detected chart version from Helm inspect [${chart_version_actual}] for [riffrepo/${RIFF_NAME}] does not match target [${chart_version_actual}]"
+  exit 1
+fi
+
+curl -sL "${HELM_CHARTS_URL}/${RIFF_NAME}-${chart_version_actual}-install-example.sh" > chart_install.sh
 chmod +x  chart_install.sh
 ./chart_install.sh "riffrepo/${RIFF_NAME}" \
   --tiller-namespace="$tiller_ns_name" \
