@@ -163,14 +163,14 @@ resources:
   source:
     uri: git@github.com:pivotal-cf/pfs-ci.git
     private_key: ((git-pfs-ci-ssh-key))
-    branch: riff
+    branch: master
 
 - name: git-pfs-system-test
   type: git
   source:
     uri: git@github.com:pivotal-cf/pfs-system-test.git
     private_key: ((git-pfs-ci-ssh-key))
-    branch: riff
+    branch: master
 
 #####################################################
 # Docker images

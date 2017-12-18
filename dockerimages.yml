@@ -4,7 +4,7 @@ resources:
   source:
     uri: git@github.com:pivotal-cf/pfs-ci.git
     private_key: ((git-pfs-ci-ssh-key))
-    branch: riff
+    branch: master
 
 - name: faas_build_dockerimage
   type: docker-image
