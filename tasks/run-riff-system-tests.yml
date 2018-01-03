@@ -12,6 +12,8 @@ inputs:
 - name: gcs-riff-chart-latest-name
 - name: java-function-invoker-version
 - name: node-function-invoker-version
+- name: python2-function-invoker-version
+- name: shell-function-invoker-version
 
 run:
   path: git-pfs-ci/tasks/scripts/run_riff_system_tests.sh
