@@ -14,6 +14,8 @@ RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
 
 JAVA_INVOKER_VERSION=$(head "$build_root/java-function-invoker-version/version")
 NODE_INVOKER_VERSION=$(head "$build_root/node-function-invoker-version/version")
+PYTHON2_INVOKER_VERSION=$(head "$build_root/python2-function-invoker-version/version")
+SHELL_INVOKER_VERSION=$(head "$build_root/shell-function-invoker-version/version")
 
 existing_riff_ns=$(find_existing_riff_ns "$RIFF_NAME" "$RIFF_VERSION")
 
@@ -33,6 +35,8 @@ kafka_pod=$(kubectl -n "$existing_riff_ns"  get pod -l component=kafka-broker -o
 
 export SYS_TEST_JAVA_INVOKER_VERSION="$JAVA_INVOKER_VERSION"
 export SYS_TEST_NODE_INVOKER_VERSION="$NODE_INVOKER_VERSION"
+export SYS_TEST_PYTHON2_INVOKER_VERSION="$PYTHON2_INVOKER_VERSION"
+export SYS_TEST_SHELL_INVOKER_VERSION="$SHELL_INVOKER_VERSION"
 export SYS_TEST_NS="$existing_riff_ns"
 export SYS_TEST_HTTP_GW_URL="http://${http_gw_host}:${http_gw_port}"
 export SYS_TEST_KAFKA_POD_NAME="$kafka_pod"
