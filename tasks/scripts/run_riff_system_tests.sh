@@ -57,7 +57,16 @@ set -e
 if [ "0" != "$test_retcode" ]; then
   echo "Tests Failed. Printing logs from all pods in [$existing_riff_ns]"
 
+  set +e
   kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | xargs -I{} kubectl logs {} -n "$existing_riff_ns"
+  logsretcode=$?
+  set -e
+
+  if [ "$logsretcode" != "0" ]; then
+    workload_pod=$(kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -v riff)
+    kubectl logs "$workload_pod" -n "$existing_riff_ns" main
+    kubectl logs "$workload_pod" -n "$existing_riff_ns" sidecar
+  fi
 fi
 
 exit $test_retcode
