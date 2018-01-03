@@ -63,9 +63,8 @@ if [ "0" != "$test_retcode" ]; then
   set -e
 
   if [ "$logsretcode" != "0" ]; then
-    workload_pod=$(kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -v riff)
-    kubectl logs "$workload_pod" -n "$existing_riff_ns" main
-    kubectl logs "$workload_pod" -n "$existing_riff_ns" sidecar
+    kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -v riff | xargs -I{} kubectl -n "$existing_riff_ns" logs {} sidecar
+    kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -v riff | xargs -I{} kubectl -n "$existing_riff_ns" logs {} main
   fi
 fi
 
