@@ -352,7 +352,7 @@ jobs:
 <%= slack_notification %>
 
 - name: run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>
-  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>]
+  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>, <%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: git-riff
@@ -385,7 +385,7 @@ jobs:
 <%= slack_notification %>
 
 - name: clean-riff-post-deploy-<%= component.name %>-pr-<%= k8s_env.name %>
-  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>]
+  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>, <%= k8s_env.name %>]
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-name
