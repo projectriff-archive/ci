@@ -1,0 +1,13 @@
+---
+external_url: https://ci2.faas.to.cf-app.com
+network_name: default
+web_vm_type: medium-https
+db_vm_type: medium
+db_persistent_disk_type: default
+worker_vm_type: large
+github_auth:
+  authorize:
+  - organization: pivotal-cf
+    teams: [pfs]
+worker_instances: 2
+web_instances: 1
