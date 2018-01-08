@@ -23,7 +23,7 @@ pushd $script_dir
   echo "|  Run This              |"
   echo " ------------------------ "
   echo
-  echo ' bbl print-env > bblenv && source bblenv && rm bblenv '
+  echo " bbl -s $script_dir print-env > $script_dir/bblenv && source $script_dir/bblenv && rm $script_dir/bblenv && $script_dir/bbl_clean.sh "
   echo
   echo
 
