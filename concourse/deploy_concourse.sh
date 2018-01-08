@@ -13,6 +13,8 @@ git clone https://github.com/concourse/concourse-deployment.git "$script_dir/con
 
 pushd "$script_dir/concourse-deployment/cluster"
 
+  concourse_deployment_sha=$(git rev-parse HEAD)
+
   patch concourse.yml "$script_dir/concourse.yml.patch"
 
   bosh -e ${BOSH_ENVIRONMENT} deploy -d "${deployment_name}" concourse.yml \
@@ -28,3 +30,14 @@ pushd "$script_dir/concourse-deployment/cluster"
     --var github_client.password=${github_client_secret}
 
 popd
+
+rm -rf "$script_dir/concourse-deployment/cluster"
+
+set +x
+echo "---------------------------------"
+echo
+echo "Deployed [$deployment_name] using concourse-deployment [$concourse_deployment_sha]"
+echo
+echo "Concourse creds: ${script_dir}/creds-${deployment_name}.yml"
+echo
+echo "---------------------------------"
