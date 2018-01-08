@@ -3,6 +3,6 @@
 set -exu -o pipefail
 
 rm -rf vars*
-rm bbl-state.json
-rm pfs-ci-key.json
-rm bblenv
+rm -f bbl-state.json
+rm -f pfs-ci-key.json
+rm -f bblenv

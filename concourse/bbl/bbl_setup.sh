@@ -3,24 +3,28 @@
 set -exu -o pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-vars' | base64 -D | tar xJvf -
-lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-vars-tf' | base64 -D | tar xJvf -
-lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-vars-director' | base64 -D | tar xJvf -
-mv vars_tf/* vars/
-mv vars_director/* vars/
-rm -r vars_tf
-rm -r vars_director
+pushd $script_dir
 
-lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-state' > "$script_dir/bbl-state.json"
-lpass show --note 'Shared-pfs-eng/pfs-gcp-ci-svc' > "$script_dir/pfs-ci-key.json"
+  lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-vars' | base64 -D | tar xJvf -
+  lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-vars-tf' | base64 -D | tar xJvf -
+  lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-vars-director' | base64 -D | tar xJvf -
+  mv vars_tf/* vars/
+  mv vars_director/* vars/
+  rm -r vars_tf
+  rm -r vars_director
 
-bbl print-env
+  lpass show --note 'Shared-pfs-eng/pfs-concourse-bosh-bbl-state' > "$script_dir/bbl-state.json"
+  lpass show --note 'Shared-pfs-eng/pfs-gcp-ci-svc' > "$script_dir/pfs-ci-key.json"
 
-set +x
-echo " ------------------------ "
-echo "|  Run This              |"
-echo " ------------------------ "
-echo
-echo ' bbl print-env > bblenv && source bblenv && rm bblenv '
-echo
-echo
+  bbl print-env
+
+  set +x
+  echo " ------------------------ "
+  echo "|  Run This              |"
+  echo " ------------------------ "
+  echo
+  echo ' bbl print-env > bblenv && source bblenv && rm bblenv '
+  echo
+  echo
+
+popd
