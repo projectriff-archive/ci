@@ -8,14 +8,14 @@
 - Log into LastPass (must have access to the `Shared-pfs-eng` folder)
 - When making changes to a pipeline, use `./set_pipeline <pipeline-name>` to submit changes upstream
 
-### Concourse BOSH 
+### Concourse BOSH
 - Install the BOSH Bootloader CLI (`bbl`: https://github.com/cloudfoundry/bosh-bootloader)
 - Install the BOSH CLI (`bosh`: https://bosh.io/docs/cli-v2.html#install)
 - Log into LastPass (must have access to the `Shared-pfs-eng` folder)
-- To export environment variables for BOSH access, run: `eval "$(./concourse/bbl/print_bbl_env.sh)"` in the `pfs-ci` directory
+- To set up the BBL environment, run `pfs-ci/concourse/bbl/bbl_setup.sh`
 
 ### Versioning
-- Container images and Helm charts built from `riff` are versioned using the Concourse `semver` resource. 
+- Container images and Helm charts built from `riff` are versioned using the Concourse `semver` resource.
 - Build numbers for container images are automatically bumped each time a container is built
 - All other version changes are operator/developer controlled
 #### Bumping Patch Version
