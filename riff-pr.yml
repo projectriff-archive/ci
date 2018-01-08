@@ -53,7 +53,7 @@
     riff_components_testable << component if ['http-gateway', 'topic-controller', 'function-controller'].include? component.name
   end
   riff_components.each do |component|
-    invokers_systest << component   if ['java-function-invoker', 'node-function-invoker'].include? component.name
+    invokers_systest << component   if ['java-function-invoker', 'node-function-invoker', 'python2-function-invoker', 'shell-function-invoker'].include? component.name
   end
 
   charts_bucket_name='riff-charts-pr'
