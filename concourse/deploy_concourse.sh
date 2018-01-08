@@ -3,11 +3,17 @@
 set -exuo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-deployment_name="pfs-gcp-concourse-next"
+bosh vms > /dev/null
 
+deployment_name="pfs-gcp-concourse-next"
+lpass_creds_entry_name="pfs-ci-concourse-next-creds"
+
+existing_concourse_creds=$(lpass show --note "Shared-pfs-eng/${lpass_creds_entry_name}")
 github_client_id=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci2/client_id')
 github_client_secret=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci2/client_secret')
 github_authorize='{"organization": "pivotal-cf", "teams": ["pfs"]}'
+
+echo "$existing_concourse_creds" > "${script_dir}/creds-${deployment_name}.yml"
 
 git clone https://github.com/concourse/concourse-deployment.git "$script_dir/concourse-deployment"
 
@@ -27,18 +33,21 @@ pushd "$script_dir/concourse-deployment/cluster"
     -o operations/github-auth.yml \
     --var deployment_name=${deployment_name} \
     --var github_client.username=${github_client_id} \
-    --var github_client.password=${github_client_secret}
+    --var github_client.password=${github_client_secret} \
+    --no-redact
 
 popd
 
-rm -rf "$script_dir/concourse-deployment/cluster"
+rm -rf "$script_dir/concourse-deployment"
 
 set +x
 echo "---------------------------------"
 echo
 echo "Deployed [$deployment_name] using concourse-deployment [$concourse_deployment_sha]"
 echo
-echo "Concourse creds: ${script_dir}/creds-${deployment_name}.yml"
+echo "Concourse creds: [${script_dir}/creds-${deployment_name}.yml]"
+echo
+echo "Update creds in LastPass: [${lpass_creds_entry_name}]"
 echo
 echo "---------------------------------"
 

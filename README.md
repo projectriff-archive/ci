@@ -1,9 +1,9 @@
 # PFS CI
 
 ### Concourse: https://ci.faas.to.cf-app.com
-- Login to the `pfs` team (via GitHub - must belong to the `pfs` collaborator team)
+- GitHub auth; must belong to the `pivotal-cf/pfs` collaborator team
 - Install `fly` locally (http://concourse.ci/single-page.html#fly-cli)
-- Authenticate with Concourse: `fly -t faas login -c https://ci.faas.to.cf-app.com -k -n pfs`
+- Authenticate with Concourse: `fly -t faas login -c https://ci.faas.to.cf-app.com -k
 - Install the LastPass CLI (`lpass`: https://github.com/lastpass/lastpass-cli) and ensure it is available on the `PATH`
 - Log into LastPass (must have access to the `Shared-pfs-eng` folder)
 - When making changes to a pipeline, use `./set_pipeline <pipeline-name>` to submit changes upstream
@@ -13,6 +13,7 @@
 - Install the BOSH CLI (`bosh`: https://bosh.io/docs/cli-v2.html#install)
 - Log into LastPass (must have access to the `Shared-pfs-eng` folder)
 - To set up the BBL environment, run `pfs-ci/concourse/bbl/bbl_setup.sh`
+- To deploy Concourse, run `pfs-ci/concourse/deploy_concourse`
 
 ### Versioning
 - Container images and Helm charts built from `riff` are versioned using the Concourse `semver` resource.
