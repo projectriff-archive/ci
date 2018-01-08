@@ -3,7 +3,7 @@
 set -exuo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-deployment_name="pfs-gcp-concourse-2"
+deployment_name="pfs-gcp-concourse-next"
 
 github_client_id=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci2/client_id')
 github_client_secret=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci2/client_secret')
@@ -41,3 +41,5 @@ echo
 echo "Concourse creds: ${script_dir}/creds-${deployment_name}.yml"
 echo
 echo "---------------------------------"
+
+bosh vms -d "$deployment_name"
