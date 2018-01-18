@@ -52,7 +52,8 @@ terraform "${COMMAND}" \
   -var zone="${AZ}" \
   -var region="${REGION}" \
   -var subnet_ip_prefix="${SUBNET_IP_PREFIX}" \
-  -state="$build_root/tf-output/iaas.terraform.tfstate"
+  -state="$build_root/tf-output/iaas.terraform.tfstate" \
+  -auto-approve
 
 echo "Paving Routing"
 
@@ -70,7 +71,8 @@ terraform "${COMMAND}" \
   -var zone="${AZ}" \
   -var region="${REGION}" \
   -var ip_cidr_range="${SUBNET_IP_PREFIX}.0/24" \
-  -state="$build_root/tf-output/routing.terraform.tfstate"
+  -state="$build_root/tf-output/routing.terraform.tfstate" \
+  -auto-approve
 
 terraform output -state="$build_root/tf-output/routing.terraform.tfstate"  kubo_master_target_pool > "$build_root/tf-output/master_target_pool"
 terraform output -state="$build_root/tf-output/routing.terraform.tfstate"  master_lb_ip_address > "$build_root/tf-output/kubernetes_master_host"
