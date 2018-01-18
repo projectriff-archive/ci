@@ -8,8 +8,8 @@ run:
   path: bash
   args:
   - git-pfs-ci/tasks/scripts/tf_invoke.sh
-  - tf-source-dir/docs/user-guide/platforms/gcp
-  - tf-source-dir/docs/user-guide/routing/gcp
+  - tf-source-dir/docs/terraform/gcp/platform
+  - tf-source-dir/docs/terraform/gcp/routing
 
 inputs:
 - name: git-pfs-ci
