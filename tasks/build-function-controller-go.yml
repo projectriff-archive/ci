@@ -1,0 +1,45 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/kafka-zookeeper
+
+inputs:
+- name: function-controller-version
+- name: git-function-controller
+- name: git-pfs-ci
+
+outputs:
+- name: docker-context
+
+run:
+  path: /bin/bash
+  args:
+  - -o
+  - pipefail
+  - -exc
+  - |
+
+    build_root=$(pwd)
+
+    source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+    RIFF_VERSION=$(determine_riff_version "$build_root/git-function-controller" "$build_root/function-controller-version")
+
+    export GOPATH=$(go env GOPATH)
+
+    mkdir -p "$GOPATH/src/github.com/fabric8io"
+    cp -pr git-function-controller "$GOPATH/src/github.com/projectriff/function-controller"
+
+    pushd "$GOPATH/src/github.com/projectriff/function-controller/"
+
+      make build-for-docker
+
+      make test
+
+      ls -lath
+
+      cp -pr . "$build_root/docker-context/"
+
+      echo "$RIFF_VERSION" > "$build_root/docker-context/docker_version"
+
+    popd
