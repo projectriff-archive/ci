@@ -27,7 +27,7 @@ run:
 
     export GOPATH=$(go env GOPATH)
 
-    mkdir -p "$GOPATH/src/github.com/fabric8io"
+    mkdir -p "$GOPATH/src/github.com/projectriff"
     cp -pr git-function-controller "$GOPATH/src/github.com/projectriff/function-controller"
 
     pushd "$GOPATH/src/github.com/projectriff/function-controller/"
