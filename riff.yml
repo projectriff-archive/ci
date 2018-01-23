@@ -21,13 +21,13 @@
                         'node-function-invoker',
                         'projectriff',
                         'node-function-invoker',
-                        'build-node-function-invoker.yml'),
+                        'node-invoker/build/task.yml'),
 
     RiffComponent.new(  'shell-function-invoker',
                         'shell-function-invoker',
                         'projectriff',
                         'shell-function-invoker',
-                        'build-shell-function-invoker.yml'),
+                        'shell-invoker/build/task.yml'),
 
     RiffComponent.new(  'java-function-invoker',
                         'java-function-invoker',
@@ -39,7 +39,7 @@
                         'python2-function-invoker',
                         'projectriff',
                         'python2-function-invoker',
-                        'build-python2-function-invoker.yml'),
+                        'python2-invoker/build/task.yml'),
   ]
 
   charts_bucket_name='riff-charts'
