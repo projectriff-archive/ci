@@ -1,0 +1,18 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-cli-build
+
+inputs:
+- name: git-faas-cli
+- name: git-pfs-ci
+
+outputs:
+- name: faas-cli-out
+
+params:
+  KUBECONFIG_STRING: replace-me
+
+run:
+  path: git-pfs-ci/tasks/build-faas-cli/run
