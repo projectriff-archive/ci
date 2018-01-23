@@ -8,23 +8,19 @@ inputs:
 - name: git-helm-charts
 - name: git-pfs-ci
 
-- name: function-sidecar-version
 - name: function-controller-version
+- name: function-sidecar-version
 - name: topic-controller-version
 - name: http-gateway-version
-
-- name: git-riff-component-pr
 
 outputs:
 - name: helm-charts
 - name: helm-charts-install
-- name: helm-charts-latest-name
 - name: helm-charts-latest-version
+- name: helm-charts-latest-name
 
 run:
-  path: git-pfs-ci/tasks/scripts/build_riff_chart_pr.sh
+  path: git-pfs-ci/tasks/helm-charts/riff/run
 
 params:
   HELM_CHARTS_URL: replace-me
-  DOCKERHUB_ORG: replace-me
-  RIFF_COMPONENT_SHORTNAME: replace-me
