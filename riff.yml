@@ -12,7 +12,7 @@
   :build_task_file)
 
   riff_components = [
-    RiffComponent.new('function-sidecar',     'function-sidecar',     'projectriff', 'function-sidecar',      'build-sidecar.yml'),
+    RiffComponent.new('function-sidecar',     'function-sidecar',     'projectriff', 'function-sidecar',      'sidecar/build/task.yml'),
     RiffComponent.new('http-gateway',         'http-gateway',         'projectriff', 'http-gateway',          'http-gateway/build/task.yml'),
     RiffComponent.new('topic-controller',     'topic-controller',     'projectriff', 'topic-controller',      'build-topic-controller.yml'),
     RiffComponent.new('function-controller',  'function-controller',  'projectriff', 'function-controller',   'build-function-controller.yml'),
