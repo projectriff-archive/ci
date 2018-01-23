@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+build_root=$(pwd)
+
+source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+RIFF_VERSION=$(determine_riff_version "$build_root/git-topic-controller" "$build_root/topic-controller-version")
+
+export GOPATH=$(go env GOPATH)
+
+mkdir -p "$GOPATH/src/github.com/projectriff"
+cp -pr git-topic-controller "$GOPATH/src/github.com/projectriff/topic-controller"
+
+pushd "$GOPATH/src/github.com/projectriff/topic-controller/"
+
+    make build-for-docker
+
+    make test
+
+    ls -lath
+
+    cp -pr . "$build_root/docker-context/"
+
+    echo "$RIFF_VERSION" > "$build_root/docker-context/docker_version"
+
+popd
