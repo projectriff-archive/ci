@@ -42,13 +42,6 @@ resources:
     username: ((docker-sk8s-username))
     password: ((docker-sk8s-password))
 
-- name: minikube_dockerimage
-  type: docker-image
-  source:
-    repository: ((docker-sk8s-org))/test-minikube
-    username: ((docker-sk8s-username))
-    password: ((docker-sk8s-password))
-
 jobs:
 
 - name: faas_build_dockerimage
@@ -85,10 +78,3 @@ jobs:
   - put: kafka_zookeeper_dockerimage
     params:
       build: git-pfs-ci/tasks/containers/kafka_zookeeper
-
-- name: minikube_dockerimage
-  plan:
-  - get: git-pfs-ci
-  - put: minikube_dockerimage
-    params:
-      build: git-pfs-ci/tasks/containers/minikube
