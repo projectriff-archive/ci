@@ -45,11 +45,8 @@
   charts_bucket_name='riff-charts'
 
   k8s_envs = [
-    K8sEnvironment.new('kubo', 'pfs-gcp-kubeconfig-pfsenv01'),
     K8sEnvironment.new('gke', 'pfs-gcp-kubeconfig-gke-ci'),
-  #  K8sEnvironment.new('minikube', 'pfs-gcp-kubeconfig-minikube-ci')
   ]
-#  slack_notification=""
 
 slack_notification="""
   on_failure:
