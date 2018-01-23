@@ -33,7 +33,7 @@
                         'java-function-invoker',
                         'projectriff',
                         'java-function-invoker',
-                        'build-java-function-invoker.yml'),
+                        'java-invoker/build/task.yml'),
 
     RiffComponent.new(  'python2-function-invoker',
                         'python2-function-invoker',
