@@ -265,12 +265,6 @@ jobs:
     params:
       file: helm-charts/index.yaml
       predefined_acl: publicRead
-  - task: config-chart-bucket
-    file: git-pfs-ci/tasks/config-chart-bucket.yml
-    params:
-      GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
-      PROJECT_ID: ((pfs-gcp-ci-project))
-      CHART_BUCKET_NAME: <%= charts_bucket_name %>
 <%= slack_notification %>
 
 <% k8s_envs.each do |k8s_env| %>
