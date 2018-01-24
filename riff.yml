@@ -390,7 +390,7 @@ jobs:
 
 <% k8s_envs.each do |k8s_env| %>
   - task: publish-crds-<%= k8s_env.name %>
-    file: git-pfs-ci/tasks/publish-crds.yml
+    file: git-pfs-ci/tasks/custom-resource-definitions/publish/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))

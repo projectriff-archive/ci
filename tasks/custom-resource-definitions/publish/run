@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+source git-pfs-ci/tasks/scripts/common.sh
+init_kubeconfig
+
+cat git-helm-charts/riff/templates/function-resource.yaml | grep -v '{{' > function-resource.yaml
+cat git-helm-charts/riff/templates/topic-resource.yaml | grep -v '{{' > topic-resource.yaml
+
+kubectl apply -f function-resource.yaml
+kubectl apply -f topic-resource.yaml
