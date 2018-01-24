@@ -2,12 +2,11 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: sk8s/java-build
+    repository: sk8s/kafka-zookeeper
 
 inputs:
 - name: function-controller-version
 - name: git-function-controller
-- name: git-kubernetes-model
 - name: git-pfs-ci
 
 outputs:
@@ -28,18 +27,18 @@ run:
 
     export GOPATH=$(go env GOPATH)
 
-    mkdir -p "$GOPATH/src/github.com/fabric8io"
-    cp -pr git-kubernetes-model/ "$GOPATH/src/github.com/fabric8io/kubernetes-model"
+    mkdir -p "$GOPATH/src/github.com/projectriff"
+    cp -pr git-function-controller "$GOPATH/src/github.com/projectriff/function-controller"
 
-    pushd "$GOPATH/src/github.com/fabric8io/kubernetes-model/"
-      make
-    popd
+    pushd "$GOPATH/src/github.com/projectriff/function-controller/"
 
-    pushd "$build_root/git-function-controller/"
+      make build-for-docker
 
-      ./mvnw clean package
+      make test
 
-      cp -pr ./function-controller/* "$build_root/docker-context/"
+      ls -lath
+
+      cp -pr . "$build_root/docker-context/"
 
       echo "$RIFF_VERSION" > "$build_root/docker-context/docker_version"
 

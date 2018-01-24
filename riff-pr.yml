@@ -16,7 +16,7 @@
     RiffComponent.new('function-sidecar',    'sc',      'function-sidecar',     'projectriff', 'function-sidecar',      'build-sidecar.yml'),
     RiffComponent.new('http-gateway',        'httpgw',  'http-gateway',         'projectriff', 'http-gateway',          'build-http-gateway.yml'),
     RiffComponent.new('topic-controller',    'tctrl',   'topic-controller',     'projectriff', 'topic-controller',      'build-topic-controller.yml'),
-    RiffComponent.new('function-controller', 'fctrl',   'function-controller',  'projectriff', 'function-controller',   'build-function-controller-go.yml'),
+    RiffComponent.new('function-controller', 'fctrl',   'function-controller',  'projectriff', 'function-controller',   'build-function-controller.yml'),
 
     RiffComponent.new(  'node-function-invoker',
                         'invnode',
