@@ -1,0 +1,16 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/kafka-zookeeper
+
+inputs:
+- name: function-controller-version
+- name: git-function-controller
+- name: git-pfs-ci
+
+outputs:
+- name: docker-context
+
+run:
+  path: git-pfs-ci/tasks/function-controller/build/run
