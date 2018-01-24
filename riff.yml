@@ -292,7 +292,7 @@ jobs:
       trigger: true
 
   - task: clean-riff-deployment
-    file: git-pfs-ci/tasks/clean-riff-deployment.yml
+    file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
@@ -374,7 +374,7 @@ jobs:
       trigger: true
 
   - task: clean-riff-deployment
-    file: git-pfs-ci/tasks/clean-riff-deployment.yml
+    file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
