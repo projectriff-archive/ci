@@ -13,7 +13,7 @@ print_usage() {
   echo "    $0 <pipeline name> [branch name] "
   echo ""
   echo "    valid pipeline names:"
-  for name in ${ci_dir}/*.yml; do
+  for name in ${ci_dir}/pipelines/*.yml; do
     local pipeline_name
     pipeline_name="$(basename "${name}")"
     echo "        - ${pipeline_name%.yml}"
@@ -24,9 +24,9 @@ print_usage() {
 extract_pipeline_name() {
   local pipeline_name="$1"
 
-  local pipeline_filename="${ci_dir}/${pipeline_name}.yml"
+  local pipeline_filename="${ci_dir}/pipelines/${pipeline_name}.yml"
   if [ ! -f "${pipeline_filename}" ]; then
-    pipeline_filename="${ci_dir}/${pipeline_name}"
+    pipeline_filename="${ci_dir}/pipelines/${pipeline_name}"
     if [ ! -f "${pipeline_filename}" ]; then
       echo "Unknown pipeline name ${pipeline_name}"
       print_usage
@@ -46,7 +46,7 @@ main() {
   fi
   pipeline_name=$(extract_pipeline_name "${1}")
 
-  local pipeline_filename="${ci_dir}/${pipeline_name}.yml"
+  local pipeline_filename="${ci_dir}/pipelines/${pipeline_name}.yml"
   local branch_name="master"
 
   if [ -z  "$(which lpass)" ]; then
