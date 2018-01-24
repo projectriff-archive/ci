@@ -317,7 +317,7 @@ jobs:
       trigger: true
 
   - task: deploy-riff
-    file: git-pfs-ci/tasks/deploy-riff.yml
+    file: git-pfs-ci/tasks/riff-deployment/deploy/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
