@@ -418,7 +418,7 @@ jobs:
 <% end %>
 <% riff_components.each do |component| %>
   - task: release-<%= component.name %>
-    file: git-pfs-ci/tasks/tag_docker_image.yml
+    file: git-pfs-ci/tasks/release-management/docker-image-tagging/task.yml
     input_mapping: { source-semver: <%= component.name %>-version }
     privileged: true
     params:
