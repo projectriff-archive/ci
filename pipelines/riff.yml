@@ -242,7 +242,7 @@ jobs:
         depth: 1
   <% end %>
   - task: build-riff-chart
-    file: git-pfs-ci/tasks/helm-charts/riff/task.yml
+    file: git-pfs-ci/tasks/helm-charts/build/task.yml
     params:
       HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
   - put: gcs-riff-chart-latest-version
