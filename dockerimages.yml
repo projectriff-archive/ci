@@ -49,32 +49,32 @@ jobs:
   - get: git-pfs-ci
   - put: faas_build_dockerimage
     params:
-      build: git-pfs-ci/tasks/containers/faas_build
+      build: git-pfs-ci/images/faas_build
 
 - name: faas_cli_build_dockerimage
   plan:
   - get: git-pfs-ci
   - put: faas_cli_build_dockerimage
     params:
-      build: git-pfs-ci/tasks/containers/faas_cli_build
+      build: git-pfs-ci/images/faas_cli_build
 
 - name: faas_gcloud_dockerimage
   plan:
   - get: git-pfs-ci
   - put: faas_gcloud_dockerimage
     params:
-      build: git-pfs-ci/tasks/containers/gcloud_extended
+      build: git-pfs-ci/images/gcloud_extended
 
 - name: java_build_dockerimage
   plan:
   - get: git-pfs-ci
   - put: java_build_dockerimage
     params:
-      build: git-pfs-ci/tasks/containers/java_build
+      build: git-pfs-ci/images/java_build
 
 - name: kafka_zookeeper_dockerimage
   plan:
   - get: git-pfs-ci
   - put: kafka_zookeeper_dockerimage
     params:
-      build: git-pfs-ci/tasks/containers/kafka_zookeeper
+      build: git-pfs-ci/images/kafka_zookeeper
