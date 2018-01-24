@@ -13,38 +13,38 @@
   :build_task_file)
 
   riff_components = [
-    RiffComponent.new('function-sidecar',    'sc',      'function-sidecar',     'projectriff', 'function-sidecar',      'build-sidecar.yml'),
-    RiffComponent.new('http-gateway',        'httpgw',  'http-gateway',         'projectriff', 'http-gateway',          'build-http-gateway.yml'),
-    RiffComponent.new('topic-controller',    'tctrl',   'topic-controller',     'projectriff', 'topic-controller',      'build-topic-controller.yml'),
-    RiffComponent.new('function-controller', 'fctrl',   'function-controller',  'projectriff', 'function-controller',   'build-function-controller.yml'),
+    RiffComponent.new('function-sidecar',    'sc',      'function-sidecar',     'projectriff', 'function-sidecar',      'sidecar/build/task.yml'),
+    RiffComponent.new('http-gateway',        'httpgw',  'http-gateway',         'projectriff', 'http-gateway',          'http-gateway/build/task.yml'),
+    RiffComponent.new('topic-controller',    'tctrl',   'topic-controller',     'projectriff', 'topic-controller',      'topic-controller/build/task.yml'),
+    RiffComponent.new('function-controller', 'fctrl',   'function-controller',  'projectriff', 'function-controller',   'function-controller/build/task.yml'),
 
     RiffComponent.new(  'node-function-invoker',
                         'invnode',
                         'node-function-invoker',
                         'projectriff',
                         'node-function-invoker',
-                        'build-node-function-invoker.yml'),
+                        'node-invoker/build/task.yml'),
 
     RiffComponent.new(  'shell-function-invoker',
                         'invshell',
                         'shell-function-invoker',
                         'projectriff',
                         'shell-function-invoker',
-                        'build-shell-function-invoker.yml'),
+                        'shell-invoker/build/task.yml'),
 
     RiffComponent.new(  'java-function-invoker',
                         'invjava',
                         'java-function-invoker',
                         'projectriff',
                         'java-function-invoker',
-                        'build-java-function-invoker.yml'),
+                        'java-invoker/build/task.yml'),
 
     RiffComponent.new(  'python2-function-invoker',
                         'invpy',
                         'python2-function-invoker',
                         'projectriff',
                         'python2-function-invoker',
-                        'build-python2-function-invoker.yml'),
+                         'python2-invoker/build/task.yml'),
   ]
 
   riff_components_testable = []
@@ -257,7 +257,7 @@ jobs:
       params:
         depth: 1
   - task: build-riff-chart
-    file: git-pfs-ci/tasks/build-riff-chart-pr.yml
+    file: git-pfs-ci/tasks/helm-charts/build-pr/task.yml
     input_mapping: { git-riff-component-pr: git-<%= component.name %>-pr }
     params:
       HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
@@ -285,12 +285,6 @@ jobs:
     params:
       file: helm-charts/index.yaml
       predefined_acl: publicRead
-  - task: config-chart-bucket
-    file: git-pfs-ci/tasks/config-chart-bucket.yml
-    params:
-      GOOGLE_CLOUD_KEYFILE_JSON: ((gcp-json-key))
-      PROJECT_ID: ((pfs-gcp-ci-project))
-      CHART_BUCKET_NAME: <%= charts_bucket_name %>
 <%= slack_notification %>
 <% end %>
 
@@ -317,7 +311,7 @@ jobs:
       trigger: true
 
   - task: clean-riff-deployment
-    file: git-pfs-ci/tasks/clean-riff-deployment.yml
+    file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
@@ -341,7 +335,7 @@ jobs:
       trigger: true
 
   - task: deploy-riff
-    file: git-pfs-ci/tasks/deploy-riff.yml
+    file: git-pfs-ci/tasks/riff-deployment/deploy/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
@@ -372,7 +366,7 @@ jobs:
 
   - task: run-riff-system-tests
     privileged: true
-    file: git-pfs-ci/tasks/run-riff-system-tests.yml
+    file: git-pfs-ci/tasks/acceptance-tests/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
@@ -399,7 +393,7 @@ jobs:
       trigger: true
 
   - task: clean-riff-deployment
-    file: git-pfs-ci/tasks/clean-riff-deployment.yml
+    file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
