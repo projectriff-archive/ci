@@ -16,7 +16,7 @@ inputs:
 - name: shell-function-invoker-version
 
 run:
-  path: git-pfs-ci/tasks/scripts/run_riff_system_tests.sh
+  path: git-pfs-ci/tasks/acceptance-tests/run
 
 params:
   KUBECONFIG_STRING: replace-me

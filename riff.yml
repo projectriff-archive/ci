@@ -346,7 +346,7 @@ jobs:
 
   - task: run-riff-system-tests
     privileged: true
-    file: git-pfs-ci/tasks/run-riff-system-tests.yml
+    file: git-pfs-ci/tasks/acceptance-tests/task.yml
     params:
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
