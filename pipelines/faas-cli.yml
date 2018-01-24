@@ -74,7 +74,7 @@ jobs:
       trigger: true
 
   - task: build-faas-cli
-    file: git-pfs-ci/tasks/build-faas-cli/task.yml
+    file: git-pfs-ci/tasks/cli/build/task.yml
     privileged: true
     params:
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
