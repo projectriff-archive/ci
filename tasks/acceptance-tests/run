@@ -62,6 +62,10 @@ test_retcode="$?"
 set -e
 
 if [ "0" != "$test_retcode" ]; then
+  echo "Tests Failed. Listing all pods in [$existing_riff_ns]"
+  
+  kubectl get pods -n "$existing_riff_ns" --show-labels
+
   echo "Tests Failed. Printing logs from all pods in [$existing_riff_ns]"
 
   set +e
