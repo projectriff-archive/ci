@@ -1,0 +1,403 @@
+<%
+  K8sEnvironment=Struct.new(
+    :name,
+    :lpass_name
+  )
+
+  RiffComponent=Struct.new(
+  :name,
+  :shortname,
+  :docker_image_name,
+  :git_org_name,
+  :git_repo_name,
+  :build_task_file)
+
+  riff_components = [
+    RiffComponent.new('function-sidecar',    'sc',      'function-sidecar',     'projectriff', 'function-sidecar',      'sidecar/build/task.yml'),
+    RiffComponent.new('http-gateway',        'httpgw',  'http-gateway',         'projectriff', 'http-gateway',          'http-gateway/build/task.yml'),
+    RiffComponent.new('topic-controller',    'tctrl',   'topic-controller',     'projectriff', 'topic-controller',      'topic-controller/build/task.yml'),
+    RiffComponent.new('function-controller', 'fctrl',   'function-controller',  'projectriff', 'function-controller',   'function-controller/build/task.yml'),
+
+    RiffComponent.new(  'node-function-invoker',
+                        'invnode',
+                        'node-function-invoker',
+                        'projectriff',
+                        'node-function-invoker',
+                        'node-invoker/build/task.yml'),
+
+    RiffComponent.new(  'shell-function-invoker',
+                        'invshell',
+                        'shell-function-invoker',
+                        'projectriff',
+                        'shell-function-invoker',
+                        'shell-invoker/build/task.yml'),
+
+    RiffComponent.new(  'java-function-invoker',
+                        'invjava',
+                        'java-function-invoker',
+                        'projectriff',
+                        'java-function-invoker',
+                        'java-invoker/build/task.yml'),
+
+    RiffComponent.new(  'python2-function-invoker',
+                        'invpy',
+                        'python2-function-invoker',
+                        'projectriff',
+                        'python2-function-invoker',
+                         'python2-invoker/build/task.yml'),
+  ]
+
+  riff_components_testable = []
+  invokers_systest = []
+  riff_components.each do |component|
+    riff_components_testable << component if ['http-gateway', 'topic-controller', 'function-controller'].include? component.name
+  end
+  riff_components.each do |component|
+    invokers_systest << component   if ['java-function-invoker', 'node-function-invoker', 'python2-function-invoker', 'shell-function-invoker'].include? component.name
+  end
+
+  charts_bucket_name='riff-charts-pr'
+
+  k8s_envs = [
+    K8sEnvironment.new('gke', 'pfs-gcp-kubeconfig-gke-ci')
+  ]
+
+slack_notification="""
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.faas.to.cf-app.com/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+"""
+
+%>
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+- name: gcs-resource
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
+resources:
+
+- name: gcs-riff-charts
+  type: gcs-resource
+  source:
+    bucket: <%= charts_bucket_name %>
+    json_key: ((gcp-json-key))
+    regexp: riff*tgz
+
+- name: gcs-riff-chart-index
+  type: gcs-resource
+  source:
+    bucket: <%= charts_bucket_name %>
+    json_key: ((gcp-json-key))
+    versioned_file: index.yaml
+
+- name: gcs-riff-chart-latest-version
+  type: gcs-resource
+  source:
+    bucket: <%= charts_bucket_name %>
+    json_key: ((gcp-json-key))
+    versioned_file: latest_version
+
+- name: gcs-riff-chart-latest-name
+  type: gcs-resource
+  source:
+    bucket: <%= charts_bucket_name %>
+    json_key: ((gcp-json-key))
+    versioned_file: latest_name
+
+<% riff_components.each do |component| %>
+- name: <%= component.name %>-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: <%= component.name %>-version
+    json_key: ((gcp-json-key))
+<% end %>
+
+
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: ((slack-hook-url))
+
+#####################################################
+# Git - Riff infra
+#####################################################
+
+<% riff_components_testable.each do |component| %>
+- name: git-<%= component.name %>-pr
+  type: pull-request
+  source:
+    repo: <%= component.git_org_name %>/<%= component.git_repo_name %>
+    access_token: ((gitbot-access-token))
+    base: master
+<% end %>
+
+- name: git-riff
+  type: git
+  source:
+    uri: https://github.com/projectriff/riff.git
+    branch: master
+
+- name: git-helm-charts
+  type: git
+  source:
+    uri: https://github.com/projectriff/helm-charts.git
+    branch: master
+
+- name: git-kubernetes-model
+  type: git
+  source:
+    uri: https://github.com/projectriff/kubernetes-model.git
+    branch: riff
+
+#####################################################
+# Git - CI
+#####################################################
+
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+- name: git-pfs-system-test
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-system-test.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+#####################################################
+# Docker images
+#####################################################
+
+<% riff_components_testable.each do |component| %>
+- name:  <%= component.name %>-docker-image-pr
+  type: docker-image
+  source:
+    repository: ((docker-test-org))/<%= component.docker_image_name %>
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+<% end %>
+
+#####################################################
+# JOBS
+#####################################################
+
+jobs:
+
+<% riff_components_testable.each do |component| %>
+- name: build-<%= component.name %>-container-pr
+  serial_groups: [<%= component.name %>]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-<%= component.name %>-pr
+      trigger: true
+      version: every
+    - get: <%= component.name %>-version
+<% if component.name == 'function-controller' %>
+    - get: git-kubernetes-model
+<% end %>
+
+  - task: build-<%= component.name %>
+    file: git-pfs-ci/tasks/<%= component.build_task_file %>
+    input_mapping: { git-<%= component.name %>: git-<%= component.name %>-pr }
+
+  - put: <%= component.name %>-docker-image-pr
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: false
+    <% if component.name == 'function-controller' %>
+      build_args:
+        JAR_FILE: "*.jar"
+    <% end %>
+<%= slack_notification %>
+<% end %>
+
+######################################################
+# helm charts
+######################################################
+
+<% riff_components_testable.each do |component| %>
+- name: build-riff-chart-<%= component.name %>-pr
+  serial_groups: [<%= component.name %>]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-helm-charts
+  <% riff_components.each do |component_internal| %>
+    - get: <%= component_internal.name %>-version
+  <% end %>
+    - get: git-<%= component.name %>-pr
+      trigger: true
+      version: every
+      passed: [build-<%= component.name %>-container-pr]
+      params:
+        depth: 1
+  - task: build-riff-chart
+    file: git-pfs-ci/tasks/helm-charts/build-pr/task.yml
+    input_mapping: { git-riff-component-pr: git-<%= component.name %>-pr }
+    params:
+      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+      DOCKERHUB_ORG: ((docker-test-org)) #  << org for PR images
+      RIFF_COMPONENT_SHORTNAME: <%= component.shortname %>
+
+  - put: gcs-riff-chart-latest-version
+    params:
+      file: helm-charts-latest-version/latest_version
+      predefined_acl: publicRead
+      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+  - put: gcs-riff-chart-latest-name
+    params:
+      file: helm-charts-latest-name/latest_name
+      predefined_acl: publicRead
+  - put: gcs-riff-charts
+    params:
+      file: helm-charts/*.tgz
+      predefined_acl: publicRead
+  - put: gcs-riff-charts
+    params:
+      file: helm-charts-install/*
+      predefined_acl: publicRead
+  - put: gcs-riff-chart-index
+    params:
+      file: helm-charts/index.yaml
+      predefined_acl: publicRead
+<%= slack_notification %>
+<% end %>
+
+#############################################################
+#  For each component:  { Clean | Deploy | Test | Clean }
+#############################################################
+<% riff_components_testable.each do |component| %>
+
+<% k8s_envs.each do |k8s_env| %>
+- name: clean-riff-pre-deploy-<%= component.name %>-pr-<%= k8s_env.name %>
+  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>]
+  plan:
+  - aggregate:
+    - get: gcs-riff-chart-latest-name
+      passed: [build-riff-chart-<%= component.name %>-pr]
+      version: every
+    - get: gcs-riff-chart-latest-version
+      passed: [build-riff-chart-<%= component.name %>-pr]
+      version: every
+    - get: git-pfs-ci
+    - get: gcs-riff-chart-index
+      passed: [build-riff-chart-<%= component.name %>-pr]
+      version: every
+      trigger: true
+
+  - task: clean-riff-deployment
+    file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
+    params:
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
+<%= slack_notification %>
+
+- name: deploy-riff-<%= component.name %>-pr-<%= k8s_env.name %>
+  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>]
+  plan:
+  - aggregate:
+    - get: gcs-riff-chart-latest-name
+      passed: [clean-riff-pre-deploy-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+    - get: gcs-riff-chart-latest-version
+      passed: [clean-riff-pre-deploy-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+    - get: git-pfs-ci
+    - get: gcs-riff-chart-index
+      passed: [clean-riff-pre-deploy-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+      trigger: true
+
+  - task: deploy-riff
+    file: git-pfs-ci/tasks/riff-deployment/deploy/task.yml
+    params:
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
+      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+<%= slack_notification %>
+
+- name: run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>
+  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>, <%= k8s_env.name %>]
+  plan:
+  - aggregate:
+    - get: git-riff
+    - get: gcs-riff-chart-latest-name
+      passed: [deploy-riff-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+    - get: gcs-riff-chart-latest-version
+      passed: [deploy-riff-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+    - get: git-pfs-ci
+    - get: gcs-riff-chart-index
+      passed: [deploy-riff-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+      trigger: true
+    - get: git-pfs-system-test
+  <% invokers_systest.each do |invoker| %>
+    - get: <%= invoker.name %>-version
+  <% end %>
+
+  - task: run-riff-system-tests
+    privileged: true
+    file: git-pfs-ci/tasks/acceptance-tests/task.yml
+    params:
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
+      DOCKER_TEST_ORG: ((docker-test-org))
+      DOCKER_USERNAME: ((docker-riff-username))
+      DOCKER_PASSWORD: ((docker-riff-password))
+<%= slack_notification %>
+
+- name: clean-riff-post-deploy-<%= component.name %>-pr-<%= k8s_env.name %>
+  serial_groups: [riff-<%= component.name %>-<%= k8s_env.name %>, <%= k8s_env.name %>]
+  plan:
+  - aggregate:
+    - get: gcs-riff-chart-latest-name
+      passed: [run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+    - get: gcs-riff-chart-latest-version
+      passed: [run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+    - get: git-pfs-ci
+    - get: gcs-riff-chart-index
+      passed: [run-riff-system-tests-<%= component.name %>-pr-<%= k8s_env.name %>]
+      version: every
+      trigger: true
+
+  - task: clean-riff-deployment
+    file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
+    params:
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))<%= slack_notification %>
+<%= slack_notification %>
+<% end %>
+<% end %>

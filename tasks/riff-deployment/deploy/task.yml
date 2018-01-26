@@ -1,0 +1,19 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-build
+
+inputs:
+- name: git-pfs-ci
+- name: gcs-riff-chart-latest-version
+- name: gcs-riff-chart-latest-name
+
+run:
+  path: git-pfs-ci/tasks/riff-deployment/deploy/run
+
+params:
+  KUBECONFIG_STRING: replace-me
+  KUBECONFIG_CERT: replace-me
+  KUBECONFIG_KEY: replace-me
+  HELM_CHARTS_URL: replace-me

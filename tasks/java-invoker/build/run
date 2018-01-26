@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+build_root=$(pwd)
+
+source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+RIFF_VERSION=$(determine_riff_version "$build_root/git-java-function-invoker" "$build_root/java-function-invoker-version")
+
+pushd "$build_root/git-java-function-invoker"
+
+    ./mvnw clean package
+
+    cp -pr . "$build_root/docker-context/"
+
+    echo "$RIFF_VERSION" > "$build_root/docker-context/docker_version"
+
+popd

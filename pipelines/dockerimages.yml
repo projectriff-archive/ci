@@ -1,0 +1,80 @@
+resources:
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/pfs-ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+- name: faas_build_dockerimage
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/faas-build
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
+- name: faas_cli_build_dockerimage
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/faas-cli-build
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
+- name: faas_gcloud_dockerimage
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/pfs-ci-gcloud
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
+
+- name: java_build_dockerimage
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/java-build
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
+- name: kafka_zookeeper_dockerimage
+  type: docker-image
+  source:
+    repository: ((docker-sk8s-org))/kafka-zookeeper
+    username: ((docker-sk8s-username))
+    password: ((docker-sk8s-password))
+
+jobs:
+
+- name: faas_build_dockerimage
+  plan:
+  - get: git-pfs-ci
+  - put: faas_build_dockerimage
+    params:
+      build: git-pfs-ci/images/faas_build
+
+- name: faas_cli_build_dockerimage
+  plan:
+  - get: git-pfs-ci
+  - put: faas_cli_build_dockerimage
+    params:
+      build: git-pfs-ci/images/faas_cli_build
+
+- name: faas_gcloud_dockerimage
+  plan:
+  - get: git-pfs-ci
+  - put: faas_gcloud_dockerimage
+    params:
+      build: git-pfs-ci/images/gcloud_extended
+
+- name: java_build_dockerimage
+  plan:
+  - get: git-pfs-ci
+  - put: java_build_dockerimage
+    params:
+      build: git-pfs-ci/images/java_build
+
+- name: kafka_zookeeper_dockerimage
+  plan:
+  - get: git-pfs-ci
+  - put: kafka_zookeeper_dockerimage
+    params:
+      build: git-pfs-ci/images/kafka_zookeeper

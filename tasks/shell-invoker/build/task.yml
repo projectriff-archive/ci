@@ -1,0 +1,16 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-build
+
+inputs:
+- name: git-pfs-ci
+- name: git-shell-function-invoker
+- name: shell-function-invoker-version
+
+outputs:
+- name: docker-context
+
+run:
+  path: git-pfs-ci/tasks/shell-invoker/build/run

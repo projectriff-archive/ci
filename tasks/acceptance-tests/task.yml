@@ -1,0 +1,27 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-cli-build
+
+inputs:
+- name: git-pfs-ci
+- name: git-pfs-system-test
+- name: git-riff
+- name: gcs-riff-chart-latest-version
+- name: gcs-riff-chart-latest-name
+- name: java-function-invoker-version
+- name: node-function-invoker-version
+- name: python2-function-invoker-version
+- name: shell-function-invoker-version
+
+run:
+  path: git-pfs-ci/tasks/acceptance-tests/run
+
+params:
+  KUBECONFIG_STRING: replace-me
+  KUBECONFIG_CERT: replace-me
+  KUBECONFIG_KEY: replace-me
+  DOCKER_TEST_ORG: replace-me
+  DOCKER_USERNAME: replace-me
+  DOCKER_PASSWORD: replace-me

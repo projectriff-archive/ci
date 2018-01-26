@@ -1,0 +1,16 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/java-build
+
+inputs:
+- name: git-pfs-ci
+- name: git-java-function-invoker
+- name: java-function-invoker-version
+
+outputs:
+- name: docker-context
+
+run:
+  path: git-pfs-ci/tasks/java-invoker/build/run
