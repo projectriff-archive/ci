@@ -62,7 +62,7 @@ test_retcode="$?"
 set -e
 
 if [ "0" != "$test_retcode" ]; then
-  echo "Tests Failed. Listing all pods in [$existing_riff_ns]"
+  echo "Tests Failed. Listing all service and pods in [$existing_riff_ns]"
 
   kubectl get svc -n "$existing_riff_ns" --show-labels
   
