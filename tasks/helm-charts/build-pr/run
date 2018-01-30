@@ -1,6 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -exuo pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
 build_root=$PWD
 
@@ -65,11 +67,13 @@ pushd $build_root/git-helm-charts
   chart_file=$(basename ${chart_name}*tgz)
 
   cat > "${build_root}/helm-charts-install/${chart_name}-${chart_version}-install-example.sh" << EOM
-#!/bin/bash
+#!/usr/bin/env bash
 
 script_name=\`basename "\$0"\`
 
-set -euo pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
 if (( \$# < 1 )); then
     echo
