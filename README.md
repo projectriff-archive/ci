@@ -1,7 +1,7 @@
 # PFS CI
 
-### Concourse: https://ci.faas.to.cf-app.com
-- GitHub auth; must belong to the `projectriff/riff-dev` or `projectriff/riff-watchers` collaborator team
+### Concourse: https://ci.projectriff.io/
+- We use Github auth. You must belong to either `projectriff/riff-dev` or `projectriff/riff-watchers`. Your membership needs to be public, [which you can configure here](https://github.com/orgs/projectriff/people).
 - Install `fly` locally (http://concourse.ci/single-page.html#fly-cli)
 - Authenticate with Concourse: `fly -t riff login --concourse-url https://ci.projectriff.io`
 - Install the LastPass CLI (`lpass`: https://github.com/lastpass/lastpass-cli) and ensure it is available on the `PATH`
