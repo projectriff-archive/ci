@@ -1,13 +1,14 @@
 ---
-external_url: https://ci.faas.to.cf-app.com
+external_url: https://ci.projectriff.io
 network_name: default
 web_vm_type: medium-https
 db_vm_type: medium
-db_persistent_disk_type: default
+db_persistent_disk_type: 100GB
 worker_vm_type: large
+worker_ephemeral_disk: 500GB_ephemeral_disk
 github_auth:
   authorize:
-  - organization: pivotal-cf
-    teams: [pfs]
+  - organization: projectriff
+    teams: [riff-dev, riff-watchers]
 worker_instances: 2
 web_instances: 1

@@ -9,9 +9,8 @@ deployment_name="pfs-gcp-concourse-next"
 lpass_creds_entry_name="pfs-ci-concourse-next-creds"
 
 existing_concourse_creds=$(lpass show --note "Shared-pfs-eng/${lpass_creds_entry_name}")
-github_client_id=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci2/client_id')
-github_client_secret=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci2/client_secret')
-github_authorize='{"organization": "pivotal-cf", "teams": ["pfs"]}'
+github_client_id=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci_projectriff_io/client_id')
+github_client_secret=$(lpass show --note 'Shared-pfs-eng/pfs-ci-gitbot' | bosh int - --path='/oauth_ci_projectriff_io/client_secret')
 
 echo "$existing_concourse_creds" > "${script_dir}/creds-${deployment_name}.yml"
 
@@ -31,6 +30,7 @@ pushd "$script_dir/concourse-deployment/cluster"
     -o operations/scale.yml \
     -o operations/privileged-https.yml \
     -o operations/github-auth.yml \
+    -o operations/worker-ephemeral-disk.yml \
     --var deployment_name=${deployment_name} \
     --var github_client.username=${github_client_id} \
     --var github_client.password=${github_client_secret} \
