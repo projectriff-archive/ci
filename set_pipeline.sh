@@ -68,11 +68,11 @@ main() {
     fi
   fi
 
-  fly --target faas sync > /dev/null
+  fly --target riff sync > /dev/null
   erb "${pipeline_filename}" > /dev/null
 
   gcp_key=$(lpass show --note Shared-pfs-eng/pfs-gcp-ci-svc)
-  fly --target faas set-pipeline  --pipeline "${pipeline_name}" \
+  fly --target riff set-pipeline  --pipeline "${pipeline_name}" \
     --config <(erb "${pipeline_filename}") \
     --var branch-name="${branch_name}" \
     --var gcp-json-key="$gcp_key" \
