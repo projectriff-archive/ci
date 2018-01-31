@@ -73,6 +73,12 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
+- name: github-status
+  type: docker-image
+  source:
+    repository: dpb587/github-status-resource
+    tag: master
+
 resources:
 
 - name: gcs-riff-charts
@@ -113,7 +119,6 @@ resources:
     json_key: ((gcp-json-key))
 <% end %>
 
-
 - name: slack-alert
   type: slack-notification
   source:
@@ -131,6 +136,13 @@ resources:
     #private_key: ((git-pfs-ci-ssh-key))
     #access_token: ((gitbot-access-token))
     branch: master
+
+- name: github-commit-status-<%= component.name %>
+  type: github-status
+  source:
+    repository: <%= component.git_org_name %>/<%= component.git_repo_name %>
+    access_token: ((gitbot-access-token))
+    context: ci/riff/<%= component.git_repo_name %>
 <% end %>
 
 - name: git-riff
@@ -204,8 +216,19 @@ jobs:
   - put: <%= component.name %>-version
     params: {pre: build}
 
+
+  - put: github-commit-status-<%= component.name %>
+    params:
+      commit: git-<%= component.name %>
+      state: pending
+
   - task: build-<%= component.name %>
     file: git-pfs-ci/tasks/<%= component.build_task_file %>
+    on_failure:
+      put: github-commit-status-<%= component.name %>
+      params:
+        commit: git-<%= component.name %>
+        state: failure
 
   - put: <%= component.name %>-docker-image
     params:
@@ -216,6 +239,13 @@ jobs:
       build_args:
         JAR_FILE: "*.jar"
     <% end %>
+
+  on_success:
+    put: github-commit-status-<%= component.name %>
+    params:
+      commit: git-<%= component.name %>
+      state: success
+
 <%= slack_notification %>
 <% end %>
 
