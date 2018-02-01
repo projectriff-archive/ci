@@ -4,8 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-start_kafka
-
 build_root=$(pwd)
 
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
@@ -16,20 +14,9 @@ export GOPATH=$(go env GOPATH)
 mkdir -p "$GOPATH/src/github.com/projectriff"
 cp -pr git-http-gateway/ "$GOPATH/src/github.com/projectriff/http-gateway"
 
-killjava() {
-    set +e
-    pkill -9 java
-    set -e
-}
-trap killjava INT QUIT TERM EXIT
-
 pushd "$GOPATH/src/github.com/projectriff/http-gateway/"
 
-    KAFKA_BROKER=localhost:9092 go test -v ./...
-
-    killjava
-
-    ls -lath
+    make test
 
     cp -pr . "$build_root/docker-context/"
 
