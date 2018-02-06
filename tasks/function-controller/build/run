@@ -16,8 +16,6 @@ cp -pr git-function-controller "$GOPATH/src/github.com/projectriff/function-cont
 
 pushd "$GOPATH/src/github.com/projectriff/function-controller/"
 
-    make build-for-docker
-
     make test
 
     ls -lath
