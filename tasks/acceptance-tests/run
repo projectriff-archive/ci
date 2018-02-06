@@ -32,7 +32,8 @@ else
   http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
 fi
 
-kafka_pod=$(kubectl -n "$existing_riff_ns"  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
+kafka_pod=$(kubectl -n 'riff-system'  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
+echo "Using kafka: $kafka_pod"
 
 # init test env vars
 
@@ -48,6 +49,7 @@ export SYS_TEST_DOCKER_USERNAME="$DOCKER_USERNAME"
 export SYS_TEST_DOCKER_PASSWORD="$DOCKER_PASSWORD"
 export SYS_TEST_BASE_DIR="$build_root/git-riff"
 export SYS_TEST_MSG_RT_TIMEOUT_SEC=120
+export SYS_RIFF_NS="riff-system"
 
 export GOPATH=$(go env GOPATH)
 workdir=$GOPATH/src/github.com/pivotal-cf
