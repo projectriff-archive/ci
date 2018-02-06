@@ -69,7 +69,7 @@ main() {
   fi
 
   fly --target riff sync > /dev/null
-  erb "${pipeline_filename}" > /dev/null
+  erb "${pipeline_filename}" > ${pipeline_filename}.rendered.yaml
 
   gcp_key=$(lpass show --note Shared-pfs-eng/pfs-gcp-ci-svc)
   fly --target riff set-pipeline  --pipeline "${pipeline_name}" \
