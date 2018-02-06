@@ -50,6 +50,7 @@ shift
 
 helm install "\${chart_name}" \
 --version="${chart_version}" \
+--set rbac.create=false \
 --set functionController.image.tag=${function_controller_version},functionController.sidecar.image.tag=${function_sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gateway_version} \
 "\$@"
 
