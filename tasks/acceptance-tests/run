@@ -54,8 +54,8 @@ export SYS_RIFF_NS="riff-system"
 export GOPATH=$(go env GOPATH)
 workdir=$GOPATH/src/github.com/pivotal-cf
 mkdir -p $workdir
-cp -rf git-pfs-system-test $workdir/pfs-system-test
-cd $workdir/pfs-system-test
+cp -rf git-faas-acceptance-test-suite $workdir/faas-acceptance-test
+cd $workdir/faas-acceptance-test
 dep ensure
 
 set +e

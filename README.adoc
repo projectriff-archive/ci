@@ -6,8 +6,8 @@
 // 1
 | https://github.com/projectriff/ci/blob/master/pipelines/riff.yml[riff]
 | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/badge[Riff Pipeline, link=https://ci.projectriff.io/teams/main/pipelines/riff]
-| https://github.com/pivotal-cf/pfs-system-test[Acceptance Tests]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/run-riff-system-tests-gke/badge[Acceptance Tests Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/run-riff-system-tests-gke/builds/latest]
+| https://github.com/projectriff/fats[Acceptance Tests]
+| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/run-faas-acceptance-tests-gke/badge[Acceptance Tests Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/run-faas-acceptance-tests-gke/builds/latest]
 | https://github.com/projectriff/java-function-invoker[Java Invoker]
 | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-java-function-invoker-container/badge[Java Invoker, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-java-function-invoker-container/builds/latest]
 

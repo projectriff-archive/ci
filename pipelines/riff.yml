@@ -181,10 +181,10 @@ resources:
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
-- name: git-pfs-system-test
+- name: git-faas-acceptance-test-suite
   type: git
   source:
-    uri: git@github.com:pivotal-cf/pfs-system-test.git
+    uri: git@github.com:projectriff/fats.git
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
@@ -369,7 +369,7 @@ jobs:
       HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
 <%= slack_notification %>
 
-- name: run-riff-system-tests-<%= k8s_env.name %>
+- name: run-faas-acceptance-tests-<%= k8s_env.name %>
   serial_groups: [riff-<%= k8s_env.name %>]
   plan:
   - aggregate:
@@ -386,7 +386,7 @@ jobs:
     - get: gcs-riff-chart-index
       passed: [deploy-riff-<%= k8s_env.name %>]
       trigger: true
-    - get: git-pfs-system-test
+    - get: git-faas-acceptance-test-suite
 
   - task: run-riff-system-tests
     privileged: true
@@ -405,16 +405,16 @@ jobs:
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
-      passed: [run-riff-system-tests-<%= k8s_env.name %>]
+      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
     - get: gcs-riff-chart-latest-name
-      passed: [run-riff-system-tests-<%= k8s_env.name %>]
+      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
     - get: git-pfs-ci
   <% riff_components.each do |component| %>
     - get: <%= component.name %>-version
-      passed: [run-riff-system-tests-<%= k8s_env.name %>]
+      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
   <% end %>
     - get: gcs-riff-chart-index
-      passed: [run-riff-system-tests-<%= k8s_env.name %>]
+      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
       trigger: true
 
   - task: clean-riff-deployment
