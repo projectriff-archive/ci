@@ -157,6 +157,13 @@ resources:
     uri: https://github.com/projectriff/helm-charts.git
     branch: master
 
+- name: github-commit-status-helm-charts
+  type: github-status
+  source:
+    repository: projectriff/helm-charts
+    access_token: ((gitbot-access-token))
+    context: ci/riff/helm-charts
+
 - name: git-kubernetes-model
   type: git
   source:
@@ -216,7 +223,6 @@ jobs:
   - put: <%= component.name %>-version
     params: {pre: build}
 
-
   - put: github-commit-status-<%= component.name %>
     params:
       commit: git-<%= component.name %>
@@ -271,10 +277,19 @@ jobs:
       params:
         depth: 1
   <% end %>
+  - put: github-commit-status-helm-charts
+    params:
+      commit: git-helm-charts
+      state: pending
   - task: build-riff-chart
     file: git-pfs-ci/tasks/helm-charts/build/task.yml
     params:
       HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+    on_failure:
+      put: github-commit-status-helm-charts
+      params:
+        commit: git-helm-charts
+        state: failure
   - put: gcs-riff-chart-latest-version
     params:
       file: helm-charts-latest-version/latest_version
@@ -295,6 +310,11 @@ jobs:
     params:
       file: helm-charts/index.yaml
       predefined_acl: publicRead
+  on_success:
+    put: github-commit-status-helm-charts
+    params:
+      commit: git-helm-charts
+      state: success
 <%= slack_notification %>
 
 <% k8s_envs.each do |k8s_env| %>
