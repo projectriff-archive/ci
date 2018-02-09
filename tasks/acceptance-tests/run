@@ -9,7 +9,11 @@ echo "System Tests for riff"
 build_root=$(pwd)
 
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+
+echo "Starting docker"
 init_docker
+
+echo "Configuring kubectl"
 init_kubeconfig
 
 RIFF_NAME=$(head "$build_root/gcs-riff-chart-latest-name/latest_name")
@@ -21,16 +25,13 @@ PYTHON2_INVOKER_VERSION=$(head "$build_root/python2-function-invoker-version/ver
 SHELL_INVOKER_VERSION=$(head "$build_root/shell-function-invoker-version/version")
 
 existing_riff_ns=$(find_existing_riff_ns "$RIFF_NAME" "$RIFF_VERSION")
+echo "Using namespace ${existing_riff_ns}"
 
 current_kubeconfig_context="$(kubectl config current-context)"
+echo "Using kubectl context ${current_kubeconfig_context}"
 
-if [ "minikube" == "${current_kubeconfig_context}" ]; then
-  http_gw_host=$(basename $(kubectl config view | grep 'server:' | awk '{print $2}') | cut -d':' -f1)
-  http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].nodePort}')
-else
-  http_gw_host=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')
-  http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
-fi
+http_gw_host=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')
+http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].port}')
 
 kafka_pod=$(kubectl -n 'riff-system'  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
 echo "Using kafka: $kafka_pod"
@@ -56,8 +57,11 @@ workdir=$GOPATH/src/github.com/pivotal-cf
 mkdir -p $workdir
 cp -rf git-faas-acceptance-test-suite $workdir/faas-acceptance-test
 cd $workdir/faas-acceptance-test
+
+echo "Setting up dependencies"
 dep ensure
 
+echo "Run tests"
 set +e
 ./test.sh
 test_retcode="$?"
@@ -70,5 +74,9 @@ if [ "0" != "$test_retcode" ]; then
   
   kubectl get pods -n "$existing_riff_ns" --show-labels
 fi
+
+echo
+echo Done.
+echo
 
 exit $test_retcode
