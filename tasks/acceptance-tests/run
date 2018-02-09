@@ -69,18 +69,6 @@ if [ "0" != "$test_retcode" ]; then
   kubectl get svc -n "$existing_riff_ns" --show-labels
   
   kubectl get pods -n "$existing_riff_ns" --show-labels
-
-  # echo "Tests Failed. Printing logs from all pods in [$existing_riff_ns]"
-  #
-  # set +e
-  # kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | xargs -I{} kubectl logs {} -n "$existing_riff_ns"
-  # logsretcode=$?
-  # set -e
-  #
-  # if [ "$logsretcode" != "0" ]; then
-  #   kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -v riff | xargs -I{} kubectl -n "$existing_riff_ns" logs {} sidecar
-  #   kubectl get pods -n "$existing_riff_ns" -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -v riff | xargs -I{} kubectl -n "$existing_riff_ns" logs {} main
-  # fi
 fi
 
 exit $test_retcode
