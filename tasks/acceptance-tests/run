@@ -13,7 +13,7 @@ build_root=$(pwd)
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 
 echo "Waiting for docker daemon"
-/usr/local/bin/dockerd-entrypoint.sh &
+/usr/local/bin/dockerd &
 until docker info >/dev/null 2>&1; do
   echo waiting for docker to come up...
   sleep 1
