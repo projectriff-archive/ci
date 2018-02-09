@@ -1,4 +1,4 @@
-FROM docker
+FROM docker:dind
 ENV DOCKER_DAEMON_ARGS="--data-root /scratch"
 COPY start_docker.sh /usr/local/bin/start_docker
 RUN apk update && \
