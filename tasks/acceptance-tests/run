@@ -4,14 +4,19 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+echo
 echo "System Tests for riff"
+echo
 
 build_root=$(pwd)
 
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 
-echo "Starting docker"
-init_docker
+echo "Waiting for docker daemon"
+until docker info >/dev/null 2>&1; do
+  echo waiting for docker to come up...
+  sleep 1
+done
 
 echo "Configuring kubectl"
 init_kubeconfig
