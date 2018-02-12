@@ -83,6 +83,10 @@ if [ "0" != "$test_retcode" ]; then
   kubectl get pods -n "$existing_riff_ns" --show-labels
 fi
 
+echo "Stopping docker damon"
+
+kill "$(jobs -p)"
+
 echo
 echo Done.
 echo
