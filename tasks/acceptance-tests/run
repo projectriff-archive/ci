@@ -61,10 +61,10 @@ export SYS_RIFF_NS="riff-system"
 
 GOPATH=$(go env GOPATH)
 export GOPATH
-workdir=$GOPATH/src/github.com/pivotal-cf
+workdir=$GOPATH/src/github.com/projectriff
 mkdir -p "$workdir"
-cp -rf git-faas-acceptance-test-suite "$workdir/faas-acceptance-test"
-cd "$workdir/faas-acceptance-test"
+cp -rf git-faas-acceptance-test-suite "$workdir/fats"
+cd "$workdir/fats"
 
 echo "Setting up dependencies"
 dep ensure
