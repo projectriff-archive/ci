@@ -11,6 +11,8 @@ RIFF_VERSION=$(determine_riff_version "$build_root/git-node-function-invoker" "$
 
 pushd "$build_root/git-node-function-invoker"
 
+    export HOST="0.0.0.0"
+
     npm install
     npm test
 
