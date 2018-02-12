@@ -13,7 +13,9 @@ build_root=$(pwd)
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 
 echo "Starting docker daemon"
-dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 &
+set +o errexit
+  /usr/local/bin/dockerd-entrypoint.sh &
+set -o errexit
 
 until docker info >/dev/null 2>&1; do
   sleep 2
