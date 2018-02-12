@@ -8,9 +8,7 @@ echo
 echo "System Tests for riff"
 echo
 
-build_root=$(pwd)
-
-source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
+source git-pfs-ci/tasks/scripts/common.sh
 
 echo "Starting docker daemon"
 set +o errexit
@@ -25,13 +23,13 @@ done
 echo "Configuring kubectl"
 init_kubeconfig
 
-RIFF_NAME=$(head "$build_root/gcs-riff-chart-latest-name/latest_name")
-RIFF_VERSION=$(head "$build_root/gcs-riff-chart-latest-version/latest_version")
+RIFF_NAME=$(cat gcs-riff-chart-latest-name/latest_name)
+RIFF_VERSION=$(cat gcs-riff-chart-latest-version/latest_version)
 
-JAVA_INVOKER_VERSION=$(head "$build_root/java-function-invoker-version/version")
-NODE_INVOKER_VERSION=$(head "$build_root/node-function-invoker-version/version")
-PYTHON2_INVOKER_VERSION=$(head "$build_root/python2-function-invoker-version/version")
-SHELL_INVOKER_VERSION=$(head "$build_root/shell-function-invoker-version/version")
+JAVA_INVOKER_VERSION=$(cat java-function-invoker-version/version)
+NODE_INVOKER_VERSION=$(cat node-function-invoker-version/version)
+PYTHON2_INVOKER_VERSION=$(cat python2-function-invoker-version/version)
+SHELL_INVOKER_VERSION=$(cat shell-function-invoker-version/version)
 
 existing_riff_ns=$(find_existing_riff_ns "$RIFF_NAME" "$RIFF_VERSION")
 echo "Using namespace ${existing_riff_ns}"
@@ -57,15 +55,16 @@ export SYS_TEST_KAFKA_POD_NAME="$kafka_pod"
 export SYS_TEST_DOCKER_ORG="$DOCKER_TEST_ORG"
 export SYS_TEST_DOCKER_USERNAME="$DOCKER_USERNAME"
 export SYS_TEST_DOCKER_PASSWORD="$DOCKER_PASSWORD"
-export SYS_TEST_BASE_DIR="$build_root/git-riff"
+export SYS_TEST_BASE_DIR="git-riff"
 export SYS_TEST_MSG_RT_TIMEOUT_SEC=120
 export SYS_RIFF_NS="riff-system"
 
-export GOPATH=$(go env GOPATH)
+GOPATH=$(go env GOPATH)
+export GOPATH
 workdir=$GOPATH/src/github.com/pivotal-cf
-mkdir -p $workdir
-cp -rf git-faas-acceptance-test-suite $workdir/faas-acceptance-test
-cd $workdir/faas-acceptance-test
+mkdir -p "$workdir"
+cp -rf git-faas-acceptance-test-suite "$workdir/faas-acceptance-test"
+cd "$workdir/faas-acceptance-test"
 
 echo "Setting up dependencies"
 dep ensure
