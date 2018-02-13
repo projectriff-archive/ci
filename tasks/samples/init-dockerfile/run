@@ -36,7 +36,7 @@ pushd git-riff
 popd
 
 echo "Copying init'd sample to output directory"
-cp -rf "git-riff/$SAMPLE_PATH/" riff-init-output/
+cp -rf git-riff/"$SAMPLE_PATH"/* riff-init-output/
 
 echo
 echo Done.
