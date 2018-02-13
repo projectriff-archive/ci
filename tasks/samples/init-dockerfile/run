@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+invoker_version=$(cat invoker-version/version)
+
+echo
+echo "Building sample $SAMPLE_PATH"
+echo "Using invoker version $invoker_version"
+
+pushd git-riff
+  echo "Installing riff locally"
+
+  cp riff /usr/local/bin/riff
+  
+  echo "Installed riff version is $(riff version)"
+
+  pushd "$SAMPLE_PATH"
+    echo "Running riff init in $PWD"
+    riff init \
+      --language "$SAMPLE_LANGUAGE" \
+      --artifact "$SAMPLE_ARTIFACT" \
+      --useraccount "$DOCKER_TEST_ORG"
+    
+    echo "$PWD after riff init:"
+    ls -alh
+
+    echo
+    echo "Dockerfile contents:"
+    echo
+    cat Dockerfile
+    echo
+  popd
+popd
+
+
+echo "Moving generated Dockerfile to output directory"
+mv "git-riff/$SAMPLE_PATH/Dockerfile" riff-init-output/Dockerfile
+
+echo
+echo Done.
+echo

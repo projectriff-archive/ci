@@ -1,0 +1,23 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: ubuntu
+    tag: xenial
+
+inputs:
+- name: git-riff
+- name: git-pfs-ci
+- name: invoker-version
+
+outputs:
+- name: riff-init-output
+
+run:
+  path: git-pfs-ci/tasks/samples/init-dockerfile/run
+
+params:
+  SAMPLE_PATH:
+  SAMPLE_ARTIFACT:
+  SAMPLE_LANGUAGE:
+  DOCKER_TEST_ORG:
