@@ -35,9 +35,8 @@ pushd git-riff
   popd
 popd
 
-
-echo "Moving generated Dockerfile to output directory"
-mv "git-riff/$SAMPLE_PATH/Dockerfile" riff-init-output/Dockerfile
+echo "Copying init'd sample to output directory"
+cp -rf "git-riff/$SAMPLE_PATH/" riff-init-output/
 
 echo
 echo Done.
