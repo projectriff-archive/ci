@@ -201,11 +201,44 @@ resources:
     password: ((docker-riff-password))
 <% end %>
 
+#################### Sample Images ##################
+
+## Node ##
+
+- name:  node-sample-image
+  type: docker-image
+  source:
+    repository: ((docker-test-org))/node-sample-image
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
 #####################################################
 # JOBS
 #####################################################
 
 jobs:
+
+- name: build-node-sample-image
+  plan:
+  - aggregate:
+    - get: git-riff
+    - get: git-pfs-ci
+    - get: node-function-invoker-version
+      trigger: true
+      passed: [build-node-function-invoker-container]
+  - task: perform-init
+    file: git-pfs-ci/tasks/samples/init-dockerfile/task.yml
+    input_mapping:
+      invoker-version: node-function-invoker-version
+    params:
+      SAMPLE_PATH: samples/node/square
+      SAMPLE_ARTIFACT: square.js
+      SAMPLE_LANGUAGE: node
+      DOCKER_TEST_ORG: riffci
+  - put: node-sample-image
+    params:
+      build: riff-init-output
+      tag: node-function-invoker-version/version
 
 <% riff_components.each do |component| %>
 - name: build-<%= component.name %>-container
