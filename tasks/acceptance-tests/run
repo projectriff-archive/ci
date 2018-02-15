@@ -10,16 +10,6 @@ echo
 
 source git-pfs-ci/tasks/scripts/common.sh
 
-echo "Starting docker daemon"
-set +o errexit
-  /usr/local/bin/dockerd-entrypoint.sh &
-set -o errexit
-
-until docker info >/dev/null 2>&1; do
-  sleep 2
-  echo waiting for docker to come up...
-done
-
 echo "Configuring kubectl"
 init_kubeconfig
 
@@ -68,27 +58,11 @@ cd "$workdir/fats"
 
 echo "Setting up dependencies"
 dep ensure
+go install ./vendor/github.com/onsi/ginkgo/ginkgo # why dep can't do this for me is left as an exercise to the hater
 
 echo "Run tests"
-set +e
-./test.sh
-test_retcode="$?"
-set -e
-
-if [ "0" != "$test_retcode" ]; then
-  echo "Tests Failed. Listing all service and pods in [$existing_riff_ns]"
-
-  kubectl get svc -n "$existing_riff_ns" --show-labels
-  
-  kubectl get pods -n "$existing_riff_ns" --show-labels
-fi
-
-echo "Stopping docker damon"
-
-kill "$(jobs -p)"
+$GOPATH/bin/ginkgo -v --focus=node ./...
 
 echo
 echo Done.
 echo
-
-exit $test_retcode
