@@ -60,8 +60,8 @@ echo "Setting up dependencies"
 dep ensure
 go install ./vendor/github.com/onsi/ginkgo/ginkgo # why dep can't do this for me is left as an exercise to the hater
 
-echo "Run tests"
-$GOPATH/bin/ginkgo -v --focus=node ./...
+echo "Run tests, focused on '$GINKGO_FOCUS'"
+"$GOPATH"/bin/ginkgo -v --focus="$GINKGO_FOCUS" ./...
 
 echo
 echo Done.

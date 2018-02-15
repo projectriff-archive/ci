@@ -392,6 +392,7 @@ jobs:
     privileged: true
     file: git-pfs-ci/tasks/acceptance-tests/task.yml
     params:
+      GINKGO_FOCUS: node
       KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
       KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
       KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
