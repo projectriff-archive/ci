@@ -9,6 +9,7 @@ invoker_version=$(cat invoker-version/version)
 echo
 echo "Building sample $SAMPLE_PATH"
 echo "Using invoker version $invoker_version"
+echo
 
 pushd git-riff
   echo "Installing riff locally"
@@ -23,7 +24,7 @@ pushd git-riff
       --language "$SAMPLE_LANGUAGE" \
       --artifact "$SAMPLE_ARTIFACT" \
       --useraccount "$DOCKER_TEST_ORG" \
-      --riff-version "$BASE_IMAGE_VERSION" # Actually used for the tag on the base image.
+      --riff-version $invoker_version # Actually used for the tag on the base image.
     
     echo "$PWD after riff init:"
     ls -alh
