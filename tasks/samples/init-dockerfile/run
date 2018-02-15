@@ -22,7 +22,8 @@ pushd git-riff
     riff init \
       --language "$SAMPLE_LANGUAGE" \
       --artifact "$SAMPLE_ARTIFACT" \
-      --useraccount "$DOCKER_TEST_ORG"
+      --useraccount "$DOCKER_TEST_ORG" \
+      --version "$BASE_IMAGE_VERSION"
     
     echo "$PWD after riff init:"
     ls -alh
