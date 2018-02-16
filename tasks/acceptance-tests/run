@@ -53,15 +53,22 @@ GOPATH=$(go env GOPATH)
 export GOPATH
 workdir=$GOPATH/src/github.com/projectriff
 mkdir -p "$workdir"
+
+cp -rf git-riff-cli "$workdir/riff-cli"
+pushd "$workdir/riff-cli"
+  make
+popd
+cp "$workdir"/riff-cli/riff git-riff/riff
+
 cp -rf git-faas-acceptance-test-suite "$workdir/fats"
-cd "$workdir/fats"
+pushd "$workdir/fats"
+  echo "Setting up dependencies"
+  dep ensure
+  go install ./vendor/github.com/onsi/ginkgo/ginkgo # why dep can't do this for me is left as an exercise to the hater
 
-echo "Setting up dependencies"
-dep ensure
-go install ./vendor/github.com/onsi/ginkgo/ginkgo # why dep can't do this for me is left as an exercise to the hater
-
-echo "Run tests, focused on '$GINKGO_FOCUS'"
-"$GOPATH"/bin/ginkgo -v --focus="$GINKGO_FOCUS" ./...
+  echo "Run tests, focused on '$GINKGO_FOCUS'"
+  "$GOPATH"/bin/ginkgo -v --focus="$GINKGO_FOCUS" ./...
+popd
 
 echo
 echo Done.

@@ -8,6 +8,7 @@ inputs:
 - name: git-pfs-ci
 - name: git-faas-acceptance-test-suite
 - name: git-riff
+- name: git-riff-cli
 - name: gcs-riff-chart-latest-version
 - name: gcs-riff-chart-latest-name
 - name: java-function-invoker-version
