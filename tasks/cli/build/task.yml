@@ -2,7 +2,8 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: sk8s/faas-cli-build
+    repository: instrumentisto/dep
+    tag: 0.4
 
 inputs:
 - name: git-riff-cli
