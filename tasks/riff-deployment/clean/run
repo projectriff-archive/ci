@@ -30,3 +30,10 @@ set -e
 kubectl get customresourcedefinitions --all-namespaces -o json |
   jq -r  .items[].metadata.name |
   xargs -I{} kubectl delete customresourcedefinition {}
+
+echo "Sleeping 1 minute because it takes time for the http-gateway load balancer to become live"
+sleep 60
+
+echo
+echo Done.
+echo
