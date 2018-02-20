@@ -244,6 +244,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-riff-cli
+      trigger: true
     - get: git-pfs-ci
     - get: cli-version
   - put: cli-version
