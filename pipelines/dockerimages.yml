@@ -7,6 +7,13 @@ resources: #####################################################################
     private_key: ((git-pfs-ci-ssh-key))
     branch: master
 
+- name: fats-image
+  type: docker-image
+  source:
+    repository: ((docker-test-org))/fats
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
 - name: faas_build_dockerimage
   type: docker-image
   source:
@@ -36,6 +43,13 @@ resources: #####################################################################
     password: ((docker-sk8s-password))
 
 jobs: ###################################################################################
+
+- name: build-fats-image
+  plan:
+  - get: git-pfs-ci
+  - put: fats-image
+    params:
+      build: git-pfs-ci/images/fats
 
 - name: faas_build_dockerimage
   plan:
