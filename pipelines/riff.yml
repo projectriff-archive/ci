@@ -264,6 +264,10 @@ jobs:
     - get: node-function-invoker-version
       trigger: true
       passed: [build-node-function-invoker-container]
+    - get: cli-version
+      passed: [build-riff-cli]
+    - get: cli-binary
+      passed: [build-riff-cli]
   - task: perform-init
     file: git-pfs-ci/tasks/samples/init-dockerfile/task.yml
     input_mapping:
@@ -445,7 +449,10 @@ jobs:
   plan:
   - aggregate:
     - get: git-riff
-    - get: git-riff-cli
+    - get: cli-version
+      passed: [build-riff-cli]
+    - get: cli-binary
+      passed: [build-riff-cli]
     - get: gcs-riff-chart-latest-version
       passed: [deploy-riff-<%= k8s_env.name %>]
     - get: gcs-riff-chart-latest-name
