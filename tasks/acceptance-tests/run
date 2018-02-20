@@ -33,6 +33,12 @@ http_gw_port=$(kubectl -n "$existing_riff_ns" get svc -l component=http-gateway 
 kafka_pod=$(kubectl -n 'riff-system'  get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
 echo "Using kafka: $kafka_pod"
 
+cli_version=$(cat cli-version/version)
+echo "Using CLI: $cli_version"
+
+echo "Installing riff locally"
+install cli-binary/riff-linux-amd64-$cli_version /usr/local/bin/riff
+
 # init test env vars
 
 export SYS_TEST_JAVA_INVOKER_VERSION="$JAVA_INVOKER_VERSION"
@@ -53,12 +59,6 @@ GOPATH=$(go env GOPATH)
 export GOPATH
 workdir=$GOPATH/src/github.com/projectriff
 mkdir -p "$workdir"
-
-cp -rf git-riff-cli "$workdir/riff-cli"
-pushd "$workdir/riff-cli"
-  make
-popd
-cp "$workdir"/riff-cli/riff git-riff/riff
 
 cp -rf git-faas-acceptance-test-suite "$workdir/fats"
 pushd "$workdir/fats"

@@ -2,13 +2,14 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: sk8s/faas-cli-build
+    repository: riffci/fats
 
 inputs:
 - name: git-pfs-ci
 - name: git-faas-acceptance-test-suite
 - name: git-riff
-- name: git-riff-cli
+- name: cli-version
+- name: cli-binary
 - name: gcs-riff-chart-latest-version
 - name: gcs-riff-chart-latest-name
 - name: java-function-invoker-version
