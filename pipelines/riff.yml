@@ -119,6 +119,22 @@ resources:
     json_key: ((gcp-json-key))
 <% end %>
 
+- name: cli-version
+  type: semver
+  source:
+    initial_version: 0.0.4
+    driver: gcs
+    bucket: riff_versions
+    key: cli-version
+    json_key: ((gcp-json-key))
+
+- name: cli-binary
+  type: gcs-resource
+  source:
+    bucket: riff-cli-binaries
+    json_key: ((gcp-json-key))
+    regexp: riff-linux-amd64-*
+
 - name: slack-alert
   type: slack-notification
   source:
@@ -223,6 +239,22 @@ resources:
 #####################################################
 
 jobs:
+
+- name: build-riff-cli
+  plan:
+  - aggregate:
+    - get: git-riff-cli
+    - get: git-pfs-ci
+    - get: cli-version
+  - put: cli-version
+    params: {pre: build}
+  - task: build-riff-cli
+    file: git-pfs-ci/tasks/cli/build/task.yml
+  - put: cli-binary
+    params:
+        file: cli-output/riff-linux-amd64-*
+        predefined_acl: publicRead
+        content_type: application/x-executable
 
 - name: build-node-sample-image
   plan:
