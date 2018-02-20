@@ -173,6 +173,13 @@ resources:
     uri: https://github.com/projectriff/riff-cli.git
     branch: master
 
+- name: github-commit-status-riff-cli
+  type: github-status
+  source:
+    repository: projectriff/riff-cli
+    access_token: ((gitbot-access-token))
+    context: ci/riff/cli
+
 - name: git-helm-charts
   type: git
   source:
@@ -249,13 +256,29 @@ jobs:
     - get: cli-version
   - put: cli-version
     params: {pre: build}
+  - put: github-commit-status-riff-cli
+    params:
+      commit: git-riff-cli
+      state: pending
   - task: build-riff-cli
     file: git-pfs-ci/tasks/cli/build/task.yml
+    on_failure:
+      put: github-commit-status-riff-cli
+      params:
+        commit: git-riff-cli
+        state: failure
   - put: cli-binary
     params:
         file: cli-output/riff-linux-amd64-*
         predefined_acl: publicRead
         content_type: application/x-executable
+  on_success:
+    put: github-commit-status-riff-cli
+    params:
+      commit: git-riff-cli
+      state: success
+
+<%= slack_notification %>
 
 - name: build-node-sample-image
   plan:
