@@ -151,6 +151,12 @@ resources:
     uri: https://github.com/projectriff/riff.git
     branch: master
 
+- name: git-riff-cli
+  type: git
+  source:
+    uri: https://github.com/projectriff/riff-cli.git
+    branch: master
+
 - name: git-helm-charts
   type: git
   source:
@@ -407,6 +413,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-riff
+    - get: git-riff-cli
     - get: gcs-riff-chart-latest-version
       passed: [deploy-riff-<%= k8s_env.name %>]
     - get: gcs-riff-chart-latest-name
