@@ -9,6 +9,8 @@ inputs:
 - name: git-riff
 - name: git-pfs-ci
 - name: invoker-version
+- name: cli-version
+- name: cli-binary
 
 outputs:
 - name: riff-init-output
