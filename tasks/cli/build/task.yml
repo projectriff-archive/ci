@@ -1,0 +1,16 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: sk8s/faas-cli-build
+
+inputs:
+- name: git-riff-cli
+- name: git-pfs-ci
+- name: cli-version
+
+outputs:
+- name: cli-output
+
+run:
+  path: git-pfs-ci/tasks/cli/build/run

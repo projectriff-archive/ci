@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+cli_version=$(cat cli-version/version)
+
+echo
+echo "Building CLI $cli_version"
+echo
+
+GOPATH=$(go env GOPATH)
+export GOPATH
+workdir=$GOPATH/src/github.com/projectriff
+mkdir -p "$workdir"
+
+cp -rf git-riff-cli "$workdir/riff-cli"
+pushd "$workdir/riff-cli"
+  make
+popd
+
+built_name=riff-linux-amd64-$cli_version
+
+echo
+echo "Copying $built_name binary to output directory"
+cp "$workdir"/riff-cli/riff \
+    cli-output/$built_name
+
+echo
+echo Done.
+echo
