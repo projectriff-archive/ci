@@ -1,67 +1,5 @@
-<%
-  K8sEnvironment=Struct.new(
-    :name,
-    :lpass_name
-  )
+resource_types: #######################################################################################################
 
-  RiffComponent=Struct.new(
-  :name,
-  :docker_image_name,
-  :git_org_name,
-  :git_repo_name,
-  :build_task_file)
-
-  riff_components = [
-    RiffComponent.new('function-sidecar',     'function-sidecar',     'projectriff', 'function-sidecar',      'sidecar/build/task.yml'),
-    RiffComponent.new('http-gateway',         'http-gateway',         'projectriff', 'http-gateway',          'http-gateway/build/task.yml'),
-    RiffComponent.new('topic-controller',     'topic-controller',     'projectriff', 'topic-controller',      'topic-controller/build/task.yml'),
-    RiffComponent.new('function-controller',  'function-controller',  'projectriff', 'function-controller',   'function-controller/build/task.yml'),
-
-    RiffComponent.new(  'node-function-invoker',
-                        'node-function-invoker',
-                        'projectriff',
-                        'node-function-invoker',
-                        'node-invoker/build/task.yml'),
-
-    RiffComponent.new(  'shell-function-invoker',
-                        'shell-function-invoker',
-                        'projectriff',
-                        'shell-function-invoker',
-                        'shell-invoker/build/task.yml'),
-
-    RiffComponent.new(  'java-function-invoker',
-                        'java-function-invoker',
-                        'projectriff',
-                        'java-function-invoker',
-                        'java-invoker/build/task.yml'),
-
-    RiffComponent.new(  'python2-function-invoker',
-                        'python2-function-invoker',
-                        'projectriff',
-                        'python2-function-invoker',
-                        'python2-invoker/build/task.yml'),
-  ]
-
-  charts_bucket_name='riff-charts'
-
-  k8s_envs = [
-    K8sEnvironment.new('gke', 'pfs-gcp-kubeconfig-gke-ci'),
-  ]
-
-slack_notification="""
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-"""
-
-%>
-
-resource_types:
 - name: slack-notification
   type: docker-image
   source:
@@ -79,45 +17,103 @@ resource_types:
     repository: dpb587/github-status-resource
     tag: master
 
-resources:
+resources: ############################################################################################################
+
+## Riff Helm Charts ##
 
 - name: gcs-riff-charts
   type: gcs-resource
   source:
-    bucket: <%= charts_bucket_name %>
+    bucket: riff-charts
     json_key: ((gcp-json-key))
     regexp: riff*tgz
 
 - name: gcs-riff-chart-index
   type: gcs-resource
   source:
-    bucket: <%= charts_bucket_name %>
+    bucket: riff-charts
     json_key: ((gcp-json-key))
     versioned_file: index.yaml
 
 - name: gcs-riff-chart-latest-version
   type: gcs-resource
   source:
-    bucket: <%= charts_bucket_name %>
+    bucket: riff-charts
     json_key: ((gcp-json-key))
     versioned_file: latest_version
 
 - name: gcs-riff-chart-latest-name
   type: gcs-resource
   source:
-    bucket: <%= charts_bucket_name %>
+    bucket: riff-charts
     json_key: ((gcp-json-key))
     versioned_file: latest_name
 
-<% riff_components.each do |component| %>
-- name: <%= component.name %>-version
+## Versions ##
+
+- name: function-sidecar-version
   type: semver
   source:
     driver: gcs
     bucket: riff_versions
-    key: <%= component.name %>-version
+    key: function-sidecar-version
     json_key: ((gcp-json-key))
-<% end %>
+
+- name: http-gateway-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: http-gateway-version
+    json_key: ((gcp-json-key))
+
+- name: topic-controller-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: topic-controller-version
+    json_key: ((gcp-json-key))
+
+- name: function-controller-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: function-controller-version
+    json_key: ((gcp-json-key))
+
+- name: node-function-invoker-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: node-function-invoker-version
+    json_key: ((gcp-json-key))
+
+- name: shell-function-invoker-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: shell-function-invoker-version
+    json_key: ((gcp-json-key))
+
+- name: java-function-invoker-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: java-function-invoker-version
+    json_key: ((gcp-json-key))
+
+- name: python2-function-invoker-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: python2-function-invoker-version
+    json_key: ((gcp-json-key))
 
 - name: cli-version
   type: semver
@@ -128,6 +124,8 @@ resources:
     key: cli-version
     json_key: ((gcp-json-key))
 
+## CLI Binary ##
+
 - name: cli-binary
   type: gcs-resource
   source:
@@ -135,41 +133,146 @@ resources:
     json_key: ((gcp-json-key))
     regexp: riff-linux-amd64-*
 
+## Slack Alert ##
+
 - name: slack-alert
   type: slack-notification
   source:
     url: ((slack-hook-url))
 
-#####################################################
-# Git - Riff infra
-#####################################################
+## Git Repos ##
 
-<% riff_components.each do |component| %>
-- name: git-<%= component.name %>
+### Git Repos: Components ###
+
+- name: git-function-sidecar
   type: git
   source:
-    uri: https://github.com/<%= component.git_org_name %>/<%= component.git_repo_name %>.git
-    branch: master
+    uri: https://github.com/projectriff/function-sidecar.git
 
-- name: github-commit-status-<%= component.name %>
-  type: github-status
-  source:
-    repository: <%= component.git_org_name %>/<%= component.git_repo_name %>
-    access_token: ((gitbot-access-token))
-    context: ci/riff/<%= component.git_repo_name %>
-<% end %>
-
-- name: git-riff
+- name: git-http-gateway
   type: git
   source:
-    uri: https://github.com/projectriff/riff.git
-    branch: master
+    uri: https://github.com/projectriff/http-gateway.git
+
+- name: git-topic-controller
+  type: git
+  source:
+    uri: https://github.com/projectriff/topic-controller.git
+
+- name: git-function-controller
+  type: git
+  source:
+    uri: https://github.com/projectriff/function-controller.git
 
 - name: git-riff-cli
   type: git
   source:
     uri: https://github.com/projectriff/riff-cli.git
-    branch: master
+
+- name: git-helm-charts
+  type: git
+  source:
+    uri: https://github.com/projectriff/helm-charts.git
+
+### Git Repos: CI & FATS ###
+
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:projectriff/ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+
+- name: git-faas-acceptance-test-suite
+  type: git
+  source:
+    uri: git@github.com:projectriff/fats.git
+    private_key: ((git-pfs-ci-ssh-key))
+
+### Git Repos: Invokers
+
+- name: git-node-function-invoker
+  type: git
+  source:
+    uri: https://github.com/projectriff/node-function-invoker.git
+
+- name: git-shell-function-invoker
+  type: git
+  source:
+    uri: https://github.com/projectriff/shell-function-invoker.git
+
+- name: git-java-function-invoker
+  type: git
+  source:
+    uri: https://github.com/projectriff/java-function-invoker.git
+
+- name: git-python2-function-invoker
+  type: git
+  source:
+    uri: https://github.com/projectriff/python2-function-invoker.git
+
+- name: git-riff
+  type: git
+  source:
+    uri: https://github.com/projectriff/riff.git
+
+## Github Commit Status Resources ##
+
+- name: github-commit-status-function-sidecar
+  type: github-status
+  source:
+    repository: projectriff/function-sidecar
+    access_token: ((gitbot-access-token))
+    context: ci/riff/function-sidecar
+
+- name: github-commit-status-http-gateway
+  type: github-status
+  source:
+    repository: projectriff/http-gateway
+    access_token: ((gitbot-access-token))
+    context: ci/riff/http-gateway
+
+- name: github-commit-status-topic-controller
+  type: github-status
+  source:
+    repository: projectriff/topic-controller
+    access_token: ((gitbot-access-token))
+    context: ci/riff/topic-controller
+
+
+- name: github-commit-status-function-controller
+  type: github-status
+  source:
+    repository: projectriff/function-controller
+    access_token: ((gitbot-access-token))
+    context: ci/riff/function-controller
+
+- name: github-commit-status-node-function-invoker
+  type: github-status
+  source:
+    repository: projectriff/node-function-invoker
+    access_token: ((gitbot-access-token))
+    context: ci/riff/node-function-invoker
+
+- name: github-commit-status-shell-function-invoker
+  type: github-status
+  source:
+    repository: projectriff/shell-function-invoker
+    access_token: ((gitbot-access-token))
+    context: ci/riff/shell-function-invoker
+
+- name: github-commit-status-java-function-invoker
+  type: github-status
+  source:
+    repository: projectriff/java-function-invoker
+    access_token: ((gitbot-access-token))
+    context: ci/riff/java-function-invoker
+
+- name: github-commit-status-python2-function-invoker
+  type: github-status
+  source:
+    repository: projectriff/python2-function-invoker
+    access_token: ((gitbot-access-token))
+    context: ci/riff/python2-function-invoker
 
 - name: github-commit-status-riff-cli
   type: github-status
@@ -178,12 +281,6 @@ resources:
     access_token: ((gitbot-access-token))
     context: ci/riff/cli
 
-- name: git-helm-charts
-  type: git
-  source:
-    uri: https://github.com/projectriff/helm-charts.git
-    branch: master
-
 - name: github-commit-status-helm-charts
   type: github-status
   source:
@@ -191,46 +288,70 @@ resources:
     access_token: ((gitbot-access-token))
     context: ci/riff/helm-charts
 
-- name: git-kubernetes-model
-  type: git
-  source:
-    uri: https://github.com/projectriff/kubernetes-model.git
-    branch: riff
+## Docker Images ##
 
-#####################################################
-# Git - CI
-#####################################################
+### Docker Images: Components ###
 
-- name: git-pfs-ci
-  type: git
-  source:
-    uri: git@github.com:projectriff/ci.git
-    private_key: ((git-pfs-ci-ssh-key))
-    branch: master
-
-- name: git-faas-acceptance-test-suite
-  type: git
-  source:
-    uri: git@github.com:projectriff/fats.git
-    private_key: ((git-pfs-ci-ssh-key))
-    branch: master
-
-#####################################################
-# Docker images
-#####################################################
-
-<% riff_components.each do |component| %>
-- name:  <%= component.name %>-docker-image
+- name:  function-sidecar-docker-image
   type: docker-image
   source:
-    repository: ((docker-riff-org))/<%= component.docker_image_name %>
+    repository: ((docker-riff-org))/function-sidecar
     username: ((docker-riff-username))
     password: ((docker-riff-password))
-<% end %>
 
-#################### Sample Images ##################
+- name:  http-gateway-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-riff-org))/http-gateway
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
 
-## Node ##
+- name:  topic-controller-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-riff-org))/topic-controller
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+- name:  function-controller-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-riff-org))/function-controller
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+### Docker Images: Invokers ###
+
+- name:  node-function-invoker-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-riff-org))/node-function-invoker
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+- name:  shell-function-invoker-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-riff-org))/shell-function-invoker
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+- name:  java-function-invoker-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-riff-org))/java-function-invoker
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+- name:  python2-function-invoker-docker-image
+  type: docker-image
+  source:
+    repository: ((docker-riff-org))/python2-function-invoker
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+
+### Docker Images: Samples ###
 
 - name:  node-sample-image
   type: docker-image
@@ -246,11 +367,9 @@ resources:
     username: ((docker-riff-username))
     password: ((docker-riff-password))
 
-#####################################################
-# JOBS
-#####################################################
+jobs: #################################################################################################################
 
-jobs:
+## CLI Binary ##
 
 - name: build-riff-cli
   plan:
@@ -282,10 +401,17 @@ jobs:
     params:
       commit: git-riff-cli
       state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
-<%= slack_notification %>
 
-## Build Sample Images ##
+## Sample Images ##
 
 - name: build-node-sample-image
   plan:
@@ -339,57 +465,334 @@ jobs:
       build: riff-init-output
       tag: shell-function-invoker-version/version
 
-<% riff_components.each do |component| %>
-- name: build-<%= component.name %>-container
-  serial_groups: [<%= component.name %>]
+## Jobs: Components ##
+
+- name: build-function-sidecar-container
+  serial_groups: [function-sidecar]
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: git-<%= component.name %>
+    - get: git-function-sidecar
       trigger: true
-    - get: <%= component.name %>-version
-<% if component.name == 'function-controller' %>
-    - get: git-kubernetes-model
-<% end %>
-
-  - put: <%= component.name %>-version
+    - get: function-sidecar-version
+  - put: function-sidecar-version
     params: {pre: build}
-
-  - put: github-commit-status-<%= component.name %>
+  - put: github-commit-status-function-sidecar
     params:
-      commit: git-<%= component.name %>
+      commit: git-function-sidecar
       state: pending
-
-  - task: build-<%= component.name %>
-    file: git-pfs-ci/tasks/<%= component.build_task_file %>
+  - task: build-function-sidecar
+    file: git-pfs-ci/tasks/sidecar/build/task.yml
     on_failure:
-      put: github-commit-status-<%= component.name %>
+      put: github-commit-status-function-sidecar
       params:
-        commit: git-<%= component.name %>
+        commit: git-function-sidecar
         state: failure
-
-  - put: <%= component.name %>-docker-image
+  - put: function-sidecar-docker-image
     params:
       build: docker-context
       tag: docker-context/docker_version
       tag_as_latest: true
-    <% if component.name == 'function-controller' %>
+  on_success:
+    put: github-commit-status-function-sidecar
+    params:
+      commit: git-function-sidecar
+      state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: build-http-gateway-container
+  serial_groups: [http-gateway]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-http-gateway
+      trigger: true
+    - get: http-gateway-version
+  - put: http-gateway-version
+    params: {pre: build}
+  - put: github-commit-status-http-gateway
+    params:
+      commit: git-http-gateway
+      state: pending
+  - task: build-http-gateway
+    file: git-pfs-ci/tasks/http-gateway/build/task.yml
+    on_failure:
+      put: github-commit-status-http-gateway
+      params:
+        commit: git-http-gateway
+        state: failure
+  - put: http-gateway-docker-image
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: true
+  on_success:
+    put: github-commit-status-http-gateway
+    params:
+      commit: git-http-gateway
+      state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: build-topic-controller-container
+  serial_groups: [topic-controller]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-topic-controller
+      trigger: true
+    - get: topic-controller-version
+  - put: topic-controller-version
+    params: {pre: build}
+  - put: github-commit-status-topic-controller
+    params:
+      commit: git-topic-controller
+      state: pending
+  - task: build-topic-controller
+    file: git-pfs-ci/tasks/topic-controller/build/task.yml
+    on_failure:
+      put: github-commit-status-topic-controller
+      params:
+        commit: git-topic-controller
+        state: failure
+  - put: topic-controller-docker-image
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: true
+  on_success:
+    put: github-commit-status-topic-controller
+    params:
+      commit: git-topic-controller
+      state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: build-function-controller-container
+  serial_groups: [function-controller]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-function-controller
+      trigger: true
+    - get: function-controller-version
+  - put: function-controller-version
+    params: {pre: build}
+  - put: github-commit-status-function-controller
+    params:
+      commit: git-function-controller
+      state: pending
+  - task: build-function-controller
+    file: git-pfs-ci/tasks/function-controller/build/task.yml
+    on_failure:
+      put: github-commit-status-function-controller
+      params:
+        commit: git-function-controller
+        state: failure
+  - put: function-controller-docker-image
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: true
       build_args:
         JAR_FILE: "*.jar"
-    <% end %>
-
   on_success:
-    put: github-commit-status-<%= component.name %>
+    put: github-commit-status-function-controller
     params:
-      commit: git-<%= component.name %>
+      commit: git-function-controller
       state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
-<%= slack_notification %>
-<% end %>
+## Jobs: Invokers ##
 
-######################################################
-# helm charts
-######################################################
+- name: build-node-function-invoker-container
+  serial_groups: [node-function-invoker]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-node-function-invoker
+      trigger: true
+    - get: node-function-invoker-version
+  - put: node-function-invoker-version
+    params: {pre: build}
+  - put: github-commit-status-node-function-invoker
+    params:
+      commit: git-node-function-invoker
+      state: pending
+  - task: build-node-function-invoker
+    file: git-pfs-ci/tasks/node-invoker/build/task.yml
+    on_failure:
+      put: github-commit-status-node-function-invoker
+      params:
+        commit: git-node-function-invoker
+        state: failure
+  - put: node-function-invoker-docker-image
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: true
+  on_success:
+    put: github-commit-status-node-function-invoker
+    params:
+      commit: git-node-function-invoker
+      state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: build-shell-function-invoker-container
+  serial_groups: [shell-function-invoker]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-shell-function-invoker
+      trigger: true
+    - get: shell-function-invoker-version
+  - put: shell-function-invoker-version
+    params: {pre: build}
+  - put: github-commit-status-shell-function-invoker
+    params:
+      commit: git-shell-function-invoker
+      state: pending
+  - task: build-shell-function-invoker
+    file: git-pfs-ci/tasks/shell-invoker/build/task.yml
+    on_failure:
+      put: github-commit-status-shell-function-invoker
+      params:
+        commit: git-shell-function-invoker
+        state: failure
+  - put: shell-function-invoker-docker-image
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: true
+  on_success:
+    put: github-commit-status-shell-function-invoker
+    params:
+      commit: git-shell-function-invoker
+      state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: build-java-function-invoker-container
+  serial_groups: [java-function-invoker]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-java-function-invoker
+      trigger: true
+    - get: java-function-invoker-version
+  - put: java-function-invoker-version
+    params: {pre: build}
+  - put: github-commit-status-java-function-invoker
+    params:
+      commit: git-java-function-invoker
+      state: pending
+  - task: build-java-function-invoker
+    file: git-pfs-ci/tasks/java-invoker/build/task.yml
+    on_failure:
+      put: github-commit-status-java-function-invoker
+      params:
+        commit: git-java-function-invoker
+        state: failure
+  - put: java-function-invoker-docker-image
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: true
+  on_success:
+    put: github-commit-status-java-function-invoker
+    params:
+      commit: git-java-function-invoker
+      state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+
+- name: build-python2-function-invoker-container
+  serial_groups: [python2-function-invoker]
+  plan:
+  - aggregate:
+    - get: git-pfs-ci
+    - get: git-python2-function-invoker
+      trigger: true
+    - get: python2-function-invoker-version
+  - put: python2-function-invoker-version
+    params: {pre: build}
+  - put: github-commit-status-python2-function-invoker
+    params:
+      commit: git-python2-function-invoker
+      state: pending
+  - task: build-python2-function-invoker
+    file: git-pfs-ci/tasks/python2-invoker/build/task.yml
+    on_failure:
+      put: github-commit-status-python2-function-invoker
+      params:
+        commit: git-python2-function-invoker
+        state: failure
+  - put: python2-function-invoker-docker-image
+    params:
+      build: docker-context
+      tag: docker-context/docker_version
+      tag_as_latest: true
+  on_success:
+    put: github-commit-status-python2-function-invoker
+    params:
+      commit: git-python2-function-invoker
+      state: success
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+## Jobs: Helm Charts ##
 
 - name: build-riff-chart
   serial_groups: [riff]
@@ -397,18 +800,70 @@ jobs:
   - aggregate:
     - get: git-pfs-ci
     - get: git-helm-charts
-  <% riff_components.each do |component| %>
-    - get: <%= component.name %>-version
+    - get: function-sidecar-version
       passed:
-      - build-<%= component.name %>-container
-  <% end %>
-  <% riff_components.each do |component| %>
-    - get: git-<%= component.name %>
+      - build-function-sidecar-container
+    - get: http-gateway-version
+      passed:
+      - build-http-gateway-container
+    - get: topic-controller-version
+      passed:
+      - build-topic-controller-container
+    - get: function-controller-version
+      passed:
+      - build-function-controller-container
+    - get: node-function-invoker-version
+      passed:
+      - build-node-function-invoker-container
+    - get: shell-function-invoker-version
+      passed:
+      - build-shell-function-invoker-container
+    - get: java-function-invoker-version
+      passed:
+      - build-java-function-invoker-container
+    - get: python2-function-invoker-version
+      passed:
+      - build-python2-function-invoker-container
+    - get: git-function-sidecar
       trigger: true
-      passed: [build-<%= component.name %>-container]
+      passed: [build-function-sidecar-container]
       params:
         depth: 1
-  <% end %>
+    - get: git-http-gateway
+      trigger: true
+      passed: [build-http-gateway-container]
+      params:
+        depth: 1
+    - get: git-topic-controller
+      trigger: true
+      passed: [build-topic-controller-container]
+      params:
+        depth: 1
+    - get: git-function-controller
+      trigger: true
+      passed: [build-function-controller-container]
+      params:
+        depth: 1
+    - get: git-node-function-invoker
+      trigger: true
+      passed: [build-node-function-invoker-container]
+      params:
+        depth: 1
+    - get: git-shell-function-invoker
+      trigger: true
+      passed: [build-shell-function-invoker-container]
+      params:
+        depth: 1
+    - get: git-java-function-invoker
+      trigger: true
+      passed: [build-java-function-invoker-container]
+      params:
+        depth: 1
+    - get: git-python2-function-invoker
+      trigger: true
+      passed: [build-python2-function-invoker-container]
+      params:
+        depth: 1
   - put: github-commit-status-helm-charts
     params:
       commit: git-helm-charts
@@ -416,7 +871,7 @@ jobs:
   - task: build-riff-chart
     file: git-pfs-ci/tasks/helm-charts/build/task.yml
     params:
-      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
+      HELM_CHARTS_URL: "https://riff-charts.storage.googleapis.com"
     on_failure:
       put: github-commit-status-helm-charts
       params:
@@ -447,11 +902,20 @@ jobs:
     params:
       commit: git-helm-charts
       state: success
-<%= slack_notification %>
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
-<% k8s_envs.each do |k8s_env| %>
-- name: clean-riff-pre-deploy-<%= k8s_env.name %>
-  serial_groups: [riff-<%= k8s_env.name %>]
+
+## Jobs: FATS Environment Preparation ##
+
+- name: clean-riff-pre-deploy-gke
+  serial_groups: [riff-gke]
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
@@ -459,50 +923,88 @@ jobs:
     - get: gcs-riff-chart-latest-name
       passed: [build-riff-chart]
     - get: git-pfs-ci
-  <% riff_components.each do |component| %>
-    - get: <%= component.name %>-version
+    - get: function-sidecar-version
       passed: [build-riff-chart]
-  <% end %>
+    - get: http-gateway-version
+      passed: [build-riff-chart]
+    - get: topic-controller-version
+      passed: [build-riff-chart]
+    - get: function-controller-version
+      passed: [build-riff-chart]
+    - get: node-function-invoker-version
+      passed: [build-riff-chart]
+    - get: shell-function-invoker-version
+      passed: [build-riff-chart]
+    - get: java-function-invoker-version
+      passed: [build-riff-chart]
+    - get: python2-function-invoker-version
+      passed: [build-riff-chart]
     - get: gcs-riff-chart-index
       passed: [build-riff-chart]
       trigger: true
-
   - task: clean-riff-deployment
     file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
     params:
-      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
-      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
-<%= slack_notification %>
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
+      KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
+      KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
-- name: deploy-riff-<%= k8s_env.name %>
-  serial_groups: [riff-<%= k8s_env.name %>]
+- name: deploy-riff-gke
+  serial_groups: [riff-gke]
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
-      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
+      passed: [clean-riff-pre-deploy-gke]
     - get: gcs-riff-chart-latest-name
-      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
+      passed: [clean-riff-pre-deploy-gke]
     - get: git-pfs-ci
-  <% riff_components.each do |component| %>
-    - get: <%= component.name %>-version
-      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
-  <% end %>
+    - get: function-sidecar-version
+      passed: [clean-riff-pre-deploy-gke]
+    - get: http-gateway-version
+      passed: [clean-riff-pre-deploy-gke]
+    - get: topic-controller-version
+      passed: [clean-riff-pre-deploy-gke]
+    - get: function-controller-version
+      passed: [clean-riff-pre-deploy-gke]
+    - get: node-function-invoker-version
+      passed: [clean-riff-pre-deploy-gke]
+    - get: shell-function-invoker-version
+      passed: [clean-riff-pre-deploy-gke]
+    - get: java-function-invoker-version
+      passed: [clean-riff-pre-deploy-gke]
+    - get: python2-function-invoker-version
+      passed: [clean-riff-pre-deploy-gke]
     - get: gcs-riff-chart-index
-      passed: [clean-riff-pre-deploy-<%= k8s_env.name %>]
+      passed: [clean-riff-pre-deploy-gke]
       trigger: true
-
   - task: deploy-riff
     file: git-pfs-ci/tasks/riff-deployment/deploy/task.yml
     params:
-      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
-      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
-      HELM_CHARTS_URL: "https://<%= charts_bucket_name %>.storage.googleapis.com"
-<%= slack_notification %>
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
+      KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
+      KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
+      HELM_CHARTS_URL: "https://riff-charts.storage.googleapis.com"
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
-- name: run-faas-acceptance-tests-<%= k8s_env.name %>
-  serial_groups: [riff-<%= k8s_env.name %>]
+## Jobs: FATS ##
+
+- name: run-faas-acceptance-tests-gke
+  serial_groups: [riff-gke]
   plan:
   - aggregate:
     - get: git-riff
@@ -511,119 +1013,156 @@ jobs:
     - get: cli-binary
       passed: [build-riff-cli]
     - get: gcs-riff-chart-latest-version
-      passed: [deploy-riff-<%= k8s_env.name %>]
+      passed: [deploy-riff-gke]
     - get: gcs-riff-chart-latest-name
-      passed: [deploy-riff-<%= k8s_env.name %>]
+      passed: [deploy-riff-gke]
     - get: git-pfs-ci
-  <% riff_components.each do |component| %>
-    - get: <%= component.name %>-version
-      passed: [deploy-riff-<%= k8s_env.name %>]
-  <% end %>
+    - get: function-sidecar-version
+      passed: [deploy-riff-gke]
+    - get: http-gateway-version
+      passed: [deploy-riff-gke]
+    - get: topic-controller-version
+      passed: [deploy-riff-gke]
+    - get: function-controller-version
+      passed: [deploy-riff-gke]
+    - get: node-function-invoker-version
+      passed: [deploy-riff-gke]
+    - get: shell-function-invoker-version
+      passed: [deploy-riff-gke]
+    - get: java-function-invoker-version
+      passed: [deploy-riff-gke]
+    - get: python2-function-invoker-version
+      passed: [deploy-riff-gke]
     - get: gcs-riff-chart-index
-      passed: [deploy-riff-<%= k8s_env.name %>]
+      passed: [deploy-riff-gke]
       trigger: true
     - get: git-faas-acceptance-test-suite
-
   - task: run-riff-system-tests-node
     file: git-pfs-ci/tasks/acceptance-tests/task.yml
     params:
       GINKGO_FOCUS: node
-      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
-      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
+      KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
+      KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
       DOCKER_TEST_ORG: ((docker-test-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
-
   - task: run-riff-system-tests-shell
     file: git-pfs-ci/tasks/acceptance-tests/task.yml
     params:
       GINKGO_FOCUS: shell
-      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
-      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
+      KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
+      KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
       DOCKER_TEST_ORG: ((docker-test-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
-<%= slack_notification %>
+## Jobs: FATS Environment Cleanup ##
 
-- name: clean-riff-post-deploy-<%= k8s_env.name %>
-  serial_groups: [riff-<%= k8s_env.name %>]
+- name: clean-riff-post-deploy-gke
+  serial_groups: [riff-gke]
   plan:
   - aggregate:
     - get: gcs-riff-chart-latest-version
-      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
+      passed: [run-faas-acceptance-tests-gke]
     - get: gcs-riff-chart-latest-name
-      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
+      passed: [run-faas-acceptance-tests-gke]
     - get: git-pfs-ci
-  <% riff_components.each do |component| %>
-    - get: <%= component.name %>-version
-      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
-  <% end %>
+    - get: function-sidecar-version
+      passed: [run-faas-acceptance-tests-gke]
+    - get: http-gateway-version
+      passed: [run-faas-acceptance-tests-gke]
+    - get: topic-controller-version
+      passed: [run-faas-acceptance-tests-gke]
+    - get: function-controller-version
+      passed: [run-faas-acceptance-tests-gke]
+    - get: node-function-invoker-version
+      passed: [run-faas-acceptance-tests-gke]
+    - get: shell-function-invoker-version
+      passed: [run-faas-acceptance-tests-gke]
+    - get: java-function-invoker-version
+      passed: [run-faas-acceptance-tests-gke]
+    - get: python2-function-invoker-version
+      passed: [run-faas-acceptance-tests-gke]
     - get: gcs-riff-chart-index
-      passed: [run-faas-acceptance-tests-<%= k8s_env.name %>]
+      passed: [run-faas-acceptance-tests-gke]
       trigger: true
-
   - task: clean-riff-deployment
     file: git-pfs-ci/tasks/riff-deployment/clean/task.yml
     params:
-      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
-      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))<%= slack_notification %>
-<%= slack_notification %>
-<% end %>
+      KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
+      KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
+      KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
-- name: manual-publish-crds
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-helm-charts
-
-<% k8s_envs.each do |k8s_env| %>
-  - task: publish-crds-<%= k8s_env.name %>
-    file: git-pfs-ci/tasks/custom-resource-definitions/publish/task.yml
-    params:
-      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
-      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
-      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
-<% end %>
-<%= slack_notification %>
+## Jobs: Version Bumping ##
 
 - name: manual-images-version-bump-build
   plan:
-  <% riff_components.each do |component| %>
-  - put: <%= component.name %>-version
+  - put: function-sidecar-version
     params: {pre: build}
-  <% end %>
-<%= slack_notification %>
+  - put: http-gateway-version
+    params: {pre: build}
+  - put: topic-controller-version
+    params: {pre: build}
+  - put: function-controller-version
+    params: {pre: build}
+  - put: node-function-invoker-version
+    params: {pre: build}
+  - put: shell-function-invoker-version
+    params: {pre: build}
+  - put: java-function-invoker-version
+    params: {pre: build}
+  - put: python2-function-invoker-version
+    params: {pre: build}
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: manual-images-version-bump-patch
   plan:
-  <% riff_components.each do |component| %>
-  - put: <%= component.name %>-version
+  - put: function-sidecar-version
     params: {bump: patch, pre: build}
-  <% end %>
-<%= slack_notification %>
-
-- name: manual-images-release
-  plan:
-  - get: git-pfs-ci
-<% riff_components.each do |component| %>
-  - get: <%= component.name %>-version
-    passed:
-    - build-<%= component.name %>-container
-<% end %>
-<% riff_components.each do |component| %>
-  - task: release-<%= component.name %>
-    file: git-pfs-ci/tasks/release-management/docker-image-tagging/task.yml
-    input_mapping: { source-semver: <%= component.name %>-version }
-    privileged: true
-    params:
-      DOCKERHUB_ORG_SOURCE: ((docker-riff-org))
-      DOCKERHUB_ORG_TARGET: ((docker-riff-org))
-      DOCKERHUB_USERNAME: ((docker-riff-username))
-      DOCKERHUB_PASSWORD: ((docker-riff-password))
-      DOCKER_IMAGE: <%= component.docker_image_name %>
-<% end %>
-<%= slack_notification %>
+  - put: http-gateway-version
+    params: {bump: patch, pre: build}
+  - put: topic-controller-version
+    params: {bump: patch, pre: build}
+  - put: function-controller-version
+    params: {bump: patch, pre: build}
+  - put: node-function-invoker-version
+    params: {bump: patch, pre: build}
+  - put: shell-function-invoker-version
+    params: {bump: patch, pre: build}
+  - put: java-function-invoker-version
+    params: {bump: patch, pre: build}
+  - put: python2-function-invoker-version
+    params: {bump: patch, pre: build}
+  on_failure:
+    do:
+    - put: slack-alert
+      params:
+        channel: '#pfs-ops'
+        text: |
+          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
