@@ -144,6 +144,11 @@ resources: #####################################################################
 
 ### Git Repos: Components ###
 
+- name: git-riff
+  type: git
+  source:
+    uri: https://github.com/projectriff/riff.git
+
 - name: git-function-sidecar
   type: git
   source:
@@ -209,11 +214,6 @@ resources: #####################################################################
   type: git
   source:
     uri: https://github.com/projectriff/python2-function-invoker.git
-
-- name: git-riff
-  type: git
-  source:
-    uri: https://github.com/projectriff/riff.git
 
 ## Github Commit Status Resources ##
 
