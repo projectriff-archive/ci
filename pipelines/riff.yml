@@ -401,14 +401,7 @@ jobs: ##########################################################################
     params:
       commit: git-riff-cli
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 
 ## Sample Images ##
@@ -498,14 +491,7 @@ jobs: ##########################################################################
     params:
       commit: git-function-sidecar
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 - name: build-http-gateway-container
   serial_groups: [http-gateway]
@@ -538,14 +524,7 @@ jobs: ##########################################################################
     params:
       commit: git-http-gateway
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 - name: build-topic-controller-container
   serial_groups: [topic-controller]
@@ -578,14 +557,7 @@ jobs: ##########################################################################
     params:
       commit: git-topic-controller
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 - name: build-function-controller-container
   serial_groups: [function-controller]
@@ -620,14 +592,7 @@ jobs: ##########################################################################
     params:
       commit: git-function-controller
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 ## Jobs: Invokers ##
 
@@ -662,14 +627,7 @@ jobs: ##########################################################################
     params:
       commit: git-node-function-invoker
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 - name: build-shell-function-invoker-container
   serial_groups: [shell-function-invoker]
@@ -702,14 +660,7 @@ jobs: ##########################################################################
     params:
       commit: git-shell-function-invoker
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 - name: build-java-function-invoker-container
   serial_groups: [java-function-invoker]
@@ -742,14 +693,7 @@ jobs: ##########################################################################
     params:
       commit: git-java-function-invoker
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 
 - name: build-python2-function-invoker-container
@@ -783,14 +727,7 @@ jobs: ##########################################################################
     params:
       commit: git-python2-function-invoker
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 ## Jobs: Helm Charts ##
 
@@ -902,14 +839,7 @@ jobs: ##########################################################################
     params:
       commit: git-helm-charts
       state: success
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 
 ## Jobs: FATS Environment Preparation ##
@@ -948,14 +878,7 @@ jobs: ##########################################################################
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
       KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
       KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 - name: deploy-riff-gke
   serial_groups: [riff-gke]
@@ -992,14 +915,7 @@ jobs: ##########################################################################
       KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
       KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
       HELM_CHARTS_URL: "https://riff-charts.storage.googleapis.com"
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 ## Jobs: FATS ##
 
@@ -1057,14 +973,7 @@ jobs: ##########################################################################
       DOCKER_TEST_ORG: ((docker-test-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 ## Jobs: FATS Environment Cleanup ##
 
@@ -1102,14 +1011,7 @@ jobs: ##########################################################################
       KUBECONFIG_STRING: ((pfs-gcp-kubeconfig-gke-ci))
       KUBECONFIG_CERT: ((pfs-gcp-kubeconfig-gke-ci-crt))
       KUBECONFIG_KEY: ((pfs-gcp-kubeconfig-gke-ci-key))
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 ## Jobs: Version Bumping ##
 
@@ -1131,14 +1033,7 @@ jobs: ##########################################################################
     params: {pre: build}
   - put: python2-function-invoker-version
     params: {pre: build}
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
 
 - name: manual-images-version-bump-patch
   plan:
@@ -1158,11 +1053,15 @@ jobs: ##########################################################################
     params: {bump: patch, pre: build}
   - put: python2-function-invoker-version
     params: {bump: patch, pre: build}
-  on_failure:
-    do:
-    - put: slack-alert
-      params:
-        channel: '#pfs-ops'
-        text: |
-          $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
-          https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_failure: *job_on_failure
+
+# Shared Components #############################################################################################################
+
+on_failure: &job_on_failure
+  do:
+  - put: slack-alert
+    params:
+      channel: '#pfs-ops'
+      text: |
+        $BUILD_PIPELINE_NAME : $BUILD_JOB_NAME Failed
+        https://ci.projectriff.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
