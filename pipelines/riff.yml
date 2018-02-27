@@ -241,6 +241,13 @@ resources:
     username: ((docker-riff-username))
     password: ((docker-riff-password))
 
+- name:  shell-sample-echo-image
+  type: docker-image
+  source:
+    repository: ((docker-test-org))/shell-sample-echo-image
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
 #####################################################
 # JOBS
 #####################################################
@@ -280,6 +287,8 @@ jobs:
 
 <%= slack_notification %>
 
+## Build Sample Images ##
+
 - name: build-node-sample-image
   plan:
   - aggregate:
@@ -305,6 +314,32 @@ jobs:
     params:
       build: riff-init-output
       tag: node-function-invoker-version/version
+
+- name: build-shell-sample-image
+  plan:
+  - aggregate:
+    - get: git-riff
+    - get: git-pfs-ci
+    - get: shell-function-invoker-version
+      trigger: true
+      passed: [build-shell-function-invoker-container]
+    - get: cli-version
+      passed: [build-riff-cli]
+    - get: cli-binary
+      passed: [build-riff-cli]
+  - task: perform-init
+    file: git-pfs-ci/tasks/samples/init-dockerfile/task.yml
+    input_mapping:
+      invoker-version: shell-function-invoker-version
+    params:
+      SAMPLE_PATH: samples/shell/echo
+      SAMPLE_ARTIFACT: echo.sh
+      SAMPLE_LANGUAGE: shell
+      DOCKER_TEST_ORG: riffci
+  - put: shell-sample-echo-image
+    params:
+      build: riff-init-output
+      tag: shell-function-invoker-version/version
 
 <% riff_components.each do |component| %>
 - name: build-<%= component.name %>-container
@@ -491,8 +526,7 @@ jobs:
       trigger: true
     - get: git-faas-acceptance-test-suite
 
-  - task: run-riff-system-tests
-    privileged: true
+  - task: run-riff-system-tests-node
     file: git-pfs-ci/tasks/acceptance-tests/task.yml
     params:
       GINKGO_FOCUS: node
@@ -502,6 +536,18 @@ jobs:
       DOCKER_TEST_ORG: ((docker-test-org))
       DOCKER_USERNAME: ((docker-riff-username))
       DOCKER_PASSWORD: ((docker-riff-password))
+
+  - task: run-riff-system-tests-shell
+    file: git-pfs-ci/tasks/acceptance-tests/task.yml
+    params:
+      GINKGO_FOCUS: shell
+      KUBECONFIG_STRING: ((<%= k8s_env.lpass_name %>))
+      KUBECONFIG_CERT: ((<%= k8s_env.lpass_name %>-crt))
+      KUBECONFIG_KEY: ((<%= k8s_env.lpass_name %>-key))
+      DOCKER_TEST_ORG: ((docker-test-org))
+      DOCKER_USERNAME: ((docker-riff-username))
+      DOCKER_PASSWORD: ((docker-riff-password))
+
 <%= slack_notification %>
 
 - name: clean-riff-post-deploy-<%= k8s_env.name %>
