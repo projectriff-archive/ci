@@ -124,6 +124,15 @@ resources: #####################################################################
     key: cli-version
     json_key: ((gcp-json-key))
 
+- name: riff-version
+  type: semver
+  source:
+    initial_version: 0.0.5
+    driver: gcs
+    bucket: riff_versions
+    key: riff-version
+    json_key: ((gcp-json-key))
+
 ## CLI Binary ##
 
 - name: cli-binary
@@ -238,7 +247,6 @@ resources: #####################################################################
     access_token: ((gitbot-access-token))
     context: ci/riff/topic-controller
 
-
 - name: github-commit-status-function-controller
   type: github-status
   source:
@@ -287,6 +295,14 @@ resources: #####################################################################
     repository: projectriff/helm-charts
     access_token: ((gitbot-access-token))
     context: ci/riff/helm-charts
+
+- name: github-commit-status-riff
+  type: github-status
+  source:
+    repository: projectriff/riff
+    access_token: ((gitbot-access-token))
+    context: ci/riff/build-component-images
+
 
 ## Docker Images ##
 
@@ -459,6 +475,89 @@ jobs: ##########################################################################
       tag: shell-function-invoker-version/version
 
 ## Jobs: Components ##
+
+- name: build-component-images
+  plan:
+  - aggregate: # fetch resources
+    - get: git-riff
+      params:
+        depth: 1
+    - get: git-pfs-ci
+    - get: riff-version
+
+  - aggregate: # pre-build metadata
+    - put: riff-version
+      params:
+        pre: build
+    - put: github-commit-status-riff
+      params:
+        commit: git-riff
+        state: pending
+        description: Building, testing and creating docker images for riff server components
+
+  - aggregate: # build and test
+    - task: test-topic-controller
+      file: git-pfs-ci/tasks/riff-components/test/task.yml
+      params:
+        COMPONENT: topic-controller
+    - task: test-function-controller
+      file: git-pfs-ci/tasks/riff-components/test/task.yml
+      params:
+        COMPONENT: function-controller
+    - task: test-function-sidecar
+      file: git-pfs-ci/tasks/sidecar/build/task.yml
+      params:
+        COMPONENT: function-sidecar
+    - task: test-http-gateway
+      file: git-pfs-ci/tasks/riff-components/test/task.yml
+      params:
+        COMPONENT: http-gateway
+    on_failure: # build/test failure
+      put: github-commit-status-riff
+      params:
+        commit: git-riff
+        state: failure
+        description: Tests failed for one or more riff server components
+
+  - aggregate: # if all tests are OK, push all component images together
+    - put: topic-controller-docker-image
+      params:
+        build: git-riff
+        tag: riff-version/version
+        build_args:
+          COMPONENT: topic-controller
+    - put: function-controller-docker-image
+      params:
+        build: git-riff
+        tag: riff-version/version
+        build_args:
+          COMPONENT: function-controller
+    - put: function-sidecar-docker-image
+      params:
+        build: git-riff
+        tag: riff-version/version
+        build_args:
+          COMPONENT: function-sidecar
+    - put: http-gateway-docker-image
+      params:
+        build: git-riff
+        tag: riff-version/version
+        build_args:
+          COMPONENT: http-gateway
+    on_failure: # docker push failure
+      put: github-commit-status-riff
+      params:
+        commit: git-riff
+        state: error
+        description: One or more riff server component images failed to upload to dockerhub
+
+  on_success: # /build-component-images
+    put: github-commit-status-riff
+    params:
+      commit: git-riff
+      state: success
+      description: Riff server components passed their tests and images were uploaded to dockerhub
+
 
 - name: build-function-sidecar-container
   serial_groups: [function-sidecar]
