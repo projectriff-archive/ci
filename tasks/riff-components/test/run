@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+version=$(cat riff-version/version)
+
+echo
+echo "Building riff component $COMPONENT version $version"
+echo
+
+GOPATH=$(go env GOPATH)
+export GOPATH
+
+workdir=$GOPATH/src/github.com/projectriff
+mkdir -p "$workdir"
+cp -rf git-riff "$workdir/riff"
+
+go get github.com/vektra/mockery/.../
+
+pushd "$workdir/riff/$COMPONENT"
+  make test
+popd
+
+echo
+echo Done.
+echo
