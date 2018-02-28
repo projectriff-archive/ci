@@ -1,0 +1,93 @@
+resources:
+
+- name: git-riff
+  type: git
+  source:
+    uri: https://github.com/projectriff/riff.git
+    branch: master
+
+- name: git-pfs-ci
+  type: git
+  source:
+    uri: git@github.com:projectriff/ci.git
+    private_key: ((git-pfs-ci-ssh-key))
+    branch: master
+
+
+## Shell ##
+- name: shell-function-invoker-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: shell-function-invoker-version
+    json_key: ((gcp-json-key))
+
+- name:  shell-sample-echo-image
+  type: docker-image
+  source:
+    repository: ((docker-test-org))/shell-sample-echo-image
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+## Node ##
+
+- name: node-function-invoker-version
+  type: semver
+  source:
+    driver: gcs
+    bucket: riff_versions
+    key: node-function-invoker-version
+    json_key: ((gcp-json-key))
+
+- name:  node-sample-image
+  type: docker-image
+  source:
+    repository: ((docker-test-org))/node-sample-image
+    username: ((docker-riff-username))
+    password: ((docker-riff-password))
+
+jobs: ####################################################################################################
+
+- name: build-shell-sample-image
+  plan:
+  - aggregate:
+    - get: git-riff
+    - get: git-pfs-ci
+    - get: shell-function-invoker-version
+  - task: perform-init
+    file: git-pfs-ci/tasks/samples/init-dockerfile/task.yml
+    input_mapping:
+      invoker-version: shell-function-invoker-version
+    params:
+      SAMPLE_PATH: samples/shell/echo
+      SAMPLE_ARTIFACT: echo.sh
+      SAMPLE_LANGUAGE: shell
+      BASE_IMAGE_VERSION: shell-function-invoker-version/version
+      DOCKER_TEST_ORG: riffci
+  - put: shell-sample-echo-image
+    params:
+      build: riff-init-output
+      tag: shell-function-invoker-version/version
+
+
+- name: build-node-sample-image
+  plan:
+  - aggregate:
+    - get: git-riff
+    - get: git-pfs-ci
+    - get: node-function-invoker-version
+  - task: perform-init
+    file: git-pfs-ci/tasks/samples/init-dockerfile/task.yml
+    input_mapping:
+      invoker-version: node-function-invoker-version
+    params:
+      SAMPLE_PATH: samples/node/square
+      SAMPLE_ARTIFACT: square.js
+      SAMPLE_LANGUAGE: node
+      BASE_IMAGE_VERSION: node-function-invoker-version/version
+      DOCKER_TEST_ORG: riffci
+  - put: node-sample-image
+    params:
+      build: riff-init-output
+      tag: node-function-invoker-version/version
