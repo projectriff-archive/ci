@@ -8,7 +8,7 @@ inputs:
 - name: git-pfs-ci
 - name: git-faas-acceptance-test-suite
 - name: git-riff
-- name: cli-version
+- name: riff-version
 - name: cli-binary
 - name: gcs-riff-chart-latest-version
 - name: gcs-riff-chart-latest-name
