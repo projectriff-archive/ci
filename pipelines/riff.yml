@@ -51,14 +51,6 @@ resources: #####################################################################
 
 ## Versions ##
 
-- name: topic-controller-version
-  type: semver
-  source:
-    driver: gcs
-    bucket: riff_versions
-    key: topic-controller-version
-    json_key: ((gcp-json-key))
-
 - name: function-controller-version
   type: semver
   source:
@@ -133,11 +125,6 @@ resources: #####################################################################
   source:
     uri: https://github.com/projectriff/riff.git
 
-- name: git-topic-controller
-  type: git
-  source:
-    uri: https://github.com/projectriff/topic-controller.git
-
 - name: git-function-controller
   type: git
   source:
@@ -185,13 +172,6 @@ resources: #####################################################################
     uri: https://github.com/projectriff/python2-function-invoker.git
 
 ## Github Commit Status Resources ##
-
-- name: github-commit-status-topic-controller
-  type: github-status
-  source:
-    repository: projectriff/topic-controller
-    access_token: ((gitbot-access-token))
-    context: ci/riff/topic-controller
 
 - name: github-commit-status-function-controller
   type: github-status
@@ -471,39 +451,6 @@ jobs: ##########################################################################
       description: Riff server components passed their tests and images were uploaded to dockerhub
   on_failure: *job_on_failure
 
-- name: build-topic-controller-container
-  serial_groups: [topic-controller]
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-topic-controller
-      trigger: true
-    - get: topic-controller-version
-  - put: topic-controller-version
-    params: {pre: build}
-  - put: github-commit-status-topic-controller
-    params:
-      commit: git-topic-controller
-      state: pending
-  - task: build-topic-controller
-    file: git-pfs-ci/tasks/topic-controller/build/task.yml
-    on_failure:
-      put: github-commit-status-topic-controller
-      params:
-        commit: git-topic-controller
-        state: failure
-  - put: topic-controller-docker-image
-    params:
-      build: docker-context
-      tag: docker-context/docker_version
-      tag_as_latest: true
-  on_success:
-    put: github-commit-status-topic-controller
-    params:
-      commit: git-topic-controller
-      state: success
-  on_failure: *job_on_failure
-
 - name: build-function-controller-container
   serial_groups: [function-controller]
   plan:
@@ -688,9 +635,6 @@ jobs: ##########################################################################
       trigger: true
       params:
         depth: 1
-    - get: topic-controller-version
-      passed:
-      - build-topic-controller-container
     - get: function-controller-version
       passed:
       - build-function-controller-container
@@ -706,11 +650,6 @@ jobs: ##########################################################################
     - get: python2-function-invoker-version
       passed:
       - build-python2-function-invoker-container
-    - get: git-topic-controller
-      trigger: true
-      passed: [build-topic-controller-container]
-      params:
-        depth: 1
     - get: git-function-controller
       trigger: true
       passed: [build-function-controller-container]
@@ -743,8 +682,9 @@ jobs: ##########################################################################
   - task: build-riff-chart
     file: git-pfs-ci/tasks/helm-charts/build/task.yml
     input_mapping:
-      topic-controller-version: riff-version
+      http-gateway-version: riff-version
       function-sidecar-version: riff-version
+      topic-controller-version: riff-version
     params:
       HELM_CHARTS_URL: "https://riff-charts.storage.googleapis.com"
     on_failure:
@@ -793,8 +733,6 @@ jobs: ##########################################################################
     - get: git-pfs-ci
     - get: riff-version
       passed: [build-riff-chart]
-    - get: topic-controller-version
-      passed: [build-riff-chart]
     - get: function-controller-version
       passed: [build-riff-chart]
     - get: node-function-invoker-version
@@ -826,8 +764,6 @@ jobs: ##########################################################################
       passed: [clean-riff-pre-deploy-gke]
     - get: git-pfs-ci
     - get: riff-version
-      passed: [clean-riff-pre-deploy-gke]
-    - get: topic-controller-version
       passed: [clean-riff-pre-deploy-gke]
     - get: function-controller-version
       passed: [clean-riff-pre-deploy-gke]
@@ -867,8 +803,6 @@ jobs: ##########################################################################
     - get: gcs-riff-chart-latest-name
       passed: [deploy-riff-gke]
     - get: git-pfs-ci
-    - get: topic-controller-version
-      passed: [deploy-riff-gke]
     - get: function-controller-version
       passed: [deploy-riff-gke]
     - get: node-function-invoker-version
@@ -918,8 +852,6 @@ jobs: ##########################################################################
     - get: git-pfs-ci
     - get: riff-version
       passed: [run-faas-acceptance-tests-gke]
-    - get: topic-controller-version
-      passed: [run-faas-acceptance-tests-gke]
     - get: function-controller-version
       passed: [run-faas-acceptance-tests-gke]
     - get: node-function-invoker-version
@@ -947,8 +879,6 @@ jobs: ##########################################################################
   plan:
   - put: riff-version
     params: {pre: build}
-  - put: topic-controller-version
-    params: {pre: build}
   - put: function-controller-version
     params: {pre: build}
   - put: node-function-invoker-version
@@ -964,8 +894,6 @@ jobs: ##########################################################################
 - name: manual-images-version-bump-patch
   plan:
   - put: riff-version
-    params: {bump: patch, pre: build}
-  - put: topic-controller-version
     params: {bump: patch, pre: build}
   - put: function-controller-version
     params: {bump: patch, pre: build}
