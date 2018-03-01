@@ -9,12 +9,12 @@ start_kafka
 build_root=$(pwd)
 
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
-RIFF_VERSION=$(determine_riff_version "$build_root/git-function-sidecar" "$build_root/function-sidecar-version")
 
+RIFF_VERSION=$(cat riff-version/version)
 export GOPATH=$(go env GOPATH)
 
 mkdir -p "$GOPATH/src/github.com/projectriff"
-cp -pr git-function-sidecar "$GOPATH/src/github.com/projectriff/function-sidecar"
+cp -pr git-riff "$GOPATH/src/github.com/projectriff/riff"
 
 killjava() {
     set +e
@@ -23,14 +23,9 @@ killjava() {
 }
 trap killjava INT QUIT TERM EXIT
 
-pushd "$GOPATH/src/github.com/projectriff/function-sidecar/"
+pushd "$GOPATH/src/github.com/projectriff/riff/function-sidecar/"
 
     KAFKA_BROKER=localhost:9092 make test
 
     killjava
-
-    cp -pr . "$build_root/docker-context/"
-
-    echo "$RIFF_VERSION" > "$build_root/docker-context/docker_version"
-
 popd

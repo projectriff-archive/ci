@@ -5,12 +5,9 @@ image_resource:
     repository: sk8s/kafka-zookeeper
 
 inputs:
-- name: function-sidecar-version
-- name: git-function-sidecar
+- name: riff-version
+- name: git-riff
 - name: git-pfs-ci
-
-outputs:
-- name: docker-context
 
 run:
   path: git-pfs-ci/tasks/sidecar/build/run
