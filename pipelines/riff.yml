@@ -117,11 +117,6 @@ resources: #####################################################################
   source:
     uri: https://github.com/projectriff/riff.git
 
-- name: git-helm-charts
-  type: git
-  source:
-    uri: https://github.com/projectriff/helm-charts.git
-
 ### Git Repos: CI & FATS ###
 
 - name: git-pfs-ci
@@ -187,13 +182,6 @@ resources: #####################################################################
     repository: projectriff/python2-function-invoker
     access_token: ((gitbot-access-token))
     context: ci/riff/python2-function-invoker
-
-- name: github-commit-status-helm-charts
-  type: github-status
-  source:
-    repository: projectriff/helm-charts
-    access_token: ((gitbot-access-token))
-    context: ci/riff/helm-charts
 
 - name: github-commit-status-riff
   type: github-status
@@ -572,7 +560,6 @@ jobs: ##########################################################################
   plan:
   - aggregate:
     - get: git-pfs-ci
-    - get: git-helm-charts
     - get: riff-version
       passed: [build-components]
     - get: git-riff
@@ -612,51 +599,56 @@ jobs: ##########################################################################
       passed: [build-python2-function-invoker-container]
       params:
         depth: 1
-  - put: github-commit-status-helm-charts
+  - put: github-commit-status-riff
     params:
-      commit: git-helm-charts
+      commit: git-riff
       state: pending
+      description: Constructing riff helm charts.
   - task: build-riff-chart
     file: git-pfs-ci/tasks/helm-charts/build/task.yml
-    input_mapping:
-      http-gateway-version: riff-version
-      function-sidecar-version: riff-version
-      topic-controller-version: riff-version
-      function-controller-version: riff-version
     params:
       HELM_CHARTS_URL: "https://riff-charts.storage.googleapis.com"
     on_failure:
-      put: github-commit-status-helm-charts
+      put: github-commit-status-riff
       params:
-        commit: git-helm-charts
+        commit: git-riff
         state: failure
-  - put: gcs-riff-chart-latest-version
-    params:
-      file: helm-charts-latest-version/latest_version
-      predefined_acl: publicRead
-  - put: gcs-riff-chart-latest-name
-    params:
-      file: helm-charts-latest-name/latest_name
-      predefined_acl: publicRead
-  - put: gcs-riff-charts
-    params:
-      file: helm-charts/*.tgz
-      predefined_acl: publicRead
-  - put: gcs-riff-charts
-    params:
-      file: helm-charts-install/*
-      predefined_acl: publicRead
-  - put: gcs-riff-chart-index
-    params:
-      file: helm-charts/index.yaml
-      predefined_acl: publicRead
+        description: Failed to build riff helm charts.
+  - aggregate:
+    - put: gcs-riff-chart-latest-version
+      params:
+        file: helm-charts-latest-version/latest_version
+        predefined_acl: publicRead
+    - put: gcs-riff-chart-latest-name
+      params:
+        file: helm-charts-latest-name/latest_name
+        predefined_acl: publicRead
+    - put: gcs-riff-charts
+      params:
+        file: helm-charts/*.tgz
+        predefined_acl: publicRead
+    - put: gcs-riff-charts
+      params:
+        file: helm-charts-install/*
+        predefined_acl: publicRead
+    - put: gcs-riff-chart-index
+      params:
+        file: helm-charts/index.yaml
+        predefined_acl: publicRead
+    on_failure:
+      put: github-commit-status-riff
+      params:
+        commit: git-riff
+        state: failure
+        description: One or more riff chart components failed to upload.
+
   on_success:
     put: github-commit-status-helm-charts
     params:
-      commit: git-helm-charts
+      commit: git-riff
       state: success
+      description: Successfully built and uploaded riff helm charts.
   on_failure: *job_on_failure
-
 
 ## Jobs: FATS Environment Preparation ##
 

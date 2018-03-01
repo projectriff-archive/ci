@@ -8,18 +8,11 @@ build_root=$PWD
 
 source "$build_root/git-pfs-ci/tasks/scripts/common.sh"
 
-cp -pr $build_root/git-helm-charts $build_root/riff
-
-pushd $build_root/git-helm-charts
-
+pushd git-riff/helm-charts
   helm init --client-only
 
-  function_controller_version=$(head "$build_root/function-controller-version/version")
-  function_sidecar_version=$(head "$build_root/function-sidecar-version/version")
-  topic_controller_version=$(head "$build_root/topic-controller-version/version")
-  http_gateway_version=$(head "$build_root/http-gateway-version/version")
-
-  chart_version=$(grep version "$build_root/git-helm-charts/riff/Chart.yaml"  | awk '{print $2}')
+  riff_version=$(cat riff-version/version)
+  chart_version=$(grep version git-riff/helm-charts/riff/Chart.yaml  | awk '{print $2}')
 
   helm package riff --version "$chart_version"
 
@@ -51,7 +44,7 @@ shift
 helm install "\${chart_name}" \
 --version="${chart_version}" \
 --set rbac.create=false \
---set functionController.image.tag=${function_controller_version},functionController.sidecar.image.tag=${function_sidecar_version},topicController.image.tag=${topic_controller_version},httpGateway.image.tag=${http_gateway_version} \
+--set functionController.image.tag=${riff_version},functionController.sidecar.image.tag=${riff_version},topicController.image.tag=${riff_version},httpGateway.image.tag=${riff_version} \
 "\$@"
 
 EOM

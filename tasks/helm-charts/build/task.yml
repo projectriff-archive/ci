@@ -5,13 +5,9 @@ image_resource:
     repository: sk8s/faas-build
 
 inputs:
-- name: git-helm-charts
+- name: git-riff
+- name: riff-version
 - name: git-pfs-ci
-
-- name: function-controller-version
-- name: function-sidecar-version
-- name: topic-controller-version
-- name: http-gateway-version
 
 outputs:
 - name: helm-charts
