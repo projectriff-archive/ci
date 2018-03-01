@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 invoker_version=$(cat invoker-version/version)
-cli_version=$(cat cli-version/version)
+cli_version=$(cat riff-version/version)
 
 echo
 echo "Building sample $SAMPLE_PATH"

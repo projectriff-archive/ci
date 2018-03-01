@@ -115,15 +115,6 @@ resources: #####################################################################
     key: python2-function-invoker-version
     json_key: ((gcp-json-key))
 
-- name: cli-version
-  type: semver
-  source:
-    initial_version: 0.0.4
-    driver: gcs
-    bucket: riff_versions
-    key: cli-version
-    json_key: ((gcp-json-key))
-
 - name: riff-version
   type: semver
   source:
@@ -177,11 +168,6 @@ resources: #####################################################################
   type: git
   source:
     uri: https://github.com/projectriff/function-controller.git
-
-- name: git-riff-cli
-  type: git
-  source:
-    uri: https://github.com/projectriff/riff-cli.git
 
 - name: git-helm-charts
   type: git
@@ -282,13 +268,6 @@ resources: #####################################################################
     access_token: ((gitbot-access-token))
     context: ci/riff/python2-function-invoker
 
-- name: github-commit-status-riff-cli
-  type: github-status
-  source:
-    repository: projectriff/riff-cli
-    access_token: ((gitbot-access-token))
-    context: ci/riff/cli
-
 - name: github-commit-status-helm-charts
   type: github-status
   source:
@@ -385,41 +364,6 @@ resources: #####################################################################
 
 jobs: #################################################################################################################
 
-## CLI Binary ##
-
-- name: build-riff-cli
-  plan:
-  - aggregate:
-    - get: git-riff-cli
-      trigger: true
-    - get: git-pfs-ci
-    - get: cli-version
-  - put: cli-version
-    params: {pre: build}
-  - put: github-commit-status-riff-cli
-    params:
-      commit: git-riff-cli
-      state: pending
-  - task: build-riff-cli
-    file: git-pfs-ci/tasks/cli/build/task.yml
-    on_failure:
-      put: github-commit-status-riff-cli
-      params:
-        commit: git-riff-cli
-        state: failure
-  - put: cli-binary
-    params:
-        file: cli-output/riff-linux-amd64-*
-        predefined_acl: publicRead
-        content_type: application/x-executable
-  on_success:
-    put: github-commit-status-riff-cli
-    params:
-      commit: git-riff-cli
-      state: success
-  on_failure: *job_on_failure
-
-
 ## Sample Images ##
 
 - name: build-node-sample-image
@@ -430,10 +374,10 @@ jobs: ##########################################################################
     - get: node-function-invoker-version
       trigger: true
       passed: [build-node-function-invoker-container]
-    - get: cli-version
-      passed: [build-riff-cli]
+    - get: riff-version
+      passed: [build-components]
     - get: cli-binary
-      passed: [build-riff-cli]
+      passed: [build-components]
   - task: perform-init
     file: git-pfs-ci/tasks/samples/init-dockerfile/task.yml
     input_mapping:
@@ -456,10 +400,10 @@ jobs: ##########################################################################
     - get: shell-function-invoker-version
       trigger: true
       passed: [build-shell-function-invoker-container]
-    - get: cli-version
-      passed: [build-riff-cli]
+    - get: riff-version
+      passed: [build-components]
     - get: cli-binary
-      passed: [build-riff-cli]
+      passed: [build-components]
   - task: perform-init
     file: git-pfs-ci/tasks/samples/init-dockerfile/task.yml
     input_mapping:
@@ -474,9 +418,11 @@ jobs: ##########################################################################
       build: riff-init-output
       tag: shell-function-invoker-version/version
 
+## CLI Binary ##
+
 ## Jobs: Components ##
 
-- name: build-component-images
+- name: build-components
   plan:
   - aggregate: # fetch resources
     - get: git-riff
@@ -494,7 +440,7 @@ jobs: ##########################################################################
       params:
         commit: git-riff
         state: pending
-        description: Building, testing and creating docker images for riff server components
+        description: Building, testing and creating docker images for riff components.
 
   - do: # build and test
     - task: test-topic-controller
@@ -511,12 +457,14 @@ jobs: ##########################################################################
         COMPONENT: http-gateway
     - task: test-function-sidecar
       file: git-pfs-ci/tasks/sidecar/build/task.yml
+    - task: build-riff-cli
+      file: git-pfs-ci/tasks/cli/build/task.yml
     on_failure: # build/test failure
       put: github-commit-status-riff
       params:
         commit: git-riff
         state: failure
-        description: Tests failed for one or more riff server components
+        description: Tests failed for one or more riff components.
 
   - aggregate: # if all tests are OK, push all component images together
     - put: topic-controller-docker-image
@@ -543,12 +491,17 @@ jobs: ##########################################################################
         tag: riff-version/version
         build_args:
           COMPONENT: http-gateway
-    on_failure: # docker push failure
+    - put: cli-binary
+      params:
+        file: cli-output/riff-linux-amd64-*
+        predefined_acl: publicRead
+        content_type: application/x-executable
+    on_failure: # docker push or GCS upload failure
       put: github-commit-status-riff
       params:
         commit: git-riff
         state: error
-        description: One or more riff server component images failed to upload to dockerhub
+        description: A component upload failed.
 
   on_success: # /build-component-images
     put: github-commit-status-riff
@@ -1022,10 +975,8 @@ jobs: ##########################################################################
   plan:
   - aggregate:
     - get: git-riff
-    - get: cli-version
-      passed: [build-riff-cli]
     - get: cli-binary
-      passed: [build-riff-cli]
+      passed: [build-components]
     - get: gcs-riff-chart-latest-version
       passed: [deploy-riff-gke]
     - get: gcs-riff-chart-latest-name
