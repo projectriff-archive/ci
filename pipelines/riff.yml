@@ -496,7 +496,7 @@ jobs: ##########################################################################
         state: pending
         description: Building, testing and creating docker images for riff server components
 
-  - aggregate: # build and test
+  - do: # build and test
     - task: test-topic-controller
       file: git-pfs-ci/tasks/riff-components/test/task.yml
       params:
