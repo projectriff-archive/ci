@@ -51,14 +51,6 @@ resources: #####################################################################
 
 ## Versions ##
 
-- name: function-sidecar-version
-  type: semver
-  source:
-    driver: gcs
-    bucket: riff_versions
-    key: function-sidecar-version
-    json_key: ((gcp-json-key))
-
 - name: topic-controller-version
   type: semver
   source:
@@ -141,11 +133,6 @@ resources: #####################################################################
   source:
     uri: https://github.com/projectriff/riff.git
 
-- name: git-function-sidecar
-  type: git
-  source:
-    uri: https://github.com/projectriff/function-sidecar.git
-
 - name: git-topic-controller
   type: git
   source:
@@ -198,13 +185,6 @@ resources: #####################################################################
     uri: https://github.com/projectriff/python2-function-invoker.git
 
 ## Github Commit Status Resources ##
-
-- name: github-commit-status-function-sidecar
-  type: github-status
-  source:
-    repository: projectriff/function-sidecar
-    access_token: ((gitbot-access-token))
-    context: ci/riff/function-sidecar
 
 - name: github-commit-status-topic-controller
   type: github-status
@@ -491,39 +471,6 @@ jobs: ##########################################################################
       description: Riff server components passed their tests and images were uploaded to dockerhub
   on_failure: *job_on_failure
 
-- name: build-function-sidecar-container
-  serial_groups: [function-sidecar]
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-function-sidecar
-      trigger: true
-    - get: function-sidecar-version
-  - put: function-sidecar-version
-    params: {pre: build}
-  - put: github-commit-status-function-sidecar
-    params:
-      commit: git-function-sidecar
-      state: pending
-  - task: build-function-sidecar
-    file: git-pfs-ci/tasks/sidecar/build/task.yml
-    on_failure:
-      put: github-commit-status-function-sidecar
-      params:
-        commit: git-function-sidecar
-        state: failure
-  - put: function-sidecar-docker-image
-    params:
-      build: docker-context
-      tag: docker-context/docker_version
-      tag_as_latest: true
-  on_success:
-    put: github-commit-status-function-sidecar
-    params:
-      commit: git-function-sidecar
-      state: success
-  on_failure: *job_on_failure
-
 - name: build-topic-controller-container
   serial_groups: [topic-controller]
   plan:
@@ -734,9 +681,6 @@ jobs: ##########################################################################
   - aggregate:
     - get: git-pfs-ci
     - get: git-helm-charts
-    - get: function-sidecar-version
-      passed:
-      - build-function-sidecar-container
     - get: riff-version
       passed: [build-components]
     - get: git-riff
@@ -762,11 +706,6 @@ jobs: ##########################################################################
     - get: python2-function-invoker-version
       passed:
       - build-python2-function-invoker-container
-    - get: git-function-sidecar
-      trigger: true
-      passed: [build-function-sidecar-container]
-      params:
-        depth: 1
     - get: git-topic-controller
       trigger: true
       passed: [build-topic-controller-container]
@@ -805,6 +744,7 @@ jobs: ##########################################################################
     file: git-pfs-ci/tasks/helm-charts/build/task.yml
     input_mapping:
       topic-controller-version: riff-version
+      function-sidecar-version: riff-version
     params:
       HELM_CHARTS_URL: "https://riff-charts.storage.googleapis.com"
     on_failure:
@@ -851,8 +791,6 @@ jobs: ##########################################################################
     - get: gcs-riff-chart-latest-name
       passed: [build-riff-chart]
     - get: git-pfs-ci
-    - get: function-sidecar-version
-      passed: [build-riff-chart]
     - get: riff-version
       passed: [build-riff-chart]
     - get: topic-controller-version
@@ -887,8 +825,6 @@ jobs: ##########################################################################
     - get: gcs-riff-chart-latest-name
       passed: [clean-riff-pre-deploy-gke]
     - get: git-pfs-ci
-    - get: function-sidecar-version
-      passed: [clean-riff-pre-deploy-gke]
     - get: riff-version
       passed: [clean-riff-pre-deploy-gke]
     - get: topic-controller-version
@@ -931,8 +867,6 @@ jobs: ##########################################################################
     - get: gcs-riff-chart-latest-name
       passed: [deploy-riff-gke]
     - get: git-pfs-ci
-    - get: function-sidecar-version
-      passed: [deploy-riff-gke]
     - get: topic-controller-version
       passed: [deploy-riff-gke]
     - get: function-controller-version
@@ -982,8 +916,6 @@ jobs: ##########################################################################
     - get: gcs-riff-chart-latest-name
       passed: [run-faas-acceptance-tests-gke]
     - get: git-pfs-ci
-    - get: function-sidecar-version
-      passed: [run-faas-acceptance-tests-gke]
     - get: riff-version
       passed: [run-faas-acceptance-tests-gke]
     - get: topic-controller-version
@@ -1013,8 +945,6 @@ jobs: ##########################################################################
 
 - name: manual-images-version-bump-build
   plan:
-  - put: function-sidecar-version
-    params: {pre: build}
   - put: riff-version
     params: {pre: build}
   - put: topic-controller-version
@@ -1033,8 +963,6 @@ jobs: ##########################################################################
 
 - name: manual-images-version-bump-patch
   plan:
-  - put: function-sidecar-version
-    params: {bump: patch, pre: build}
   - put: riff-version
     params: {bump: patch, pre: build}
   - put: topic-controller-version
