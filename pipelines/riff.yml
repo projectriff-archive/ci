@@ -504,14 +504,12 @@ jobs: ##########################################################################
       file: git-pfs-ci/tasks/riff-components/test/task.yml
       params:
         COMPONENT: function-controller
-    - task: test-function-sidecar
-      file: git-pfs-ci/tasks/sidecar/build/task.yml
-      params:
-        COMPONENT: function-sidecar
     - task: test-http-gateway
       file: git-pfs-ci/tasks/riff-components/test/task.yml
       params:
         COMPONENT: http-gateway
+    - task: test-function-sidecar
+      file: git-pfs-ci/tasks/sidecar/build/task.yml
     on_failure: # build/test failure
       put: github-commit-status-riff
       params:
