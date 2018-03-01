@@ -556,7 +556,7 @@ jobs: ##########################################################################
       commit: git-riff
       state: success
       description: Riff server components passed their tests and images were uploaded to dockerhub
-
+  on_failure: *job_on_failure
 
 - name: build-function-sidecar-container
   serial_groups: [function-sidecar]
