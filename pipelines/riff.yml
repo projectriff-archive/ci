@@ -59,14 +59,6 @@ resources: #####################################################################
     key: function-sidecar-version
     json_key: ((gcp-json-key))
 
-- name: http-gateway-version
-  type: semver
-  source:
-    driver: gcs
-    bucket: riff_versions
-    key: http-gateway-version
-    json_key: ((gcp-json-key))
-
 - name: topic-controller-version
   type: semver
   source:
@@ -154,11 +146,6 @@ resources: #####################################################################
   source:
     uri: https://github.com/projectriff/function-sidecar.git
 
-- name: git-http-gateway
-  type: git
-  source:
-    uri: https://github.com/projectriff/http-gateway.git
-
 - name: git-topic-controller
   type: git
   source:
@@ -218,13 +205,6 @@ resources: #####################################################################
     repository: projectriff/function-sidecar
     access_token: ((gitbot-access-token))
     context: ci/riff/function-sidecar
-
-- name: github-commit-status-http-gateway
-  type: github-status
-  source:
-    repository: projectriff/http-gateway
-    access_token: ((gitbot-access-token))
-    context: ci/riff/http-gateway
 
 - name: github-commit-status-topic-controller
   type: github-status
@@ -544,39 +524,6 @@ jobs: ##########################################################################
       state: success
   on_failure: *job_on_failure
 
-- name: build-http-gateway-container
-  serial_groups: [http-gateway]
-  plan:
-  - aggregate:
-    - get: git-pfs-ci
-    - get: git-http-gateway
-      trigger: true
-    - get: http-gateway-version
-  - put: http-gateway-version
-    params: {pre: build}
-  - put: github-commit-status-http-gateway
-    params:
-      commit: git-http-gateway
-      state: pending
-  - task: build-http-gateway
-    file: git-pfs-ci/tasks/http-gateway/build/task.yml
-    on_failure:
-      put: github-commit-status-http-gateway
-      params:
-        commit: git-http-gateway
-        state: failure
-  - put: http-gateway-docker-image
-    params:
-      build: docker-context
-      tag: docker-context/docker_version
-      tag_as_latest: true
-  on_success:
-    put: github-commit-status-http-gateway
-    params:
-      commit: git-http-gateway
-      state: success
-  on_failure: *job_on_failure
-
 - name: build-topic-controller-container
   serial_groups: [topic-controller]
   plan:
@@ -746,7 +693,6 @@ jobs: ##########################################################################
       state: success
   on_failure: *job_on_failure
 
-
 - name: build-python2-function-invoker-container
   serial_groups: [python2-function-invoker]
   plan:
@@ -791,9 +737,13 @@ jobs: ##########################################################################
     - get: function-sidecar-version
       passed:
       - build-function-sidecar-container
-    - get: http-gateway-version
-      passed:
-      - build-http-gateway-container
+    - get: riff-version
+      passed: [build-components]
+    - get: git-riff
+      passed: [build-components]
+      trigger: true
+      params:
+        depth: 1
     - get: topic-controller-version
       passed:
       - build-topic-controller-container
@@ -815,11 +765,6 @@ jobs: ##########################################################################
     - get: git-function-sidecar
       trigger: true
       passed: [build-function-sidecar-container]
-      params:
-        depth: 1
-    - get: git-http-gateway
-      trigger: true
-      passed: [build-http-gateway-container]
       params:
         depth: 1
     - get: git-topic-controller
@@ -858,6 +803,8 @@ jobs: ##########################################################################
       state: pending
   - task: build-riff-chart
     file: git-pfs-ci/tasks/helm-charts/build/task.yml
+    input_mapping:
+      topic-controller-version: riff-version
     params:
       HELM_CHARTS_URL: "https://riff-charts.storage.googleapis.com"
     on_failure:
@@ -906,7 +853,7 @@ jobs: ##########################################################################
     - get: git-pfs-ci
     - get: function-sidecar-version
       passed: [build-riff-chart]
-    - get: http-gateway-version
+    - get: riff-version
       passed: [build-riff-chart]
     - get: topic-controller-version
       passed: [build-riff-chart]
@@ -942,7 +889,7 @@ jobs: ##########################################################################
     - get: git-pfs-ci
     - get: function-sidecar-version
       passed: [clean-riff-pre-deploy-gke]
-    - get: http-gateway-version
+    - get: riff-version
       passed: [clean-riff-pre-deploy-gke]
     - get: topic-controller-version
       passed: [clean-riff-pre-deploy-gke]
@@ -975,6 +922,8 @@ jobs: ##########################################################################
   plan:
   - aggregate:
     - get: git-riff
+    - get: riff-version
+      passed: [deploy-riff-gke]
     - get: cli-binary
       passed: [build-components]
     - get: gcs-riff-chart-latest-version
@@ -983,8 +932,6 @@ jobs: ##########################################################################
       passed: [deploy-riff-gke]
     - get: git-pfs-ci
     - get: function-sidecar-version
-      passed: [deploy-riff-gke]
-    - get: http-gateway-version
       passed: [deploy-riff-gke]
     - get: topic-controller-version
       passed: [deploy-riff-gke]
@@ -1037,7 +984,7 @@ jobs: ##########################################################################
     - get: git-pfs-ci
     - get: function-sidecar-version
       passed: [run-faas-acceptance-tests-gke]
-    - get: http-gateway-version
+    - get: riff-version
       passed: [run-faas-acceptance-tests-gke]
     - get: topic-controller-version
       passed: [run-faas-acceptance-tests-gke]
@@ -1068,7 +1015,7 @@ jobs: ##########################################################################
   plan:
   - put: function-sidecar-version
     params: {pre: build}
-  - put: http-gateway-version
+  - put: riff-version
     params: {pre: build}
   - put: topic-controller-version
     params: {pre: build}
@@ -1088,7 +1035,7 @@ jobs: ##########################################################################
   plan:
   - put: function-sidecar-version
     params: {bump: patch, pre: build}
-  - put: http-gateway-version
+  - put: riff-version
     params: {bump: patch, pre: build}
   - put: topic-controller-version
     params: {bump: patch, pre: build}
