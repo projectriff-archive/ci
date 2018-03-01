@@ -6,9 +6,9 @@ image_resource:
     tag: 0.4
 
 inputs:
-- name: git-riff-cli
+- name: git-riff
 - name: git-pfs-ci
-- name: cli-version
+- name: riff-version
 
 outputs:
 - name: cli-output
