@@ -480,6 +480,7 @@ jobs: ##########################################################################
   plan:
   - aggregate: # fetch resources
     - get: git-riff
+      trigger: true
       params:
         depth: 1
     - get: git-pfs-ci
