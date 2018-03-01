@@ -6,3 +6,4 @@
 .factorypath
 *.swp
 target
+*.rendered.yml
